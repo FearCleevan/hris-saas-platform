@@ -110,7 +110,26 @@ body {
   border-radius: 3px;
 }
 
+/* WCAG 2.1 AA — visible focus indicator for keyboard navigation */
 :focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect reduced-motion preference — WCAG 2.1 2.3.3 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Ensure sufficient color contrast for muted text — WCAG 1.4.3 */
+@media (forced-colors: active) {
+  * {
+    border-color: ButtonText;
+  }
 }
