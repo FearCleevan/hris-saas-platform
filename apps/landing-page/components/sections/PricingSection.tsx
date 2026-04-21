@@ -84,6 +84,7 @@ function PricingCalculator() {
             </label>
             <div className="flex items-center gap-3">
               <input
+                title="range"
                 type="range"
                 min={1}
                 max={600}

@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     canonical: BASE_URL,
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/preview-icon-256.png',
     shortcut: '/favicon-16x16.png',
     apple: '/apple-touch-icon.png',
   },
