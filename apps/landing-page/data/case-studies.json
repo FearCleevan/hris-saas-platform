@@ -1,0 +1,62 @@
+[
+  {
+    "id": "jollibee",
+    "company": "Jollibee Foods Corporation",
+    "industry": "Food & Beverage",
+    "location": "Pasig City, Metro Manila",
+    "employees": 4200,
+    "logo": "JFC",
+    "color": "#ce1126",
+    "challenge": "Managing payroll for 4,200 employees across 180+ branches nationwide with varying schedules, holiday pay, and government compliance was taking the HR team 12 days per payroll cycle.",
+    "solution": "Deployed HRISPH across all entities with biometric integration, automated SSS/PhilHealth/Pag-IBIG computation, and one-click BIR Form 2316 generation for year-end filing.",
+    "results": [
+      { "metric": "12 days → 2 days", "label": "Payroll cycle reduced" },
+      { "metric": "₱0", "label": "Compliance penalties (12 months)" },
+      { "metric": "40%", "label": "Reduction in HR overhead" },
+      { "metric": "100%", "label": "BIR TRAIN Law accuracy" }
+    ],
+    "quote": "The 13th month pay calculation used to take us a week across all branches. Now it's one click. BIR Form 2316 generation is completely seamless.",
+    "quotePerson": "Liza Reyes, Finance & Admin Manager",
+    "featured": true
+  },
+  {
+    "id": "bdo",
+    "company": "BDO Unibank, Inc.",
+    "industry": "Banking & Financial Services",
+    "location": "Makati City",
+    "employees": 22000,
+    "logo": "BDO",
+    "color": "#0038a8",
+    "challenge": "As a BSP-regulated bank, BDO required enterprise-grade audit trails, data privacy compliance (RA 10173), and strict role-based access control for 22,000 employees across the Philippines.",
+    "solution": "Implemented HRISPH Enterprise with full audit logging, data residency configuration, SSO integration with their existing Active Directory, and a dedicated compliance dashboard for HR audit requirements.",
+    "results": [
+      { "metric": "100%", "label": "RA 10173 data privacy compliant" },
+      { "metric": "22,000+", "label": "Employees on one platform" },
+      { "metric": "3 weeks", "label": "Full implementation timeline" },
+      { "metric": "99.99%", "label": "System uptime achieved" }
+    ],
+    "quote": "Security and audit trails were non-negotiable for us as a bank. This system delivers enterprise-grade security with complete visibility into every data access.",
+    "quotePerson": "Christine Dela Rosa, CHRO",
+    "featured": true
+  },
+  {
+    "id": "sm-prime",
+    "company": "SM Prime Holdings",
+    "industry": "Real Estate & Retail",
+    "location": "Mall of Asia Complex, Pasay City",
+    "employees": 15000,
+    "logo": "SM",
+    "color": "#fcd116",
+    "challenge": "SM Prime manages 15,000+ employees across mall operations, real estate, and hospitality — each entity with different pay structures, benefits, and government ID remittance schedules.",
+    "solution": "Multi-entity setup with consolidated reporting, unified government contribution management, and a custom employee portal deployed to all SM properties nationwide.",
+    "results": [
+      { "metric": "12 entities", "label": "Managed in one dashboard" },
+      { "metric": "₱820M+", "label": "Monthly payroll processed" },
+      { "metric": "5 days", "label": "Go-live per entity (avg)" },
+      { "metric": "60%", "label": "Reduction in inter-entity reconciliation time" }
+    ],
+    "quote": "Hindi ko akalaing makakahanap ng Philippine HRIS na kaya ng enterprise-level requirements namin. The multi-company feature alone justified the switch.",
+    "quotePerson": "Roberto Mendoza, HR Director",
+    "featured": true
+  }
+]

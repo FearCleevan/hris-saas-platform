@@ -1,0 +1,107 @@
+{
+  "tiers": [
+    {
+      "id": "starter",
+      "name": "Starter",
+      "tagline": "For small businesses getting started",
+      "monthlyPricePerEmployee": 149,
+      "annualPricePerEmployee": 119,
+      "minEmployees": 1,
+      "maxEmployees": 50,
+      "currency": "PHP",
+      "popular": false,
+      "cta": "Start Free Trial",
+      "ctaVariant": "outline",
+      "features": [
+        "Up to 50 employees",
+        "Automated payroll computation",
+        "SSS, PhilHealth, Pag-IBIG, BIR",
+        "Digital payslips",
+        "Leave management",
+        "Time & attendance",
+        "Basic reports",
+        "Employee self-service portal",
+        "Email support",
+        "1 company entity"
+      ],
+      "notIncluded": [
+        "Performance management",
+        "Recruitment module",
+        "Multi-company support",
+        "API access",
+        "Dedicated account manager"
+      ]
+    },
+    {
+      "id": "professional",
+      "name": "Professional",
+      "tagline": "For growing companies with complex needs",
+      "monthlyPricePerEmployee": 299,
+      "annualPricePerEmployee": 239,
+      "minEmployees": 51,
+      "maxEmployees": 500,
+      "currency": "PHP",
+      "popular": true,
+      "cta": "Start Free Trial",
+      "ctaVariant": "default",
+      "features": [
+        "Up to 500 employees",
+        "Everything in Starter",
+        "Performance management",
+        "Recruitment & onboarding",
+        "Benefits administration",
+        "Salary loans & advances",
+        "Advanced analytics & reports",
+        "Mobile app (iOS & Android)",
+        "Approval workflows",
+        "Accounting integrations",
+        "API access",
+        "Priority email & chat support",
+        "Up to 3 company entities"
+      ],
+      "notIncluded": [
+        "Dedicated account manager",
+        "Custom integrations",
+        "On-premise deployment"
+      ]
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "tagline": "For large organizations with enterprise requirements",
+      "monthlyPricePerEmployee": null,
+      "annualPricePerEmployee": null,
+      "minEmployees": 501,
+      "maxEmployees": null,
+      "currency": "PHP",
+      "popular": false,
+      "cta": "Contact Sales",
+      "ctaVariant": "outline",
+      "features": [
+        "Unlimited employees",
+        "Everything in Professional",
+        "Unlimited company entities",
+        "Custom integrations",
+        "Dedicated account manager",
+        "SLA guarantee (99.9% uptime)",
+        "Custom reporting",
+        "Single Sign-On (SSO)",
+        "Advanced audit trails",
+        "Data residency options",
+        "On-premise or private cloud",
+        "24/7 phone & email support",
+        "Quarterly business reviews",
+        "Free data migration"
+      ],
+      "notIncluded": []
+    }
+  ],
+  "annualDiscount": 20,
+  "trialDays": 14,
+  "notes": [
+    "All prices are in Philippine Peso (PHP) per employee per month",
+    "14-day free trial, no credit card required",
+    "Annual billing saves 20% vs monthly",
+    "Government contribution computations included in all plans"
+  ]
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "category": "General",
+    "question": "Is this system compliant with Philippine government requirements?",
+    "answer": "Yes. Our system is built specifically for Philippine compliance. It handles SSS (R.A. 11199), PhilHealth (Circular 2023-0009), Pag-IBIG (Circular 274), and BIR TRAIN Law (R.A. 10963) requirements out of the box. Government contribution tables are updated automatically."
+  },
+  {
+    "id": 2,
+    "category": "Payroll",
+    "question": "How does the BIR withholding tax computation work?",
+    "answer": "Our system uses the TRAIN Law withholding tax table effective 2023. It automatically computes taxable income after deducting SSS, PhilHealth, Pag-IBIG, and other non-taxable allowances, then applies the correct tax bracket. We also handle the annual tax reconciliation and generate BIR Form 2316."
+  },
+  {
+    "id": 3,
+    "category": "Payroll",
+    "question": "Can it handle 13th month pay computation?",
+    "answer": "Yes. The system automatically computes 13th month pay based on total basic salary earned during the calendar year divided by 12. It handles pro-rated amounts for employees who started or left mid-year, and generates the required BIR alphalist for reporting."
+  },
+  {
+    "id": 4,
+    "category": "Payroll",
+    "question": "What overtime and holiday rates does the system support?",
+    "answer": "The system supports all PH Labor Code rates: regular overtime (125%), rest day work (130%), holiday overtime (260%), and all holiday combinations. It also handles night differential (10%) automatically based on shift schedules."
+  },
+  {
+    "id": 5,
+    "category": "Setup",
+    "question": "How long does implementation take?",
+    "answer": "Most small to medium businesses (up to 200 employees) go live within 1-2 weeks. Enterprise clients typically take 3-6 weeks including data migration, custom configuration, and training. Our implementation team provides hands-on support throughout the process."
+  },
+  {
+    "id": 6,
+    "category": "Setup",
+    "question": "Can we migrate data from our existing system?",
+    "answer": "Yes. We support data migration from most popular HRIS and payroll systems including SAP SuccessFactors, Oracle HCM, ADP, and local systems. Our team will handle the migration and verify data accuracy before go-live."
+  },
+  {
+    "id": 7,
+    "category": "Pricing",
+    "question": "Is there a free trial available?",
+    "answer": "Yes! We offer a 14-day free trial with full access to all features based on your chosen plan. No credit card required to start. Our team will also schedule a personalized demo to walk you through the system."
+  },
+  {
+    "id": 8,
+    "category": "Pricing",
+    "question": "How is pricing calculated for part-time employees?",
+    "answer": "Part-time employees count as 0.5 of a full employee for pricing purposes. We count active employees in your account at the start of each billing period. Employees on long-term leave are excluded from the count."
+  },
+  {
+    "id": 9,
+    "category": "Security",
+    "question": "Is our employee data secure?",
+    "answer": "Absolutely. We are compliant with the Philippine Data Privacy Act (RA 10173). Data is encrypted at rest (AES-256) and in transit (TLS 1.3). We maintain separate data stores per organization, conduct regular security audits, and never share your data with third parties."
+  },
+  {
+    "id": 10,
+    "category": "Security",
+    "question": "Where is the data stored? Is it in the Philippines?",
+    "answer": "By default, data is stored in secure cloud infrastructure in Singapore and Japan for reliability. Enterprise clients can request Philippine data residency or on-premise deployment to meet specific regulatory requirements."
+  },
+  {
+    "id": 11,
+    "category": "Features",
+    "question": "Does the system support biometric time attendance integration?",
+    "answer": "Yes. We integrate with major biometric brands used in the Philippines including ZKTeco, Anviz, and Suprema. We also support manual time entries, RFID cards, and mobile app clock-in with GPS verification."
+  },
+  {
+    "id": 12,
+    "category": "Features",
+    "question": "Can employees access their payslips and file leaves on mobile?",
+    "answer": "Yes. Our mobile app (iOS and Android) allows employees to view payslips, check leave balances, file leave requests, view company announcements, and log attendance. All actions sync in real-time with the HR admin dashboard."
+  },
+  {
+    "id": 13,
+    "category": "Features",
+    "question": "Does it handle multiple payroll frequencies (semi-monthly, monthly)?",
+    "answer": "Yes. The system supports daily, weekly, semi-monthly (15th and 30th), and monthly pay frequencies. Different employee groups can have different pay schedules within the same company."
+  },
+  {
+    "id": 14,
+    "category": "Support",
+    "question": "What kind of customer support do you provide?",
+    "answer": "Starter plan includes email support (response within 24 hours). Professional plan adds live chat support during Philippine business hours (8AM-6PM PHT, Monday-Friday). Enterprise clients get 24/7 phone support and a dedicated account manager."
+  },
+  {
+    "id": 15,
+    "category": "Integrations",
+    "question": "Can it integrate with our accounting software?",
+    "answer": "Yes. We have built-in integrations with QuickBooks Online, Xero, and SAP Business One. We also provide journal entry exports compatible with most Philippine accounting software. Our REST API allows custom integrations with any system."
+  }
+]

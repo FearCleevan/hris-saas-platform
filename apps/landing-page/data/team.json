@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Eduardo Macaraeg",
+    "title": "Co-Founder & CEO",
+    "bio": "Former SVP at BDO Unibank with 18 years in HR technology. Started HRisPH after experiencing firsthand the pain of Philippine payroll compliance.",
+    "avatar": "/images/team/eduardo-macaraeg.jpg",
+    "avatarFallback": "EM",
+    "linkedin": "#",
+    "order": 1
+  },
+  {
+    "id": 2,
+    "name": "Clarissa Ocampo",
+    "title": "Co-Founder & CTO",
+    "bio": "Ex-Google engineer and Ateneo de Manila alumna. Built scalable systems for Southeast Asian markets. Passionate about making enterprise tech accessible to PH businesses.",
+    "avatar": "/images/team/clarissa-ocampo.jpg",
+    "avatarFallback": "CO",
+    "linkedin": "#",
+    "order": 2
+  },
+  {
+    "id": 3,
+    "name": "Rommel Pascual",
+    "title": "Chief Product Officer",
+    "bio": "15 years in HRIS product development. Previously led product at PayrollHero and Sprout Solutions. Deep expertise in Philippine labor compliance.",
+    "avatar": "/images/team/rommel-pascual.jpg",
+    "avatarFallback": "RP",
+    "linkedin": "#",
+    "order": 3
+  },
+  {
+    "id": 4,
+    "name": "Maricel Santos",
+    "title": "VP of Customer Success",
+    "bio": "Certified SHRM professional with 12 years of HR practice in the Philippines. Led implementations at 200+ Philippine companies.",
+    "avatar": "/images/team/maricel-santos.jpg",
+    "avatarFallback": "MS",
+    "linkedin": "#",
+    "order": 4
+  },
+  {
+    "id": 5,
+    "name": "Arvin dela Cruz",
+    "title": "Head of Compliance",
+    "bio": "CPA and former BIR examiner. Ensures all our computations are always in sync with the latest SSS, PhilHealth, Pag-IBIG, and BIR circulars.",
+    "avatar": "/images/team/arvin-dela-cruz.jpg",
+    "avatarFallback": "AD",
+    "linkedin": "#",
+    "order": 5
+  },
+  {
+    "id": 6,
+    "name": "Patricia Lim",
+    "title": "Head of Sales",
+    "bio": "Former enterprise sales at SAP Philippines. Helped hundreds of Philippine companies modernize their HR operations.",
+    "avatar": "/images/team/patricia-lim.jpg",
+    "avatarFallback": "PL",
+    "linkedin": "#",
+    "order": 6
+  }
+]

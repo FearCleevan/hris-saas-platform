@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "slug": "train-law-2024-withholding-tax-guide",
+    "title": "Complete Guide to BIR TRAIN Law Withholding Tax in 2024",
+    "excerpt": "Everything Philippine employers need to know about computing withholding tax under the TRAIN Law — updated tax tables, exemptions, and BIR Form 2316 filing.",
+    "category": "BIR Compliance",
+    "readTime": "8 min read",
+    "publishedAt": "2024-10-15",
+    "author": { "name": "Arvin dela Cruz", "title": "Head of Compliance, CPA", "initials": "AD" },
+    "tags": ["BIR", "TRAIN Law", "Withholding Tax", "Payroll"],
+    "featured": true,
+    "color": "#fcd116"
+  },
+  {
+    "id": 2,
+    "slug": "sss-contribution-table-2024",
+    "title": "SSS Contribution Table 2024: What Employers Must Know",
+    "excerpt": "The SSS contribution rate increased to 14% in 2024. Here's the complete contribution table, how to compute employee and employer shares, and how to file the R3 report.",
+    "category": "SSS",
+    "readTime": "6 min read",
+    "publishedAt": "2024-09-28",
+    "author": { "name": "Arvin dela Cruz", "title": "Head of Compliance, CPA", "initials": "AD" },
+    "tags": ["SSS", "Government Contributions", "Payroll Compliance"],
+    "featured": true,
+    "color": "#0038a8"
+  },
+  {
+    "id": 3,
+    "slug": "philhealth-5-percent-premium-guide",
+    "title": "PhilHealth 5% Premium Rate: A Practical Employer Guide",
+    "excerpt": "PhilHealth's 5% premium rate is now in full effect under Circular 2023-0009. Learn how to compute contributions, generate the RF-1 report, and avoid penalties.",
+    "category": "PhilHealth",
+    "readTime": "5 min read",
+    "publishedAt": "2024-09-10",
+    "author": { "name": "Maria Santos", "title": "Senior HR Consultant", "initials": "MS" },
+    "tags": ["PhilHealth", "Government Contributions", "HR Compliance"],
+    "featured": false,
+    "color": "#16a34a"
+  },
+  {
+    "id": 4,
+    "slug": "ph-labor-code-overtime-holiday-pay-guide",
+    "title": "PH Labor Code: Overtime, Holiday Pay, and Night Differential Rates",
+    "excerpt": "A comprehensive breakdown of Philippine Labor Code overtime rates for regular days, rest days, regular holidays, and special non-working holidays — with sample computations.",
+    "category": "Labor Code",
+    "readTime": "10 min read",
+    "publishedAt": "2024-08-22",
+    "author": { "name": "Rommel Pascual", "title": "Chief Product Officer", "initials": "RP" },
+    "tags": ["Labor Code", "Overtime", "Holiday Pay", "PH Law"],
+    "featured": true,
+    "color": "#ce1126"
+  },
+  {
+    "id": 5,
+    "slug": "13th-month-pay-computation-guide-2024",
+    "title": "13th Month Pay in the Philippines: How to Compute It Correctly",
+    "excerpt": "Presidential Decree 851 mandates 13th month pay for all rank-and-file employees. Learn the correct formula, pro-rated computations, and tax exemption rules under TRAIN Law.",
+    "category": "Payroll",
+    "readTime": "7 min read",
+    "publishedAt": "2024-08-05",
+    "author": { "name": "Arvin dela Cruz", "title": "Head of Compliance, CPA", "initials": "AD" },
+    "tags": ["13th Month Pay", "Payroll", "PH Law", "Tax Exemption"],
+    "featured": false,
+    "color": "#0038a8"
+  },
+  {
+    "id": 6,
+    "slug": "data-privacy-act-hr-compliance-ra10173",
+    "title": "RA 10173: Data Privacy Act Compliance for HR Departments",
+    "excerpt": "Philippine HR departments handle sensitive employee data daily. Here's how to stay compliant with the Data Privacy Act of 2012 — from 201 file management to consent forms.",
+    "category": "Data Privacy",
+    "readTime": "9 min read",
+    "publishedAt": "2024-07-18",
+    "author": { "name": "Patricia Lim", "title": "Head of Sales & Compliance", "initials": "PL" },
+    "tags": ["Data Privacy Act", "RA 10173", "HR Compliance", "DICT"],
+    "featured": false,
+    "color": "#7c3aed"
+  }
+]

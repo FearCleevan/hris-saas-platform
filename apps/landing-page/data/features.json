@@ -1,0 +1,170 @@
+[
+  {
+    "id": "payroll",
+    "category": "Payroll & Compensation",
+    "icon": "Calculator",
+    "title": "Automated Philippine Payroll",
+    "description": "Process accurate payroll with automatic computation of SSS, PhilHealth, Pag-IBIG, and BIR withholding tax per TRAIN Law.",
+    "highlight": true
+  },
+  {
+    "id": "sss",
+    "category": "Government Compliance",
+    "icon": "Shield",
+    "title": "SSS Contribution Management",
+    "description": "Auto-compute SSS contributions using the 2024 contribution table (R.A. 11199). Generate R3 reports and e-filing ready files.",
+    "highlight": true
+  },
+  {
+    "id": "philhealth",
+    "category": "Government Compliance",
+    "icon": "Heart",
+    "title": "PhilHealth Integration",
+    "description": "Automatic 5% premium computation per Circular 2023-0009. Generate RF-1 reports and MDR submissions.",
+    "highlight": true
+  },
+  {
+    "id": "pagibig",
+    "category": "Government Compliance",
+    "icon": "Home",
+    "title": "Pag-IBIG Fund Management",
+    "description": "Compute Pag-IBIG contributions and MPF. Handle Pag-IBIG loan deductions and generate MCRF reports.",
+    "highlight": true
+  },
+  {
+    "id": "bir",
+    "category": "Government Compliance",
+    "icon": "FileText",
+    "title": "BIR TRAIN Law Compliance",
+    "description": "TRAIN Law withholding tax computation, 2316 generation, alphalist submission, and annual tax filing support.",
+    "highlight": true
+  },
+  {
+    "id": "attendance",
+    "category": "Time & Attendance",
+    "icon": "Clock",
+    "title": "Time & Attendance Tracking",
+    "description": "Biometric integration, manual time entries, flexi-time support, and real-time attendance monitoring.",
+    "highlight": false
+  },
+  {
+    "id": "overtime",
+    "category": "Time & Attendance",
+    "icon": "Timer",
+    "title": "Overtime & Holiday Pay",
+    "description": "Auto-calculate OT pay per PH Labor Code rates. Handles regular holidays, special non-working days, and rest day work.",
+    "highlight": false
+  },
+  {
+    "id": "leave",
+    "category": "Leave Management",
+    "icon": "Calendar",
+    "title": "Leave Management",
+    "description": "SL, VL, SIL, maternity, paternity, solo parent, and VAWC leave tracking per Labor Code and special laws.",
+    "highlight": false
+  },
+  {
+    "id": "employee",
+    "category": "Employee Management",
+    "icon": "Users",
+    "title": "Employee Information System",
+    "description": "Centralized 201 file management, employment history, document storage, and org chart visualization.",
+    "highlight": false
+  },
+  {
+    "id": "recruitment",
+    "category": "Recruitment",
+    "icon": "UserPlus",
+    "title": "Recruitment & Onboarding",
+    "description": "Job posting, applicant tracking, interview scheduling, and digital onboarding with e-signature support.",
+    "highlight": false
+  },
+  {
+    "id": "performance",
+    "category": "Performance Management",
+    "icon": "TrendingUp",
+    "title": "Performance Management",
+    "description": "KPI setting, 360-degree feedback, performance review cycles, and merit increase recommendations.",
+    "highlight": false
+  },
+  {
+    "id": "benefits",
+    "category": "Benefits Administration",
+    "icon": "Gift",
+    "title": "Benefits Administration",
+    "description": "HMO enrollment, life insurance, rice allowance, transportation, and 13th month pay automation.",
+    "highlight": false
+  },
+  {
+    "id": "payslip",
+    "category": "Payroll & Compensation",
+    "icon": "Receipt",
+    "title": "Digital Payslips",
+    "description": "Paperless payslip distribution via employee portal and email. Secure download with password protection.",
+    "highlight": false
+  },
+  {
+    "id": "loans",
+    "category": "Employee Services",
+    "icon": "CreditCard",
+    "title": "Salary Loans & Advances",
+    "description": "Manage SSS, Pag-IBIG, and company loans. Auto-deduct installments from payroll with amortization schedule.",
+    "highlight": false
+  },
+  {
+    "id": "reports",
+    "category": "Reports & Analytics",
+    "icon": "BarChart3",
+    "title": "HR Analytics & Reports",
+    "description": "Headcount, turnover, payroll cost, attendance analytics. Export to Excel/PDF. Government-ready reports.",
+    "highlight": false
+  },
+  {
+    "id": "mobile",
+    "category": "Employee Self-Service",
+    "icon": "Smartphone",
+    "title": "Mobile Employee Portal",
+    "description": "iOS and Android app for leave filing, payslip viewing, attendance logging, and company announcements.",
+    "highlight": false
+  },
+  {
+    "id": "multicompany",
+    "category": "Enterprise Features",
+    "icon": "Building2",
+    "title": "Multi-Company Support",
+    "description": "Manage multiple legal entities under one account. Consolidated reports with per-company data isolation.",
+    "highlight": false
+  },
+  {
+    "id": "workflow",
+    "category": "Workflow & Approvals",
+    "icon": "GitBranch",
+    "title": "Approval Workflows",
+    "description": "Configurable multi-level approval workflows for leave, overtime, expenses, and document requests.",
+    "highlight": false
+  },
+  {
+    "id": "audit",
+    "category": "Security & Compliance",
+    "icon": "Search",
+    "title": "Audit Trails",
+    "description": "Complete audit log of all system actions. Role-based access control with data privacy compliance (RA 10173).",
+    "highlight": false
+  },
+  {
+    "id": "integration",
+    "category": "Integrations",
+    "icon": "Plug",
+    "title": "Accounting Integrations",
+    "description": "Sync with QuickBooks, Xero, and local accounting software. Journal entry export for payroll transactions.",
+    "highlight": false
+  },
+  {
+    "id": "api",
+    "category": "Developer Tools",
+    "icon": "Code",
+    "title": "REST API & Webhooks",
+    "description": "Open API for custom integrations. Webhooks for real-time event notifications to third-party systems.",
+    "highlight": false
+  }
+]
