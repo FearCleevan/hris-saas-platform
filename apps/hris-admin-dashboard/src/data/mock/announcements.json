@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ann001",
+    "title": "Company Summer Outing — May 10",
+    "body": "This year's summer outing will be held at Club Balai Isabel, Talisay, Batangas. Buses depart from the office at 6:00 AM. RSVPs are due by April 30.",
+    "priority": "high",
+    "pinned": true,
+    "author": "Ana Luz Garcia",
+    "date": "2026-04-18",
+    "category": "Events"
+  },
+  {
+    "id": "ann002",
+    "title": "New Hybrid Work Policy Effective May 1",
+    "body": "Starting May 1, all regular employees may work from home up to 2 days per week. Department heads must approve schedules. See the updated Employee Handbook for details.",
+    "priority": "high",
+    "pinned": true,
+    "author": "Jose Rizal Reyes",
+    "date": "2026-04-15",
+    "category": "Policy"
+  },
+  {
+    "id": "ann003",
+    "title": "Q1 2026 Performance Results Available",
+    "body": "Q1 performance review results have been published. Employees can view their ratings and manager feedback in the Employee Portal. Merit increases will be reflected in the May 15 payroll.",
+    "priority": "normal",
+    "pinned": false,
+    "author": "Michelle Grace Morales",
+    "date": "2026-04-20",
+    "category": "HR"
+  },
+  {
+    "id": "ann004",
+    "title": "Mandatory PhilHealth Form Submission",
+    "body": "All employees must submit updated PhilHealth Member Data Record (MDR) by April 30. Please coordinate with HR for the updated forms. Failure to comply may affect your contributions.",
+    "priority": "normal",
+    "pinned": false,
+    "author": "Juan Paulo Bautista",
+    "date": "2026-04-17",
+    "category": "Compliance"
+  },
+  {
+    "id": "ann005",
+    "title": "Office Renovation: Floor 3 Closure April 25-26",
+    "body": "The 3rd floor will be closed for renovation on April 25-26. Affected teams (Engineering, IT) will be temporarily relocated to the 2nd floor conference rooms.",
+    "priority": "low",
+    "pinned": false,
+    "author": "Maribel Cruz Ramos",
+    "date": "2026-04-21",
+    "category": "Facilities"
+  }
+]

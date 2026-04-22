@@ -1,0 +1,38 @@
+[
+  {
+    "id": "t001",
+    "name": "Maharlika Manufacturing Corp.",
+    "slug": "maharlika-manufacturing",
+    "plan": "enterprise",
+    "employeeCount": 284,
+    "logoUrl": null,
+    "industry": "Manufacturing",
+    "location": "Caloocan City, Metro Manila",
+    "tinNumber": "123-456-789-000",
+    "rdoCode": "RDO 022"
+  },
+  {
+    "id": "t002",
+    "name": "Bayani BPO Solutions Inc.",
+    "slug": "bayani-bpo",
+    "plan": "pro",
+    "employeeCount": 156,
+    "logoUrl": null,
+    "industry": "Business Process Outsourcing",
+    "location": "Cebu City, Cebu",
+    "tinNumber": "987-654-321-000",
+    "rdoCode": "RDO 083"
+  },
+  {
+    "id": "t003",
+    "name": "Pamana Retail Group",
+    "slug": "pamana-retail",
+    "plan": "starter",
+    "employeeCount": 47,
+    "logoUrl": null,
+    "industry": "Retail",
+    "location": "Davao City, Davao del Sur",
+    "tinNumber": "456-789-123-000",
+    "rdoCode": "RDO 118"
+  }
+]

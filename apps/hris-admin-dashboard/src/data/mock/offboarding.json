@@ -1,0 +1,98 @@
+[
+  {
+    "id": "off001",
+    "employeeId": "emp034",
+    "resignationDate": "2023-10-15",
+    "lastDay": "2023-11-15",
+    "reason": "Career Growth",
+    "position": "UI/UX Designer",
+    "department": "Engineering",
+    "assignedHR": "emp002",
+    "status": "in_progress",
+    "resignationLetterUploaded": true,
+    "exitInterviewStatus": "scheduled",
+    "exitInterviewDate": "2023-11-13",
+    "finalPayStatus": "pending",
+    "clearance": [
+      { "department": "IT", "cleared": true, "clearedBy": "emp010", "clearedDate": "2023-11-05", "notes": "Laptop returned, accounts deactivated." },
+      { "department": "HR", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "Pending 201 file review." },
+      { "department": "Finance", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "Pending loan balance check." },
+      { "department": "Admin", "cleared": true, "clearedBy": "emp035", "clearedDate": "2023-11-06", "notes": "Access card and ID returned." },
+      { "department": "Operations", "cleared": true, "clearedBy": "emp018", "clearedDate": "2023-11-04", "notes": "Ongoing projects handed over." }
+    ],
+    "finalPay": {
+      "basicPayRemaining": 18500,
+      "unusedLeaveConversion": 8750,
+      "thirteenthMonthPro": 5166,
+      "sssLoanDeduction": 0,
+      "pagibigLoanDeduction": 2000,
+      "otherDeductions": 0,
+      "netFinalPay": 30416
+    },
+    "notes": "Handing over active projects to emp016 (Mark Villanueva). Notice period served in full."
+  },
+  {
+    "id": "off002",
+    "employeeId": "emp031",
+    "resignationDate": "2023-10-28",
+    "lastDay": "2023-11-28",
+    "reason": "Personal / Relocation",
+    "position": "Content Specialist",
+    "department": "Sales",
+    "assignedHR": "emp003",
+    "status": "in_progress",
+    "resignationLetterUploaded": true,
+    "exitInterviewStatus": "pending",
+    "exitInterviewDate": null,
+    "finalPayStatus": "pending",
+    "clearance": [
+      { "department": "IT", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "Equipment return scheduled Nov 27." },
+      { "department": "HR", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "In progress." },
+      { "department": "Finance", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "No outstanding loans." },
+      { "department": "Admin", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "ID return pending." },
+      { "department": "Operations", "cleared": false, "clearedBy": null, "clearedDate": null, "notes": "Content calendar handover in progress." }
+    ],
+    "finalPay": {
+      "basicPayRemaining": 11333,
+      "unusedLeaveConversion": 3400,
+      "thirteenthMonthPro": 2833,
+      "sssLoanDeduction": 0,
+      "pagibigLoanDeduction": 0,
+      "otherDeductions": 0,
+      "netFinalPay": 17566
+    },
+    "notes": "Relocating to Cebu. Good standing — no disciplinary records."
+  },
+  {
+    "id": "off003",
+    "employeeId": "emp029",
+    "resignationDate": "2023-09-20",
+    "lastDay": "2023-10-20",
+    "reason": "End of Contract",
+    "position": "Operations Analyst",
+    "department": "Operations",
+    "assignedHR": "emp002",
+    "status": "completed",
+    "resignationLetterUploaded": true,
+    "exitInterviewStatus": "done",
+    "exitInterviewDate": "2023-10-18",
+    "finalPayStatus": "released",
+    "clearance": [
+      { "department": "IT", "cleared": true, "clearedBy": "emp010", "clearedDate": "2023-10-17", "notes": "All equipment returned." },
+      { "department": "HR", "cleared": true, "clearedBy": "emp003", "clearedDate": "2023-10-18", "notes": "201 file archived." },
+      { "department": "Finance", "cleared": true, "clearedBy": "emp004", "clearedDate": "2023-10-18", "notes": "No outstanding obligations." },
+      { "department": "Admin", "cleared": true, "clearedBy": "emp035", "clearedDate": "2023-10-17", "notes": "ID and access card surrendered." },
+      { "department": "Operations", "cleared": true, "clearedBy": "emp018", "clearedDate": "2023-10-16", "notes": "All tasks endorsed to team." }
+    ],
+    "finalPay": {
+      "basicPayRemaining": 12000,
+      "unusedLeaveConversion": 5400,
+      "thirteenthMonthPro": 3000,
+      "sssLoanDeduction": 500,
+      "pagibigLoanDeduction": 0,
+      "otherDeductions": 0,
+      "netFinalPay": 19900
+    },
+    "notes": "Contract not renewed. Employee in good standing. COE issued on Oct 20, 2023."
+  }
+]

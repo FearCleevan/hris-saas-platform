@@ -1,0 +1,46 @@
+[
+  {
+    "id": "u001",
+    "email": "admin@hris-demo.ph",
+    "password": "Admin@123",
+    "name": "Maria Clara Santos",
+    "role": "super_admin",
+    "avatar": null,
+    "tenantIds": ["t001", "t002", "t003"],
+    "twoFactorEnabled": true,
+    "twoFactorCode": "123456"
+  },
+  {
+    "id": "u002",
+    "email": "hr@hris-demo.ph",
+    "password": "HR@123",
+    "name": "Jose Rizal Reyes",
+    "role": "hr_manager",
+    "avatar": null,
+    "tenantIds": ["t001"],
+    "twoFactorEnabled": true,
+    "twoFactorCode": "123456"
+  },
+  {
+    "id": "u003",
+    "email": "hrstaff@hris-demo.ph",
+    "password": "Staff@123",
+    "name": "Rizza Mae Dela Cruz",
+    "role": "hr_staff",
+    "avatar": null,
+    "tenantIds": ["t001"],
+    "twoFactorEnabled": false,
+    "twoFactorCode": null
+  },
+  {
+    "id": "u004",
+    "email": "accounting@hris-demo.ph",
+    "password": "Acct@123",
+    "name": "Juan Paulo Bautista",
+    "role": "accountant",
+    "avatar": null,
+    "tenantIds": ["t001", "t002"],
+    "twoFactorEnabled": true,
+    "twoFactorCode": "123456"
+  }
+]

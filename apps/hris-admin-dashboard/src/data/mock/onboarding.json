@@ -1,0 +1,967 @@
+[
+  {
+    "id": "onb001",
+    "employeeId": "emp046",
+    "hireDate": "2023-10-02",
+    "position": "Cloud Engineer",
+    "department": "Engineering",
+    "assignedHR": "emp002",
+    "status": "in_progress",
+    "checklist": [
+      {
+        "category": "Pre-Arrival",
+        "items": [
+          {
+            "id": "c1-1",
+            "task": "NBI Clearance submitted",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-2",
+            "task": "Medical Certificate (Fit to Work)",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-3",
+            "task": "SSS ID / E-1 Form",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-4",
+            "task": "PhilHealth MDR Form",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-5",
+            "task": "Pag-IBIG MDF Form",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-6",
+            "task": "TIN / BIR Form 1902",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-7",
+            "task": "Birth Certificate (PSA)",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          },
+          {
+            "id": "c1-8",
+            "task": "2x2 ID photos (6 pcs)",
+            "done": true,
+            "dueDate": "2023-09-29",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Day 1 Setup",
+        "items": [
+          {
+            "id": "c2-1",
+            "task": "Company ID issued",
+            "done": true,
+            "dueDate": "2023-10-02",
+            "assignee": "hr"
+          },
+          {
+            "id": "c2-2",
+            "task": "Company email account created",
+            "done": true,
+            "dueDate": "2023-10-02",
+            "assignee": "it"
+          },
+          {
+            "id": "c2-3",
+            "task": "Laptop / equipment issued",
+            "done": true,
+            "dueDate": "2023-10-02",
+            "assignee": "it"
+          },
+          {
+            "id": "c2-4",
+            "task": "Building access card issued",
+            "done": false,
+            "dueDate": "2023-10-03",
+            "assignee": "admin"
+          },
+          {
+            "id": "c2-5",
+            "task": "Workstation set up",
+            "done": true,
+            "dueDate": "2023-10-02",
+            "assignee": "it"
+          }
+        ]
+      },
+      {
+        "category": "Orientation",
+        "items": [
+          {
+            "id": "c3-1",
+            "task": "Company handbook signed",
+            "done": true,
+            "dueDate": "2023-10-04",
+            "assignee": "hr"
+          },
+          {
+            "id": "c3-2",
+            "task": "IT Acceptable Use Policy signed",
+            "done": true,
+            "dueDate": "2023-10-04",
+            "assignee": "it"
+          },
+          {
+            "id": "c3-3",
+            "task": "Data Privacy Consent Form signed",
+            "done": false,
+            "dueDate": "2023-10-05",
+            "assignee": "hr"
+          },
+          {
+            "id": "c3-4",
+            "task": "Org chart walkthrough with team",
+            "done": true,
+            "dueDate": "2023-10-04",
+            "assignee": "hr"
+          },
+          {
+            "id": "c3-5",
+            "task": "Benefits enrollment form submitted",
+            "done": false,
+            "dueDate": "2023-10-10",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Role Training",
+        "items": [
+          {
+            "id": "c4-1",
+            "task": "System access granted (Jira, GitHub, AWS)",
+            "done": true,
+            "dueDate": "2023-10-05",
+            "assignee": "it"
+          },
+          {
+            "id": "c4-2",
+            "task": "Mentor / buddy assigned",
+            "done": true,
+            "dueDate": "2023-10-03",
+            "assignee": "hr"
+          },
+          {
+            "id": "c4-3",
+            "task": "30-day check-in scheduled",
+            "done": false,
+            "dueDate": "2023-10-15",
+            "assignee": "hr"
+          },
+          {
+            "id": "c4-4",
+            "task": "Role-specific training completed",
+            "done": false,
+            "dueDate": "2023-10-30",
+            "assignee": "employee"
+          },
+          {
+            "id": "c4-5",
+            "task": "First project assigned",
+            "done": false,
+            "dueDate": "2023-10-16",
+            "assignee": "supervisor"
+          }
+        ]
+      }
+    ],
+    "notes": "Building access card pending — new card printer issue. Data privacy form to be signed on next HR visit."
+  },
+  {
+    "id": "onb002",
+    "employeeId": "emp050",
+    "hireDate": "2023-11-06",
+    "position": "Payroll Assistant",
+    "department": "Finance",
+    "assignedHR": "emp003",
+    "status": "in_progress",
+    "checklist": [
+      {
+        "category": "Pre-Arrival",
+        "items": [
+          {
+            "id": "d1-1",
+            "task": "NBI Clearance submitted",
+            "done": true,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-2",
+            "task": "Medical Certificate (Fit to Work)",
+            "done": true,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-3",
+            "task": "SSS ID / E-1 Form",
+            "done": false,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-4",
+            "task": "PhilHealth MDR Form",
+            "done": true,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-5",
+            "task": "Pag-IBIG MDF Form",
+            "done": true,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-6",
+            "task": "TIN / BIR Form 1902",
+            "done": false,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-7",
+            "task": "Birth Certificate (PSA)",
+            "done": true,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          },
+          {
+            "id": "d1-8",
+            "task": "2x2 ID photos (6 pcs)",
+            "done": true,
+            "dueDate": "2023-11-03",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Day 1 Setup",
+        "items": [
+          {
+            "id": "d2-1",
+            "task": "Company ID issued",
+            "done": false,
+            "dueDate": "2023-11-06",
+            "assignee": "hr"
+          },
+          {
+            "id": "d2-2",
+            "task": "Company email account created",
+            "done": false,
+            "dueDate": "2023-11-06",
+            "assignee": "it"
+          },
+          {
+            "id": "d2-3",
+            "task": "Laptop / equipment issued",
+            "done": false,
+            "dueDate": "2023-11-06",
+            "assignee": "it"
+          },
+          {
+            "id": "d2-4",
+            "task": "Building access card issued",
+            "done": false,
+            "dueDate": "2023-11-07",
+            "assignee": "admin"
+          },
+          {
+            "id": "d2-5",
+            "task": "Workstation set up",
+            "done": false,
+            "dueDate": "2023-11-06",
+            "assignee": "it"
+          }
+        ]
+      },
+      {
+        "category": "Orientation",
+        "items": [
+          {
+            "id": "d3-1",
+            "task": "Company handbook signed",
+            "done": false,
+            "dueDate": "2023-11-08",
+            "assignee": "hr"
+          },
+          {
+            "id": "d3-2",
+            "task": "IT Acceptable Use Policy signed",
+            "done": false,
+            "dueDate": "2023-11-08",
+            "assignee": "it"
+          },
+          {
+            "id": "d3-3",
+            "task": "Data Privacy Consent Form signed",
+            "done": false,
+            "dueDate": "2023-11-09",
+            "assignee": "hr"
+          },
+          {
+            "id": "d3-4",
+            "task": "Org chart walkthrough with team",
+            "done": false,
+            "dueDate": "2023-11-08",
+            "assignee": "hr"
+          },
+          {
+            "id": "d3-5",
+            "task": "Benefits enrollment form submitted",
+            "done": false,
+            "dueDate": "2023-11-14",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Role Training",
+        "items": [
+          {
+            "id": "d4-1",
+            "task": "Payroll system access granted",
+            "done": false,
+            "dueDate": "2023-11-07",
+            "assignee": "it"
+          },
+          {
+            "id": "d4-2",
+            "task": "Mentor / buddy assigned",
+            "done": false,
+            "dueDate": "2023-11-07",
+            "assignee": "hr"
+          },
+          {
+            "id": "d4-3",
+            "task": "30-day check-in scheduled",
+            "done": false,
+            "dueDate": "2023-11-15",
+            "assignee": "hr"
+          },
+          {
+            "id": "d4-4",
+            "task": "BIR TRAIN Law overview training",
+            "done": false,
+            "dueDate": "2023-11-30",
+            "assignee": "employee"
+          },
+          {
+            "id": "d4-5",
+            "task": "First payroll cutoff shadowing",
+            "done": false,
+            "dueDate": "2023-11-15",
+            "assignee": "supervisor"
+          }
+        ]
+      }
+    ],
+    "notes": "New hire starting Nov 6. SSS and TIN forms not yet submitted — follow up with employee."
+  },
+  {
+    "id": "onb003",
+    "employeeId": "emp013",
+    "hireDate": "2023-08-14",
+    "position": "Admin Assistant",
+    "department": "Admin",
+    "assignedHR": "emp003",
+    "status": "completed",
+    "checklist": [
+      {
+        "category": "Pre-Arrival",
+        "items": [
+          {
+            "id": "e1-1",
+            "task": "NBI Clearance submitted",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-2",
+            "task": "Medical Certificate (Fit to Work)",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-3",
+            "task": "SSS ID / E-1 Form",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-4",
+            "task": "PhilHealth MDR Form",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-5",
+            "task": "Pag-IBIG MDF Form",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-6",
+            "task": "TIN / BIR Form 1902",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-7",
+            "task": "Birth Certificate (PSA)",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          },
+          {
+            "id": "e1-8",
+            "task": "2x2 ID photos (6 pcs)",
+            "done": true,
+            "dueDate": "2023-08-11",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Day 1 Setup",
+        "items": [
+          {
+            "id": "e2-1",
+            "task": "Company ID issued",
+            "done": true,
+            "dueDate": "2023-08-14",
+            "assignee": "hr"
+          },
+          {
+            "id": "e2-2",
+            "task": "Company email account created",
+            "done": true,
+            "dueDate": "2023-08-14",
+            "assignee": "it"
+          },
+          {
+            "id": "e2-3",
+            "task": "Laptop / equipment issued",
+            "done": true,
+            "dueDate": "2023-08-14",
+            "assignee": "it"
+          },
+          {
+            "id": "e2-4",
+            "task": "Building access card issued",
+            "done": true,
+            "dueDate": "2023-08-15",
+            "assignee": "admin"
+          },
+          {
+            "id": "e2-5",
+            "task": "Workstation set up",
+            "done": true,
+            "dueDate": "2023-08-14",
+            "assignee": "it"
+          }
+        ]
+      },
+      {
+        "category": "Orientation",
+        "items": [
+          {
+            "id": "e3-1",
+            "task": "Company handbook signed",
+            "done": true,
+            "dueDate": "2023-08-16",
+            "assignee": "hr"
+          },
+          {
+            "id": "e3-2",
+            "task": "IT Acceptable Use Policy signed",
+            "done": true,
+            "dueDate": "2023-08-16",
+            "assignee": "it"
+          },
+          {
+            "id": "e3-3",
+            "task": "Data Privacy Consent Form signed",
+            "done": true,
+            "dueDate": "2023-08-17",
+            "assignee": "hr"
+          },
+          {
+            "id": "e3-4",
+            "task": "Org chart walkthrough with team",
+            "done": true,
+            "dueDate": "2023-08-16",
+            "assignee": "hr"
+          },
+          {
+            "id": "e3-5",
+            "task": "Benefits enrollment form submitted",
+            "done": true,
+            "dueDate": "2023-08-22",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Role Training",
+        "items": [
+          {
+            "id": "e4-1",
+            "task": "System access granted",
+            "done": true,
+            "dueDate": "2023-08-16",
+            "assignee": "it"
+          },
+          {
+            "id": "e4-2",
+            "task": "Mentor / buddy assigned",
+            "done": true,
+            "dueDate": "2023-08-15",
+            "assignee": "hr"
+          },
+          {
+            "id": "e4-3",
+            "task": "30-day check-in completed",
+            "done": true,
+            "dueDate": "2023-09-14",
+            "assignee": "hr"
+          },
+          {
+            "id": "e4-4",
+            "task": "Role-specific training completed",
+            "done": true,
+            "dueDate": "2023-09-14",
+            "assignee": "employee"
+          },
+          {
+            "id": "e4-5",
+            "task": "First project assigned",
+            "done": true,
+            "dueDate": "2023-08-21",
+            "assignee": "supervisor"
+          }
+        ]
+      }
+    ],
+    "notes": "All tasks completed. Employee has settled in well. Recommended for regularization after probation."
+  },
+  {
+    "id": "onb004",
+    "employeeId": "emp020",
+    "hireDate": "2023-09-04",
+    "position": "Data Scientist",
+    "department": "Engineering",
+    "assignedHR": "emp002",
+    "status": "overdue",
+    "checklist": [
+      {
+        "category": "Pre-Arrival",
+        "items": [
+          {
+            "id": "f1-1",
+            "task": "NBI Clearance submitted",
+            "done": true,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-2",
+            "task": "Medical Certificate (Fit to Work)",
+            "done": false,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-3",
+            "task": "SSS ID / E-1 Form",
+            "done": true,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-4",
+            "task": "PhilHealth MDR Form",
+            "done": true,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-5",
+            "task": "Pag-IBIG MDF Form",
+            "done": false,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-6",
+            "task": "TIN / BIR Form 1902",
+            "done": true,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-7",
+            "task": "Birth Certificate (PSA)",
+            "done": true,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          },
+          {
+            "id": "f1-8",
+            "task": "2x2 ID photos (6 pcs)",
+            "done": true,
+            "dueDate": "2023-09-01",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Day 1 Setup",
+        "items": [
+          {
+            "id": "f2-1",
+            "task": "Company ID issued",
+            "done": true,
+            "dueDate": "2023-09-04",
+            "assignee": "hr"
+          },
+          {
+            "id": "f2-2",
+            "task": "Company email account created",
+            "done": true,
+            "dueDate": "2023-09-04",
+            "assignee": "it"
+          },
+          {
+            "id": "f2-3",
+            "task": "Laptop / equipment issued",
+            "done": true,
+            "dueDate": "2023-09-04",
+            "assignee": "it"
+          },
+          {
+            "id": "f2-4",
+            "task": "Building access card issued",
+            "done": true,
+            "dueDate": "2023-09-05",
+            "assignee": "admin"
+          },
+          {
+            "id": "f2-5",
+            "task": "Workstation set up",
+            "done": true,
+            "dueDate": "2023-09-04",
+            "assignee": "it"
+          }
+        ]
+      },
+      {
+        "category": "Orientation",
+        "items": [
+          {
+            "id": "f3-1",
+            "task": "Company handbook signed",
+            "done": true,
+            "dueDate": "2023-09-06",
+            "assignee": "hr"
+          },
+          {
+            "id": "f3-2",
+            "task": "IT Acceptable Use Policy signed",
+            "done": true,
+            "dueDate": "2023-09-06",
+            "assignee": "it"
+          },
+          {
+            "id": "f3-3",
+            "task": "Data Privacy Consent Form signed",
+            "done": false,
+            "dueDate": "2023-09-07",
+            "assignee": "hr"
+          },
+          {
+            "id": "f3-4",
+            "task": "Org chart walkthrough with team",
+            "done": true,
+            "dueDate": "2023-09-06",
+            "assignee": "hr"
+          },
+          {
+            "id": "f3-5",
+            "task": "Benefits enrollment form submitted",
+            "done": false,
+            "dueDate": "2023-09-12",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Role Training",
+        "items": [
+          {
+            "id": "f4-1",
+            "task": "System access granted (Jupyter, GCP)",
+            "done": true,
+            "dueDate": "2023-09-05",
+            "assignee": "it"
+          },
+          {
+            "id": "f4-2",
+            "task": "Mentor / buddy assigned",
+            "done": true,
+            "dueDate": "2023-09-05",
+            "assignee": "hr"
+          },
+          {
+            "id": "f4-3",
+            "task": "30-day check-in scheduled",
+            "done": false,
+            "dueDate": "2023-09-15",
+            "assignee": "hr"
+          },
+          {
+            "id": "f4-4",
+            "task": "Role-specific training completed",
+            "done": false,
+            "dueDate": "2023-10-04",
+            "assignee": "employee"
+          },
+          {
+            "id": "f4-5",
+            "task": "First project assigned",
+            "done": false,
+            "dueDate": "2023-09-18",
+            "assignee": "supervisor"
+          }
+        ]
+      }
+    ],
+    "notes": "Medical certificate and Pag-IBIG form overdue. Data privacy consent and 30-day check-in still pending."
+  },
+  {
+    "id": "onb005",
+    "employeeId": "emp037",
+    "hireDate": "2023-07-10",
+    "position": "Sales Coordinator",
+    "department": "Sales",
+    "assignedHR": "emp003",
+    "status": "completed",
+    "checklist": [
+      {
+        "category": "Pre-Arrival",
+        "items": [
+          {
+            "id": "g1-1",
+            "task": "NBI Clearance submitted",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-2",
+            "task": "Medical Certificate (Fit to Work)",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-3",
+            "task": "SSS ID / E-1 Form",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-4",
+            "task": "PhilHealth MDR Form",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-5",
+            "task": "Pag-IBIG MDF Form",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-6",
+            "task": "TIN / BIR Form 1902",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-7",
+            "task": "Birth Certificate (PSA)",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          },
+          {
+            "id": "g1-8",
+            "task": "2x2 ID photos (6 pcs)",
+            "done": true,
+            "dueDate": "2023-07-07",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Day 1 Setup",
+        "items": [
+          {
+            "id": "g2-1",
+            "task": "Company ID issued",
+            "done": true,
+            "dueDate": "2023-07-10",
+            "assignee": "hr"
+          },
+          {
+            "id": "g2-2",
+            "task": "Company email account created",
+            "done": true,
+            "dueDate": "2023-07-10",
+            "assignee": "it"
+          },
+          {
+            "id": "g2-3",
+            "task": "Laptop / equipment issued",
+            "done": true,
+            "dueDate": "2023-07-10",
+            "assignee": "it"
+          },
+          {
+            "id": "g2-4",
+            "task": "Building access card issued",
+            "done": true,
+            "dueDate": "2023-07-11",
+            "assignee": "admin"
+          },
+          {
+            "id": "g2-5",
+            "task": "Workstation set up",
+            "done": true,
+            "dueDate": "2023-07-10",
+            "assignee": "it"
+          }
+        ]
+      },
+      {
+        "category": "Orientation",
+        "items": [
+          {
+            "id": "g3-1",
+            "task": "Company handbook signed",
+            "done": true,
+            "dueDate": "2023-07-12",
+            "assignee": "hr"
+          },
+          {
+            "id": "g3-2",
+            "task": "IT Acceptable Use Policy signed",
+            "done": true,
+            "dueDate": "2023-07-12",
+            "assignee": "it"
+          },
+          {
+            "id": "g3-3",
+            "task": "Data Privacy Consent Form signed",
+            "done": true,
+            "dueDate": "2023-07-13",
+            "assignee": "hr"
+          },
+          {
+            "id": "g3-4",
+            "task": "Org chart walkthrough with team",
+            "done": true,
+            "dueDate": "2023-07-12",
+            "assignee": "hr"
+          },
+          {
+            "id": "g3-5",
+            "task": "Benefits enrollment form submitted",
+            "done": true,
+            "dueDate": "2023-07-18",
+            "assignee": "employee"
+          }
+        ]
+      },
+      {
+        "category": "Role Training",
+        "items": [
+          {
+            "id": "g4-1",
+            "task": "CRM system access granted",
+            "done": true,
+            "dueDate": "2023-07-11",
+            "assignee": "it"
+          },
+          {
+            "id": "g4-2",
+            "task": "Mentor / buddy assigned",
+            "done": true,
+            "dueDate": "2023-07-11",
+            "assignee": "hr"
+          },
+          {
+            "id": "g4-3",
+            "task": "30-day check-in completed",
+            "done": true,
+            "dueDate": "2023-08-10",
+            "assignee": "hr"
+          },
+          {
+            "id": "g4-4",
+            "task": "Sales training completed",
+            "done": true,
+            "dueDate": "2023-08-10",
+            "assignee": "employee"
+          },
+          {
+            "id": "g4-5",
+            "task": "First client assigned",
+            "done": true,
+            "dueDate": "2023-07-17",
+            "assignee": "supervisor"
+          }
+        ]
+      }
+    ],
+    "notes": "All tasks completed. Employee performing well in sales role. First client upsell recorded in Week 2."
+  }
+]

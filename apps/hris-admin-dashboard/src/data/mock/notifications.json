@@ -1,0 +1,65 @@
+[
+  {
+    "id": "n001",
+    "type": "leave_request",
+    "title": "Leave Request Pending",
+    "message": "Juan Dela Cruz submitted a 3-day Vacation Leave (Oct 20-22).",
+    "time": "2026-04-22T08:30:00",
+    "read": false,
+    "link": "/leaves"
+  },
+  {
+    "id": "n002",
+    "type": "payroll",
+    "title": "Payroll Ready for Review",
+    "message": "April 15 payroll cutoff is ready. ₱2.4M total — awaiting your approval.",
+    "time": "2026-04-22T07:15:00",
+    "read": false,
+    "link": "/payroll"
+  },
+  {
+    "id": "n003",
+    "type": "compliance",
+    "title": "SSS Filing Deadline in 3 Days",
+    "message": "SSS R-3 report for March 2026 is due on April 25. Generate now.",
+    "time": "2026-04-21T16:00:00",
+    "read": false,
+    "link": "/reports"
+  },
+  {
+    "id": "n004",
+    "type": "employee",
+    "title": "New Employee Onboarded",
+    "message": "Rizza Mae Santos (Software Engineer) completed onboarding on April 21.",
+    "time": "2026-04-21T14:30:00",
+    "read": true,
+    "link": "/employees"
+  },
+  {
+    "id": "n005",
+    "type": "leave_request",
+    "title": "Overtime Approval Needed",
+    "message": "5 employees have pending overtime requests for the April 20 weekend.",
+    "time": "2026-04-21T10:00:00",
+    "read": true,
+    "link": "/attendance"
+  },
+  {
+    "id": "n006",
+    "type": "document",
+    "title": "Contract Expiring Soon",
+    "message": "Jose Reyes (Contractual) contract expires in 7 days. Renew or offboard.",
+    "time": "2026-04-20T09:00:00",
+    "read": true,
+    "link": "/documents"
+  },
+  {
+    "id": "n007",
+    "type": "payroll",
+    "title": "13th Month Pay Reminder",
+    "message": "13th month pay computation is available. Generate report for all employees.",
+    "time": "2026-04-19T08:00:00",
+    "read": true,
+    "link": "/payroll"
+  }
+]
