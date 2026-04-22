@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/FormField';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const COMPANY_SIZES = ['1-10', '11-50', '51-200', '201-500', '500+'];
 
@@ -65,16 +64,22 @@ export function SignupForm() {
         <Label htmlFor="size" className="text-sm font-medium">
           Number of Employees <span className="text-[#ce1126]">*</span>
         </Label>
-        <Select onValueChange={setCompanySize} required>
-          <SelectTrigger id="size">
-            <SelectValue placeholder="Select company size" />
-          </SelectTrigger>
-          <SelectContent>
+        <div className="relative">
+          <select
+            id="size"
+            title="Number of employees"
+            required
+            value={companySize}
+            onChange={(e) => setCompanySize(e.target.value)}
+            className="h-10 w-full appearance-none pl-3 pr-8 rounded-md border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
+          >
+            <option value="">Select company size</option>
             {COMPANY_SIZES.map((s) => (
-              <SelectItem key={s} value={s}>{s} employees</SelectItem>
+              <option key={s} value={s}>{s} employees</option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        </div>
       </div>
 
       <FormField

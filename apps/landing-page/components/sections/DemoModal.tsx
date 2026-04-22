@@ -4,19 +4,15 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Calendar, CheckCircle2, Loader2 } from 'lucide-react';
+import { Calendar, CheckCircle2, Loader2, ChevronDown } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
 import { FormField } from '@/components/ui/FormField';
 import { Badge } from '@/components/ui/badge';
 import { demoFormSchema, type DemoFormData } from '@/lib/demo-schema';
-import { cn } from '@/lib/utils';
 
 interface DemoModalProps {
   open: boolean;
@@ -44,7 +40,6 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors },
   } = useForm<DemoFormData>({ resolver: zodResolver(demoFormSchema) });
@@ -152,16 +147,20 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                   <Label htmlFor="companySize" className="text-sm font-medium">
                     Company Size <span className="text-[#ce1126]">*</span>
                   </Label>
-                  <Select onValueChange={(v) => setValue('companySize', v as DemoFormData['companySize'])}>
-                    <SelectTrigger id="companySize" className={cn(errors.companySize && 'border-[#ce1126]')}>
-                      <SelectValue placeholder="Select size" />
-                    </SelectTrigger>
-                    <SelectContent>
+                  <div className="relative">
+                    <select
+                      id="companySize"
+                      title="Company size"
+                      onChange={(e) => setValue('companySize', e.target.value as DemoFormData['companySize'])}
+                      className={`h-10 w-full appearance-none pl-3 pr-8 rounded-md border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors ${errors.companySize ? 'border-[#ce1126]' : 'border-input'}`}
+                    >
+                      <option value="">Select size</option>
                       {COMPANY_SIZES.map((s) => (
-                        <SelectItem key={s} value={s}>{s} employees</SelectItem>
+                        <option key={s} value={s}>{s} employees</option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
                   {errors.companySize && (
                     <p className="text-xs text-[#ce1126]">{errors.companySize.message}</p>
                   )}
@@ -171,16 +170,20 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                   <Label htmlFor="industry" className="text-sm font-medium">
                     Industry <span className="text-[#ce1126]">*</span>
                   </Label>
-                  <Select onValueChange={(v) => setValue('industry', v as DemoFormData['industry'])}>
-                    <SelectTrigger id="industry" className={cn(errors.industry && 'border-[#ce1126]')}>
-                      <SelectValue placeholder="Select industry" />
-                    </SelectTrigger>
-                    <SelectContent>
+                  <div className="relative">
+                    <select
+                      id="industry"
+                      title="Industry"
+                      onChange={(e) => setValue('industry', e.target.value as DemoFormData['industry'])}
+                      className={`h-10 w-full appearance-none pl-3 pr-8 rounded-md border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors ${errors.industry ? 'border-[#ce1126]' : 'border-input'}`}
+                    >
+                      <option value="">Select industry</option>
                       {INDUSTRIES.map((ind) => (
-                        <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                        <option key={ind} value={ind}>{ind}</option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
                   {errors.industry && (
                     <p className="text-xs text-[#ce1126]">{errors.industry.message}</p>
                   )}
@@ -207,16 +210,20 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                     <Label htmlFor="preferredTime" className="text-sm font-medium">
                       Time <span className="text-[#ce1126]">*</span>
                     </Label>
-                    <Select onValueChange={(v) => setValue('preferredTime', v as DemoFormData['preferredTime'])}>
-                      <SelectTrigger id="preferredTime" className={cn(errors.preferredTime && 'border-[#ce1126]')}>
-                        <SelectValue placeholder="Select time" />
-                      </SelectTrigger>
-                      <SelectContent>
+                    <div className="relative">
+                      <select
+                        id="preferredTime"
+                        title="Preferred time"
+                        onChange={(e) => setValue('preferredTime', e.target.value as DemoFormData['preferredTime'])}
+                        className={`h-10 w-full appearance-none pl-3 pr-8 rounded-md border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors ${errors.preferredTime ? 'border-[#ce1126]' : 'border-input'}`}
+                      >
+                        <option value="">Select time</option>
                         {TIME_SLOTS.map((t) => (
-                          <SelectItem key={t} value={t}>{t} PHT</SelectItem>
+                          <option key={t} value={t}>{t} PHT</option>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
                     {errors.preferredTime && (
                       <p className="text-xs text-[#ce1126]">{errors.preferredTime.message}</p>
                     )}
