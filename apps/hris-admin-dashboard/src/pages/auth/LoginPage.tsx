@@ -69,12 +69,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex flex-col w-[480px] shrink-0 bg-[#0038a8] text-white relative overflow-hidden">
+      <div className="hidden lg:flex flex-col w-120 shrink-0 bg-brand-blue text-white relative overflow-hidden">
         {/* PH flag accent */}
         <div className="absolute top-0 left-0 right-0 flex h-1.5">
-          <div className="flex-1 bg-[#0038a8]" />
-          <div className="flex-1 bg-[#ce1126]" />
-          <div className="flex-1 bg-[#fcd116]" />
+          <div className="flex-1 bg-brand-blue" />
+          <div className="flex-1 bg-brand-red" />
+          <div className="flex-1 bg-brand-gold" />
         </div>
 
         <div className="flex flex-col h-full px-10 py-12">
@@ -110,10 +110,10 @@ export default function LoginPage() {
           {/* Demo creds hint */}
           <div className="bg-white/10 rounded-xl p-4 text-xs text-blue-200 space-y-1">
             <p className="font-semibold text-white mb-2">Demo Accounts</p>
-            <p>admin@hris-demo.ph / Admin@123 <span className="text-[#fcd116]">(Super Admin)</span></p>
-            <p>hr@hris-demo.ph / HR@123 <span className="text-[#fcd116]">(HR Manager)</span></p>
-            <p>hrstaff@hris-demo.ph / Staff@123 <span className="text-[#fcd116]">(HR Staff)</span></p>
-            <p>accounting@hris-demo.ph / Acct@123 <span className="text-[#fcd116]">(Accountant)</span></p>
+            <p>admin@hris-demo.ph / Admin@123 <span className="text-brand-gold">(Super Admin)</span></p>
+            <p>hr@hris-demo.ph / HR@123 <span className="text-brand-gold">(HR Manager)</span></p>
+            <p>hrstaff@hris-demo.ph / Staff@123 <span className="text-brand-gold">(HR Staff)</span></p>
+            <p>accounting@hris-demo.ph / Acct@123 <span className="text-brand-gold">(Accountant)</span></p>
             <p className="pt-1 text-blue-300">2FA code: <span className="font-mono text-white">123456</span></p>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function LoginPage() {
         >
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 bg-[#0038a8] rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center">
               <span className="text-white font-extrabold text-sm">H</span>
             </div>
             <span className="text-lg font-extrabold text-gray-900 dark:text-white">HRISPH</span>
@@ -162,7 +162,7 @@ export default function LoginPage() {
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-[#ce1126]">{errors.email.message}</p>
+                <p className="text-xs text-brand-red">{errors.email.message}</p>
               )}
             </div>
 
@@ -172,7 +172,7 @@ export default function LoginPage() {
                 <Label htmlFor="password">Password</Label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-[#0038a8] hover:underline dark:text-blue-400"
+                  className="text-xs text-brand-blue hover:underline dark:text-blue-400"
                 >
                   Forgot password?
                 </Link>
@@ -211,7 +211,7 @@ export default function LoginPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-[#ce1126]">{errors.password.message}</p>
+                <p className="text-xs text-brand-red">{errors.password.message}</p>
               )}
             </div>
 
@@ -219,7 +219,7 @@ export default function LoginPage() {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                className="w-4 h-4 rounded border-gray-300 text-[#0038a8] accent-[#0038a8]"
+                className="w-4 h-4 rounded border-gray-300 text-brand-blue accent-brand-blue"
                 {...register('rememberMe')}
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
@@ -276,8 +276,8 @@ export default function LoginPage() {
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
             Don&apos;t have an account?{' '}
             <a
-              href="https://hrisph.com/signup"
-              className="text-[#0038a8] font-medium hover:underline dark:text-blue-400"
+              href="https://hrisph.vercel.app/signup"
+              className="text-brand-blue font-medium hover:underline dark:text-blue-400"
             >
               Start free trial
             </a>
