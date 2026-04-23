@@ -69,6 +69,7 @@ export function NotificationDrawer() {
                   Mark all read
                 </button>
                 <button
+                  title='Mark'
                   type="button"
                   onClick={() => setNotificationDrawerOpen(false)}
                   className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"

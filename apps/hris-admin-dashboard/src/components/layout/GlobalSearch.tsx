@@ -100,7 +100,7 @@ export function GlobalSearch() {
                 className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none"
               />
               {query && (
-                <button type="button" onClick={() => setQuery('')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <button title='Search' type="button" onClick={() => setQuery('')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                   <X className="w-4 h-4" />
                 </button>
               )}

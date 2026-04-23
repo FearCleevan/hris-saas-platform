@@ -99,6 +99,7 @@ export default function TwoFactorPage() {
           <div className="flex gap-2.5 justify-center mb-6" onPaste={handlePaste}>
             {code.map((digit, i) => (
               <input
+                title='text'
                 key={i}
                 ref={(el) => { inputRefs.current[i] = el; }}
                 type="text"

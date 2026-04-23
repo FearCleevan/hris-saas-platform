@@ -184,7 +184,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                   </div>
                   <span className="font-extrabold text-gray-900 dark:text-white text-sm">HRISPH Admin</span>
                 </div>
-                <button type="button" onClick={onMobileClose} className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <button title='Admin' type="button" onClick={onMobileClose} className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                   <X className="w-5 h-5" />
                 </button>
               </div>
