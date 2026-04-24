@@ -1,0 +1,95 @@
+
+[
+  {
+    "id": "wf001",
+    "name": "Expense Reimbursement Approval",
+    "module": "expenses",
+    "triggerCondition": "amount",
+    "triggerValue": ">5000",
+    "steps": [
+      {"order": 1, "roleId": "role005", "roleName": "Team Lead", "timeoutHours": 48, "escalateTo": "role004"},
+      {"order": 2, "roleId": "role004", "roleName": "Department Manager", "timeoutHours": 72, "escalateTo": "role003"},
+      {"order": 3, "roleId": "role003", "roleName": "Finance Manager", "timeoutHours": 48, "escalateTo": "role001", "condition": "amount>20000"}
+    ],
+    "isActive": true,
+    "description": "Expense claims above ₱5,000 require Team Lead → Manager → Finance (if >₱20K) approval"
+  },
+  {
+    "id": "wf002",
+    "name": "Small Expense Approval",
+    "module": "expenses",
+    "triggerCondition": "amount",
+    "triggerValue": "<=5000",
+    "steps": [
+      {"order": 1, "roleId": "role005", "roleName": "Team Lead", "timeoutHours": 24, "escalteTo": "role004"}
+    ],
+    "isActive": true,
+    "description": "Expense claims ₱5,000 and below require only Team Lead approval"
+  },
+  {
+    "id": "wf003",
+    "name": "Overtime Approval",
+    "module": "attendance",
+    "triggerCondition": "hours",
+    "triggerValue": ">4",
+    "steps": [
+      {"order": 1, "roleId": "role005", "roleName": "Team Lead", "timeoutHours": 24, "escalateTo": "role004"},
+      {"order": 2, "roleId": "role004", "roleName": "Department Manager", "timeoutHours": 48, "escalateTo": "role002"}
+    ],
+    "isActive": true,
+    "description": "Overtime requests exceeding 4 hours require Team Lead → Manager approval"
+  },
+  {
+    "id": "wf004",
+    "name": "Leave Approval",
+    "module": "attendance",
+    "triggerCondition": "days",
+    "triggerValue": ">=3",
+    "steps": [
+      {"order": 1, "roleId": "role005", "roleName": "Team Lead", "timeoutHours": 24, "escalateTo": "role004"},
+      {"order": 2, "roleId": "role004", "roleName": "Department Manager", "timeoutHours": 48, "escalateTo": "role002"}
+    ],
+    "isActive": true,
+    "description": "Leave requests of 3+ days require Team Lead → Manager approval"
+  },
+  {
+    "id": "wf005",
+    "name": "Performance Review Sign-off",
+    "module": "performance",
+    "triggerCondition": "all",
+    "triggerValue": "",
+    "steps": [
+      {"order": 1, "roleId": "role005", "roleName": "Team Lead", "timeoutHours": 168, "escalateTo": "role004"},
+      {"order": 2, "roleId": "role004", "roleName": "Department Manager", "timeoutHours": 72, "escalateTo": "role002"},
+      {"order": 3, "roleId": "role002", "roleName": "HR Admin", "timeoutHours": 72, "escalateTo": "role001"}
+    ],
+    "isActive": true,
+    "description": "Performance reviews require Team Lead → Manager → HR Admin sign-off"
+  },
+  {
+    "id": "wf006",
+    "name": "Job Offer Approval",
+    "module": "recruitment",
+    "triggerCondition": "salary",
+    "triggerValue": ">80000",
+    "steps": [
+      {"order": 1, "roleId": "role004", "roleName": "Department Manager", "timeoutHours": 48, "escalateTo": "role001"},
+      {"order": 2, "roleId": "role002", "roleName": "HR Admin", "timeoutHours": 48, "escalateTo": "role001"},
+      {"order": 3, "roleId": "role001", "roleName": "Super Admin", "timeoutHours": 72, "escalateTo": ""}
+    ],
+    "isActive": true,
+    "description": "Job offers above ₱80,000 require Manager → HR Admin → Super Admin approval"
+  },
+  {
+    "id": "wf007",
+    "name": "Document Access Request",
+    "module": "documents",
+    "triggerCondition": "accessLevel",
+    "triggerValue": "confidential",
+    "steps": [
+      {"order": 1, "roleId": "role002", "roleName": "HR Admin", "timeoutHours": 24, "escalateTo": "role001"}
+    ],
+    "isActive": true,
+    "description": "Confidential document access requires HR Admin approval"
+  }
+]

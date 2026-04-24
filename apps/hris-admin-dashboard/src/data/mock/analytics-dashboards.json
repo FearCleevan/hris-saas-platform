@@ -1,0 +1,117 @@
+
+[
+  {
+    "id": "dash001",
+    "name": "Executive Overview",
+    "description": "High-level KPIs for executive review",
+    "layout": "grid-3-3",
+    "isDefault": true,
+    "createdBy": "emp048",
+    "createdDate": "2023-06-01",
+    "lastModified": "2023-11-20",
+    "sharedWith": ["manager", "hr_admin"],
+    "widgets": [
+      {"id": "w1", "type": "kpi_headcount", "title": "Total Headcount", "size": "small"},
+      {"id": "w2", "type": "kpi_payroll_cost", "title": "Monthly Payroll Cost", "size": "small"},
+      {"id": "w3", "type": "kpi_attendance", "title": "Attendance Rate", "size": "small"},
+      {"id": "w4", "type": "kpi_open_positions", "title": "Open Positions", "size": "small"},
+      {"id": "w5", "type": "kpi_active_loans", "title": "Active Loans", "size": "small"},
+      {"id": "w6", "type": "kpi_compliance", "title": "Compliance Score", "size": "small"},
+      {"id": "w7", "type": "chart_headcount_trend", "title": "Headcount Trend", "size": "large"},
+      {"id": "w8", "type": "chart_payroll_trend", "title": "Payroll Cost Trend", "size": "large"},
+      {"id": "w9", "type": "chart_department_breakdown", "title": "Department Breakdown", "size": "large"}
+    ]
+  },
+  {
+    "id": "dash002",
+    "name": "HR Analytics",
+    "description": "Workforce demographics, turnover, and attendance",
+    "layout": "grid-2-2",
+    "isDefault": false,
+    "createdBy": "emp002",
+    "createdDate": "2023-07-15",
+    "lastModified": "2023-10-05",
+    "sharedWith": ["hr_admin"],
+    "widgets": [
+      {"id": "w10", "type": "chart_headcount_trend", "title": "Headcount by Department", "size": "large"},
+      {"id": "w11", "type": "chart_turnover", "title": "Turnover Rate", "size": "medium"},
+      {"id": "w12", "type": "chart_tenure", "title": "Tenure Distribution", "size": "medium"},
+      {"id": "w13", "type": "chart_attendance", "title": "Attendance Patterns", "size": "large"},
+      {"id": "w14", "type": "kpi_absenteeism", "title": "Absenteeism Rate", "size": "small"},
+      {"id": "w15", "type": "kpi_new_hires", "title": "New Hires (YTD)", "size": "small"}
+    ]
+  },
+  {
+    "id": "dash003",
+    "name": "Payroll Dashboard",
+    "description": "Payroll costs, department breakdown, and trends",
+    "layout": "grid-3-2",
+    "isDefault": false,
+    "createdBy": "emp018",
+    "createdDate": "2023-08-01",
+    "lastModified": "2023-11-15",
+    "sharedWith": ["manager"],
+    "widgets": [
+      {"id": "w16", "type": "kpi_payroll_cost", "title": "Monthly Payroll", "size": "small"},
+      {"id": "w17", "type": "kpi_cost_per_employee", "title": "Cost per Employee", "size": "small"},
+      {"id": "w18", "type": "kpi_overtime_cost", "title": "Overtime Cost", "size": "small"},
+      {"id": "w19", "type": "chart_payroll_trend", "title": "6-Month Trend", "size": "large"},
+      {"id": "w20", "type": "chart_dept_cost", "title": "Cost by Department", "size": "large"}
+    ]
+  },
+  {
+    "id": "dash004",
+    "name": "Attendance Tracker",
+    "description": "Attendance patterns, absenteeism, and late analysis",
+    "layout": "grid-2-3",
+    "isDefault": false,
+    "createdBy": "emp036",
+    "createdDate": "2023-09-01",
+    "lastModified": "2023-11-01",
+    "sharedWith": ["department", "manager"],
+    "widgets": [
+      {"id": "w21", "type": "kpi_attendance", "title": "Attendance Rate", "size": "small"},
+      {"id": "w22", "type": "kpi_absenteeism", "title": "Absenteeism", "size": "small"},
+      {"id": "w23", "type": "kpi_late_count", "title": "Late Arrivals", "size": "small"},
+      {"id": "w24", "type": "chart_attendance_trend", "title": "Monthly Trend", "size": "large"},
+      {"id": "w25", "type": "chart_peak_absence", "title": "Peak Absence Days", "size": "medium"},
+      {"id": "w26", "type": "chart_leave_usage", "title": "Leave Usage", "size": "medium"}
+    ]
+  },
+  {
+    "id": "dash005",
+    "name": "Financial Overview",
+    "description": "Payroll, benefits, and loan costs consolidated",
+    "layout": "grid-2-2",
+    "isDefault": false,
+    "createdBy": "emp018",
+    "createdDate": "2023-10-01",
+    "lastModified": "2023-11-25",
+    "sharedWith": ["manager", "hr_admin"],
+    "widgets": [
+      {"id": "w27", "type": "kpi_total_labor_cost", "title": "Total Labor Cost", "size": "small"},
+      {"id": "w28", "type": "kpi_benefits_cost", "title": "Benefits Cost", "size": "small"},
+      {"id": "w29", "type": "kpi_loan_balance", "title": "Outstanding Loans", "size": "small"},
+      {"id": "w30", "type": "chart_cost_breakdown", "title": "Cost Breakdown", "size": "large"},
+      {"id": "w31", "type": "chart_dept_cost", "title": "Department Costs", "size": "large"}
+    ]
+  },
+  {
+    "id": "dash006",
+    "name": "Compliance & Risk",
+    "description": "Compliance status, audit summary, and risk indicators",
+    "layout": "grid-3-2",
+    "isDefault": false,
+    "createdBy": "emp036",
+    "createdDate": "2023-11-01",
+    "lastModified": "2023-11-20",
+    "sharedWith": ["hr_admin", "manager"],
+    "widgets": [
+      {"id": "w32", "type": "kpi_compliance", "title": "Compliance Score", "size": "small"},
+      {"id": "w33", "type": "kpi_expiring_docs", "title": "Expiring Documents", "size": "small"},
+      {"id": "w34", "type": "kpi_audit_actions", "title": "Audit Actions (30d)", "size": "small"},
+      {"id": "w35", "type": "chart_dole_status", "title": "DOLE Compliance", "size": "large"},
+      {"id": "w36", "type": "chart_risk_indicators", "title": "Risk Indicators", "size": "large"}
+    ]
+  }
+]

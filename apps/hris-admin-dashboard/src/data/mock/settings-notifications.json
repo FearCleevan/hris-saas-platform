@@ -1,0 +1,17 @@
+
+[
+  {"id":"not001","type":"payroll_released","module":"payroll","label":"Payroll Released","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify employees when payroll is processed"},
+  {"id":"not002","type":"payslip_available","module":"payroll","label":"Payslip Available","channels":["in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify when payslip is viewable"},
+  {"id":"not003","type":"expense_approved","module":"expenses","label":"Expense Approved","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify when expense claim is approved"},
+  {"id":"not004","type":"expense_rejected","module":"expenses","label":"Expense Rejected","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify when expense claim is rejected"},
+  {"id":"not005","type":"leave_approved","module":"attendance","label":"Leave Approved","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify when leave request is approved"},
+  {"id":"not006","type":"leave_rejected","module":"attendance","label":"Leave Rejected","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify when leave request is rejected"},
+  {"id":"not007","type":"performance_review_due","module":"performance","label":"Review Due Reminder","channels":["email","in_app"],"enabledByDefault":true,"frequency":"weekly","description":"Weekly reminder for pending performance reviews"},
+  {"id":"not008","type":"goal_checkin","module":"performance","label":"Goal Check-in","channels":["in_app"],"enabledByDefault":true,"frequency":"weekly","description":"Weekly goal progress check-in reminder"},
+  {"id":"not009","type":"document_expiring","module":"documents","label":"Document Expiring Soon","channels":["email","in_app"],"enabledByDefault":true,"frequency":"daily","description":"Daily alert for documents expiring within 30 days"},
+  {"id":"not010","type":"compliance_deadline","module":"compliance","label":"Compliance Deadline","channels":["email","in_app"],"enabledByDefault":true,"frequency":"daily","description":"Daily alert for upcoming compliance deadlines"},
+  {"id":"not011","type":"interview_scheduled","module":"recruitment","label":"Interview Scheduled","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify interviewers of scheduled interviews"},
+  {"id":"not012","type":"offer_accepted","module":"recruitment","label":"Offer Accepted","channels":["email","in_app"],"enabledByDefault":true,"frequency":"immediate","description":"Notify HR when candidate accepts offer"},
+  {"id":"not013","type":"attendance_anomaly","module":"attendance","label":"Attendance Anomaly","channels":["email","in_app"],"enabledByDefault":false,"frequency":"immediate","description":"Alert for unusual attendance patterns"},
+  {"id":"not014","type":"weekly_digest","module":"analytics","label":"Weekly HR Digest","channels":["email"],"enabledByDefault":true,"frequency":"weekly","description":"Weekly summary of HR metrics and updates"}
+]

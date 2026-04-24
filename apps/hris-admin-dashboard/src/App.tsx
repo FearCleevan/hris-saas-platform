@@ -35,6 +35,9 @@ import ExpensesPage from '@/pages/expenses/ExpensesPage';
 import DocumentsPage from '@/pages/documents/DocumentsPage';
 import PerformancePage from '@/pages/performance/PerformancePage';
 import CompliancePage from '@/pages/compliance/CompliancePage';
+import RecruitmentPage from '@/pages/recruitment/RecruitmentPage';
+import AnalyticsPage from '@/pages/analytics/AnalyticsPage';
+import SettingsPage from '@/pages/settings/SettingsPage';
 import ComingSoonPage from '@/pages/ComingSoonPage';
 
 const queryClient = new QueryClient({
@@ -95,10 +98,10 @@ const router = createBrowserRouter([
       { path: 'expenses', element: <ExpensesPage /> },
       { path: 'documents', element: <DocumentsPage /> },
       { path: 'performance', element: <PerformancePage /> },
-      { path: 'recruitment', element: <ComingSoonPage /> },
+      { path: 'recruitment', element: <RecruitmentPage /> },
       { path: 'reports', element: <CompliancePage /> },
-      { path: 'analytics', element: <ComingSoonPage /> },
-      { path: 'settings/*', element: <ComingSoonPage /> },
+      { path: 'analytics', element: <AnalyticsPage /> },
+      { path: 'settings/*', element: <SettingsPage /> },
       { path: 'notifications', element: <ComingSoonPage /> },
       { path: '*', element: <ComingSoonPage /> },
     ],

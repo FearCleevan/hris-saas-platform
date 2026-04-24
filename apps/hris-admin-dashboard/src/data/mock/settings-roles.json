@@ -1,0 +1,179 @@
+
+[
+  {
+    "id": "role001",
+    "name": "Super Admin",
+    "description": "Full system access with all permissions across all modules",
+    "level": 1,
+    "isDefault": false,
+    "userCount": 1,
+    "permissions": {
+      "employees": "admin",
+      "payroll": "admin",
+      "attendance": "admin",
+      "benefits": "admin",
+      "expenses": "admin",
+      "documents": "admin",
+      "performance": "admin",
+      "recruitment": "admin",
+      "compliance": "admin",
+      "analytics": "admin",
+      "settings": "admin"
+    },
+    "color": "#dc2626"
+  },
+  {
+    "id": "role002",
+    "name": "HR Admin",
+    "description": "Human resources administration with access to employee data and HR modules",
+    "level": 2,
+    "isDefault": false,
+    "userCount": 2,
+    "permissions": {
+      "employees": "admin",
+      "payroll": "read",
+      "attendance": "write",
+      "benefits": "admin",
+      "expenses": "approve",
+      "documents": "write",
+      "performance": "write",
+      "recruitment": "write",
+      "compliance": "read",
+      "analytics": "read",
+      "settings": "read"
+    },
+    "color": "#0038a8"
+  },
+  {
+    "id": "role003",
+    "name": "Finance Manager",
+    "description": "Manages payroll, benefits costs, expenses, and financial compliance",
+    "level": 3,
+    "isDefault": false,
+    "userCount": 2,
+    "permissions": {
+      "employees": "read",
+      "payroll": "write",
+      "attendance": "read",
+      "benefits": "write",
+      "expenses": "approve",
+      "documents": "read",
+      "performance": "read",
+      "recruitment": "read",
+      "compliance": "read",
+      "analytics": "read",
+      "settings": "read"
+    },
+    "color": "#059669"
+  },
+  {
+    "id": "role004",
+    "name": "Department Manager",
+    "description": "Manages team attendance, performance, and approves team expenses",
+    "level": 4,
+    "isDefault": false,
+    "userCount": 8,
+    "permissions": {
+      "employees": "read",
+      "payroll": "read",
+      "attendance": "write",
+      "benefits": "read",
+      "expenses": "approve",
+      "documents": "read",
+      "performance": "write",
+      "recruitment": "read",
+      "compliance": "",
+      "analytics": "read",
+      "settings": ""
+    },
+    "color": "#7c3aed"
+  },
+  {
+    "id": "role005",
+    "name": "Team Lead",
+    "description": "Leads a small team with limited approval and review capabilities",
+    "level": 5,
+    "isDefault": false,
+    "userCount": 6,
+    "permissions": {
+      "employees": "read",
+      "payroll": "",
+      "attendance": "write",
+      "benefits": "",
+      "expenses": "approve",
+      "documents": "read",
+      "performance": "write",
+      "recruitment": "read",
+      "compliance": "",
+      "analytics": "",
+      "settings": ""
+    },
+    "color": "#f59e0b"
+  },
+  {
+    "id": "role006",
+    "name": "Employee",
+    "description": "Standard employee access to own records and self-service features",
+    "level": 6,
+    "isDefault": true,
+    "userCount": 25,
+    "permissions": {
+      "employees": "read_own",
+      "payroll": "read_own",
+      "attendance": "read_own",
+      "benefits": "read_own",
+      "expenses": "write",
+      "documents": "read",
+      "performance": "write_self",
+      "recruitment": "",
+      "compliance": "",
+      "analytics": "",
+      "settings": ""
+    },
+    "color": "#6366f1"
+  },
+  {
+    "id": "role007",
+    "name": "Auditor",
+    "description": "Read-only access across all modules for audit and compliance review",
+    "level": 3,
+    "isDefault": false,
+    "userCount": 1,
+    "permissions": {
+      "employees": "read",
+      "payroll": "read",
+      "attendance": "read",
+      "benefits": "read",
+      "expenses": "read",
+      "documents": "read",
+      "performance": "read",
+      "recruitment": "read",
+      "compliance": "read",
+      "analytics": "read",
+      "settings": "read"
+    },
+    "color": "#64748b"
+  },
+  {
+    "id": "role008",
+    "name": "Probationary Employee",
+    "description": "Limited access for probationary employees during evaluation period",
+    "level": 7,
+    "isDefault": false,
+    "userCount": 5,
+    "permissions": {
+      "employees": "read_own",
+      "payroll": "read_own",
+      "attendance": "read_own",
+      "benefits": "read_own",
+      "expenses": "",
+      "documents": "read",
+      "performance": "write_self",
+      "recruitment": "",
+      "compliance": "",
+      "analytics": "",
+      "settings": ""
+    },
+    "color": "#0891b2"
+  }
+]

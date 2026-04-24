@@ -1,0 +1,103 @@
+
+[
+  {
+    "id": "tpl001",
+    "name": "Welcome Email",
+    "module": "employees",
+    "subject": "Welcome to {{companyName}}, {{employeeName}}!",
+    "body": "<h2>Welcome aboard!</h2><p>Dear {{employeeName}},</p><p>We're excited to have you join {{companyName}} as {{position}} in the {{department}} department.</p><p>Your start date is {{startDate}}.</p>",
+    "variables": ["companyName", "employeeName", "position", "department", "startDate"],
+    "isActive": true,
+    "description": "Sent to new employees upon onboarding"
+  },
+  {
+    "id": "tpl002",
+    "name": "Payroll Released",
+    "module": "payroll",
+    "subject": "Payroll for {{period}} has been released",
+    "body": "<p>Dear {{employeeName}},</p><p>Your payroll for {{period}} has been processed.</p><p>Gross Pay: {{grossPay}}<br>Net Pay: {{netPay}}</p><p>View your payslip <a href='{{payslipLink}}'>here</a>.</p>",
+    "variables": ["employeeName", "period", "grossPay", "netPay", "payslipLink"],
+    "isActive": true,
+    "description": "Notification when payroll is processed"
+  },
+  {
+    "id": "tpl003",
+    "name": "Expense Claim Approved",
+    "module": "expenses",
+    "subject": "Your expense claim #{{claimId}} has been approved",
+    "body": "<p>Dear {{employeeName}},</p><p>Your expense claim #{{claimId}} for {{amount}} ({{category}}) has been approved by {{approverName}}.</p><p>Reimbursement will be processed on {{reimbursementDate}}.</p>",
+    "variables": ["employeeName", "claimId", "amount", "category", "approverName", "reimbursementDate"],
+    "isActive": true,
+    "description": "Notification when expense claim is approved"
+  },
+  {
+    "id": "tpl004",
+    "name": "Expense Claim Rejected",
+    "module": "expenses",
+    "subject": "Your expense claim #{{claimId}} has been rejected",
+    "body": "<p>Dear {{employeeName}},</p><p>Your expense claim #{{claimId}} for {{amount}} has been rejected.</p><p>Reason: {{rejectionReason}}</p>",
+    "variables": ["employeeName", "claimId", "amount", "rejectionReason"],
+    "isActive": true,
+    "description": "Notification when expense claim is rejected"
+  },
+  {
+    "id": "tpl005",
+    "name": "Leave Approved",
+    "module": "attendance",
+    "subject": "Your leave request ({{leaveType}}) has been approved",
+    "body": "<p>Dear {{employeeName}},</p><p>Your {{leaveType}} leave from {{startDate}} to {{endDate}} ({{days}} days) has been approved by {{approverName}}.</p>",
+    "variables": ["employeeName", "leaveType", "startDate", "endDate", "days", "approverName"],
+    "isActive": true,
+    "description": "Notification when leave request is approved"
+  },
+  {
+    "id": "tpl006",
+    "name": "Performance Review Reminder",
+    "module": "performance",
+    "subject": "Reminder: Performance Review due by {{deadline}}",
+    "body": "<p>Dear {{employeeName}},</p><p>Your {{cycleName}} performance review is due by {{deadline}}.</p><p>Please complete your self-assessment <a href='{{reviewLink}}'>here</a>.</p>",
+    "variables": ["employeeName", "cycleName", "deadline", "reviewLink"],
+    "isActive": true,
+    "description": "Reminder for pending performance reviews"
+  },
+  {
+    "id": "tpl007",
+    "name": "Interview Invitation",
+    "module": "recruitment",
+    "subject": "Interview Invitation: {{position}} at {{companyName}}",
+    "body": "<p>Dear {{candidateName}},</p><p>We'd like to invite you for an interview for the {{position}} role.</p><p>Date: {{interviewDate}}<br>Time: {{interviewTime}}<br>Location: {{interviewLocation}}</p>",
+    "variables": ["candidateName", "position", "companyName", "interviewDate", "interviewTime", "interviewLocation"],
+    "isActive": true,
+    "description": "Interview invitation email to candidates"
+  },
+  {
+    "id": "tpl008",
+    "name": "Offer Letter",
+    "module": "recruitment",
+    "subject": "Job Offer: {{position}} at {{companyName}}",
+    "body": "<p>Dear {{candidateName}},</p><p>We're pleased to offer you the position of {{position}} at {{companyName}}.</p><p>Salary: {{salary}}<br>Start Date: {{startDate}}<br>Benefits: {{benefitsSummary}}</p>",
+    "variables": ["candidateName", "position", "companyName", "salary", "startDate", "benefitsSummary"],
+    "isActive": true,
+    "description": "Offer letter sent to selected candidates"
+  },
+  {
+    "id": "tpl009",
+    "name": "Document Expiry Reminder",
+    "module": "documents",
+    "subject": "Document Expiry Reminder: {{documentName}} expires on {{expiryDate}}",
+    "body": "<p>Dear {{employeeName}},</p><p>Your {{documentName}} will expire on {{expiryDate}} ({{daysLeft}} days remaining).</p><p>Please upload the renewed document <a href='{{uploadLink}}'>here</a>.</p>",
+    "variables": ["employeeName", "documentName", "expiryDate", "daysLeft", "uploadLink"],
+    "isActive": true,
+    "description": "Reminder for expiring employee documents"
+  },
+  {
+    "id": "tpl010",
+    "name": "13th Month Pay Notification",
+    "module": "payroll",
+    "subject": "13th Month Pay for {{year}}",
+    "body": "<p>Dear {{employeeName}},</p><p>Your 13th month pay for {{year}} has been computed.</p><p>Amount: {{thirteenthMonthAmount}}</p><p>This will be released on or before December 24.</p>",
+    "variables": ["employeeName", "year", "thirteenthMonthAmount"],
+    "isActive": false,
+    "description": "Seasonal notification for 13th month pay release"
+  }
+]
