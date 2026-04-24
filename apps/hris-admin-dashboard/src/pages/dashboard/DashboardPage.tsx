@@ -24,7 +24,7 @@ export default function DashboardPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-5 max-w-screen-2xl"
+      className="flex flex-col gap-5 max-w-full"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-4">

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "shift001",
+    "name": "Regular Day Shift",
+    "code": "RDS",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "breakMinutes": 60,
+    "workHours": 8,
+    "departments": ["Engineering", "HR", "Finance", "Admin", "IT", "Operations", "Sales"],
+    "gracePeriodMinutes": 15,
+    "color": "#0038a8"
+  },
+  {
+    "id": "shift002",
+    "name": "Early Morning Shift",
+    "code": "EMS",
+    "startTime": "06:00",
+    "endTime": "15:00",
+    "breakMinutes": 60,
+    "workHours": 8,
+    "departments": ["Operations"],
+    "gracePeriodMinutes": 10,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "shift003",
+    "name": "Mid Shift",
+    "code": "MID",
+    "startTime": "12:00",
+    "endTime": "21:00",
+    "breakMinutes": 60,
+    "workHours": 8,
+    "departments": ["Engineering", "IT"],
+    "gracePeriodMinutes": 15,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "shift004",
+    "name": "Night Shift",
+    "code": "NS",
+    "startTime": "22:00",
+    "endTime": "06:00",
+    "breakMinutes": 60,
+    "workHours": 8,
+    "departments": ["IT", "Engineering"],
+    "gracePeriodMinutes": 15,
+    "color": "#6366f1"
+  },
+  {
+    "id": "shift005",
+    "name": "Compressed Work Week",
+    "code": "CWW",
+    "startTime": "07:00",
+    "endTime": "17:00",
+    "breakMinutes": 60,
+    "workHours": 9,
+    "departments": ["Finance", "HR"],
+    "gracePeriodMinutes": 15,
+    "color": "#10b981"
+  }
+]

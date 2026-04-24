@@ -1,0 +1,1252 @@
+[
+  {
+    "employeeId": "emp001",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 8,
+      "used": 2,
+      "pending": 0,
+      "remaining": 21
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 1,
+      "pending": 0,
+      "remaining": 19
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp002",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 8,
+      "used": 5,
+      "pending": 0,
+      "remaining": 18
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 3,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp003",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 8,
+      "used": 8,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 5,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp004",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 8,
+      "used": 0,
+      "pending": 0,
+      "remaining": 23
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 7,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp005",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 8,
+      "used": 3,
+      "pending": 0,
+      "remaining": 20
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 0,
+      "pending": 0,
+      "remaining": 20
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp006",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 7,
+      "used": 6,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 2,
+      "pending": 0,
+      "remaining": 18
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp007",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 7,
+      "used": 9,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 4,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp008",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 7,
+      "used": 1,
+      "pending": 2,
+      "remaining": 19
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 6,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp009",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 7,
+      "used": 4,
+      "pending": 0,
+      "remaining": 18
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 8,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp010",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 7,
+      "used": 7,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 1,
+      "pending": 0,
+      "remaining": 18
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp011",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 6,
+      "used": 10,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 3,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp012",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 6,
+      "used": 2,
+      "pending": 0,
+      "remaining": 19
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 5,
+      "pending": 1,
+      "remaining": 13
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp013",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 6,
+      "used": 5,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 7,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp014",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 6,
+      "used": 8,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 0,
+      "pending": 0,
+      "remaining": 19
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp015",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 6,
+      "used": 0,
+      "pending": 2,
+      "remaining": 19
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 2,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp016",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 3,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 4,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp017",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 6,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 6,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp018",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 9,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 8,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp019",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 1,
+      "pending": 0,
+      "remaining": 19
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 1,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp020",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 5,
+      "used": 4,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 3,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp021",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 7,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 5,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp022",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 10,
+      "pending": 2,
+      "remaining": 7
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 7,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp023",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 2,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 0,
+      "pending": 1,
+      "remaining": 17
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp024",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 5,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 2,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp025",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 4,
+      "used": 8,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 4,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp026",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 0,
+      "pending": 0,
+      "remaining": 18
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 6,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp027",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 3,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 8,
+      "pending": 0,
+      "remaining": 9
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp028",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 6,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 1,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp029",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 9,
+      "pending": 2,
+      "remaining": 7
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 3,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp030",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 3,
+      "used": 1,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 5,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp031",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 4,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 7,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp032",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 7,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 0,
+      "pending": 0,
+      "remaining": 17
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp033",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 10,
+      "pending": 0,
+      "remaining": 7
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 2,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp034",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 2,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 4,
+      "pending": 1,
+      "remaining": 11
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp035",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 2,
+      "used": 5,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 6,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp036",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 8,
+      "pending": 2,
+      "remaining": 6
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 8,
+      "pending": 0,
+      "remaining": 8
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp037",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 0,
+      "pending": 0,
+      "remaining": 16
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 1,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp038",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 3,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 3,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp039",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 6,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 5,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp040",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 9,
+      "pending": 0,
+      "remaining": 7
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 1,
+      "used": 7,
+      "pending": 0,
+      "remaining": 9
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp041",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp042",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 4,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp043",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 7,
+      "pending": 2,
+      "remaining": 6
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 4,
+      "pending": 0,
+      "remaining": 11
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp044",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 10,
+      "pending": 0,
+      "remaining": 5
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 6,
+      "pending": 0,
+      "remaining": 9
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp045",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 13
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 8,
+      "pending": 1,
+      "remaining": 6
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp046",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 5,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 14
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  },
+  {
+    "employeeId": "emp047",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 8,
+      "pending": 0,
+      "remaining": 7
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 2
+    }
+  },
+  {
+    "employeeId": "emp048",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 5,
+      "pending": 0,
+      "remaining": 10
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 5
+    }
+  },
+  {
+    "employeeId": "emp049",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 3,
+      "pending": 0,
+      "remaining": 12
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 7,
+      "pending": 0,
+      "remaining": 8
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 1,
+      "pending": 0,
+      "remaining": 4
+    }
+  },
+  {
+    "employeeId": "emp050",
+    "year": 2023,
+    "vl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 6,
+      "pending": 2,
+      "remaining": 7
+    },
+    "sl": {
+      "entitled": 15,
+      "carryOver": 0,
+      "used": 0,
+      "pending": 0,
+      "remaining": 15
+    },
+    "sil": {
+      "entitled": 5,
+      "carryOver": 0,
+      "used": 2,
+      "pending": 0,
+      "remaining": 3
+    }
+  }
+]

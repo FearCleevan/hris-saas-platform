@@ -26,6 +26,9 @@ import OnboardingPage from '@/pages/onboarding/OnboardingPage';
 import OnboardingDetailPage from '@/pages/onboarding/OnboardingDetailPage';
 import OffboardingPage from '@/pages/offboarding/OffboardingPage';
 import OffboardingDetailPage from '@/pages/offboarding/OffboardingDetailPage';
+import AttendancePage from '@/pages/attendance/AttendancePage';
+import LeavesPage from '@/pages/leaves/LeavesPage';
+import SchedulePage from '@/pages/schedule/SchedulePage';
 import ComingSoonPage from '@/pages/ComingSoonPage';
 
 const queryClient = new QueryClient({
@@ -78,9 +81,9 @@ const router = createBrowserRouter([
       { path: 'onboarding/:id', element: <OnboardingDetailPage /> },
       { path: 'offboarding', element: <OffboardingPage /> },
       { path: 'offboarding/:id', element: <OffboardingDetailPage /> },
-      { path: 'attendance', element: <ComingSoonPage /> },
-      { path: 'leaves', element: <ComingSoonPage /> },
-      { path: 'schedule', element: <ComingSoonPage /> },
+      { path: 'attendance', element: <AttendancePage /> },
+      { path: 'leaves', element: <LeavesPage /> },
+      { path: 'schedule', element: <SchedulePage /> },
       { path: 'payroll', element: <ComingSoonPage /> },
       { path: 'benefits', element: <ComingSoonPage /> },
       { path: 'expenses', element: <ComingSoonPage /> },

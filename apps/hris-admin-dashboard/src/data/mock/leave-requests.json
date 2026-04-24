@@ -1,0 +1,350 @@
+[
+  {
+    "id": "lr001",
+    "employeeId": "emp003",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-10-16",
+    "endDate": "2023-10-18",
+    "days": 3,
+    "reason": "Family vacation in Palawan",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-10-10T09:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-10-09T08:30:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr002",
+    "employeeId": "emp007",
+    "leaveTypeId": "lt002",
+    "leaveTypeCode": "SL",
+    "leaveTypeName": "Sick Leave",
+    "startDate": "2023-10-05",
+    "endDate": "2023-10-05",
+    "days": 1,
+    "reason": "Fever and flu symptoms — consulting company doctor",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp014", "status": "approved", "timestamp": "2023-10-05T07:30:00", "remarks": "Get well soon!" }
+    ],
+    "submittedAt": "2023-10-05T06:15:00",
+    "documents": [],
+    "notes": "Filed on the same day"
+  },
+  {
+    "id": "lr003",
+    "employeeId": "emp010",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-10-23",
+    "endDate": "2023-10-27",
+    "days": 5,
+    "reason": "Annual family reunion in Cebu — pre-planned trip",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-10-16T10:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-10-13T09:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr004",
+    "employeeId": "emp013",
+    "leaveTypeId": "lt007",
+    "leaveTypeCode": "BL",
+    "leaveTypeName": "Bereavement Leave",
+    "startDate": "2023-09-11",
+    "endDate": "2023-09-13",
+    "days": 3,
+    "reason": "Death of maternal grandmother",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-09-11T06:45:00", "remarks": "Approved. Condolences." }
+    ],
+    "submittedAt": "2023-09-11T06:00:00",
+    "documents": ["death_cert_lr004.pdf"],
+    "notes": "Document submitted on Sep 14"
+  },
+  {
+    "id": "lr005",
+    "employeeId": "emp001",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-08-21",
+    "endDate": "2023-08-25",
+    "days": 5,
+    "reason": "Summer vacation with family",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-08-15T14:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-08-10T09:30:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr006",
+    "employeeId": "emp004",
+    "leaveTypeId": "lt002",
+    "leaveTypeCode": "SL",
+    "leaveTypeName": "Sick Leave",
+    "startDate": "2023-10-11",
+    "endDate": "2023-10-12",
+    "days": 2,
+    "reason": "Scheduled medical procedure — minor surgery",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-10-09T11:30:00", "remarks": "Approved. Take care." }
+    ],
+    "submittedAt": "2023-10-09T10:00:00",
+    "documents": ["medical_cert_lr006.pdf"],
+    "notes": ""
+  },
+  {
+    "id": "lr007",
+    "employeeId": "emp009",
+    "leaveTypeId": "lt002",
+    "leaveTypeCode": "SL",
+    "leaveTypeName": "Sick Leave",
+    "startDate": "2023-10-25",
+    "endDate": "2023-10-25",
+    "days": 1,
+    "reason": "Migraine — unable to report to work",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-10-25T07:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-10-25T06:45:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr008",
+    "employeeId": "emp011",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-11-06",
+    "endDate": "2023-11-08",
+    "days": 3,
+    "reason": "Wedding anniversary trip to Baguio",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "approved", "timestamp": "2023-10-30T13:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-10-27T09:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr009",
+    "employeeId": "emp006",
+    "leaveTypeId": "lt008",
+    "leaveTypeCode": "EL",
+    "leaveTypeName": "Emergency Leave",
+    "startDate": "2023-10-30",
+    "endDate": "2023-10-30",
+    "days": 1,
+    "reason": "Flash flood damaged residence — evacuation assistance",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp001", "status": "approved", "timestamp": "2023-10-30T07:30:00", "remarks": "Stay safe!" }
+    ],
+    "submittedAt": "2023-10-30T07:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr010",
+    "employeeId": "emp014",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-07-24",
+    "endDate": "2023-07-28",
+    "days": 5,
+    "reason": "International trip to Japan — booked in advance",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp005", "status": "approved", "timestamp": "2023-07-17T10:30:00", "remarks": "Enjoy!" }
+    ],
+    "submittedAt": "2023-07-10T14:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr011",
+    "employeeId": "emp008",
+    "leaveTypeId": "lt002",
+    "leaveTypeCode": "SL",
+    "leaveTypeName": "Sick Leave",
+    "startDate": "2023-09-25",
+    "endDate": "2023-09-25",
+    "days": 1,
+    "reason": "Dental procedure — tooth extraction",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp005", "status": "approved", "timestamp": "2023-09-24T16:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-09-24T15:30:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr012",
+    "employeeId": "emp012",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-11-02",
+    "endDate": "2023-11-03",
+    "days": 2,
+    "reason": "Undas — visiting ancestral province",
+    "status": "approved",
+    "approvals": [
+      { "level": 1, "approverId": "emp005", "status": "approved", "timestamp": "2023-10-26T09:00:00", "remarks": "" }
+    ],
+    "submittedAt": "2023-10-24T10:00:00",
+    "documents": [],
+    "notes": "Together with Nov 1 special non-working holiday"
+  },
+  {
+    "id": "lr013",
+    "employeeId": "emp001",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-11-20",
+    "endDate": "2023-11-24",
+    "days": 5,
+    "reason": "Year-end team trip — pre-arranged with supervisor",
+    "status": "pending",
+    "approvals": [],
+    "submittedAt": "2023-11-08T09:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr014",
+    "employeeId": "emp003",
+    "leaveTypeId": "lt002",
+    "leaveTypeCode": "SL",
+    "leaveTypeName": "Sick Leave",
+    "startDate": "2023-11-13",
+    "endDate": "2023-11-13",
+    "days": 1,
+    "reason": "Not feeling well — possible viral infection",
+    "status": "pending",
+    "approvals": [],
+    "submittedAt": "2023-11-10T07:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr015",
+    "employeeId": "emp007",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-12-20",
+    "endDate": "2023-12-22",
+    "days": 3,
+    "reason": "Christmas family reunion in hometown",
+    "status": "pending",
+    "approvals": [],
+    "submittedAt": "2023-11-09T14:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr016",
+    "employeeId": "emp019",
+    "leaveTypeId": "lt002",
+    "leaveTypeCode": "SL",
+    "leaveTypeName": "Sick Leave",
+    "startDate": "2023-11-15",
+    "endDate": "2023-11-15",
+    "days": 1,
+    "reason": "Annual physical exam — company-required",
+    "status": "pending",
+    "approvals": [],
+    "submittedAt": "2023-11-10T08:30:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr017",
+    "employeeId": "emp022",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-11-27",
+    "endDate": "2023-12-01",
+    "days": 5,
+    "reason": "Bonifacio Day long weekend extension — family trip",
+    "status": "pending",
+    "approvals": [],
+    "submittedAt": "2023-11-08T11:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr018",
+    "employeeId": "emp005",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-12-18",
+    "endDate": "2023-12-22",
+    "days": 5,
+    "reason": "Year-end leave with family — will ensure proper handover",
+    "status": "pending",
+    "approvals": [],
+    "submittedAt": "2023-11-07T15:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr019",
+    "employeeId": "emp009",
+    "leaveTypeId": "lt001",
+    "leaveTypeCode": "VL",
+    "leaveTypeName": "Vacation Leave",
+    "startDate": "2023-08-14",
+    "endDate": "2023-08-18",
+    "days": 5,
+    "reason": "Vacation leave during month-end",
+    "status": "rejected",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "rejected", "timestamp": "2023-08-10T10:30:00", "remarks": "Dates coincide with month-end reporting. Please choose alternative dates." }
+    ],
+    "submittedAt": "2023-08-08T09:00:00",
+    "documents": [],
+    "notes": ""
+  },
+  {
+    "id": "lr020",
+    "employeeId": "emp015",
+    "leaveTypeId": "lt008",
+    "leaveTypeCode": "EL",
+    "leaveTypeName": "Emergency Leave",
+    "startDate": "2023-10-19",
+    "endDate": "2023-10-20",
+    "days": 2,
+    "reason": "Personal matter",
+    "status": "rejected",
+    "approvals": [
+      { "level": 1, "approverId": "emp002", "status": "rejected", "timestamp": "2023-10-18T16:00:00", "remarks": "Emergency Leave requires a valid and specific emergency. Please resubmit with proper documentation." }
+    ],
+    "submittedAt": "2023-10-18T14:30:00",
+    "documents": [],
+    "notes": "Employee advised to convert to VL if applicable"
+  }
+]

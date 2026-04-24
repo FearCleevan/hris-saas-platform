@@ -1,0 +1,597 @@
+[
+  {
+    "employeeId": "emp001",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp002",
+    "shiftId": "shift005",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp003",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp004",
+    "shiftId": "shift005",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp005",
+    "shiftId": "shift002",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp006",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp007",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp008",
+    "shiftId": "shift003",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp009",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp010",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp011",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp012",
+    "shiftId": "shift003",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp013",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp014",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp015",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp016",
+    "shiftId": "shift003",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp017",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp018",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp019",
+    "shiftId": "shift002",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp020",
+    "shiftId": "shift003",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp021",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp022",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp023",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp024",
+    "shiftId": "shift004",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp025",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp026",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp027",
+    "shiftId": "shift004",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp028",
+    "shiftId": "shift003",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp029",
+    "shiftId": "shift002",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp030",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp031",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp032",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp033",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp034",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp035",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp036",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp037",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp038",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp039",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp040",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp041",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp042",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp043",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp044",
+    "shiftId": "shift005",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp045",
+    "shiftId": "shift002",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp046",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp047",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp048",
+    "shiftId": "shift005",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp049",
+    "shiftId": "shift001",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+    ],
+    "effectiveFrom": "2023-01-01"
+  },
+  {
+    "employeeId": "emp050",
+    "shiftId": "shift005",
+    "workDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "effectiveFrom": "2023-01-01"
+  }
+]
