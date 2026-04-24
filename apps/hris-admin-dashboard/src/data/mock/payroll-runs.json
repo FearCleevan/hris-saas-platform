@@ -1,0 +1,93 @@
+[
+  {
+    "id": "run001",
+    "period": "Aug 1–15, 2023",
+    "cutoffStart": "2023-08-01",
+    "cutoffEnd": "2023-08-15",
+    "payDate": "2023-08-20",
+    "status": "released",
+    "type": "semi-monthly",
+    "totalGross": 1521400,
+    "totalDeductions": 229850,
+    "totalNetPay": 1291550,
+    "employeeCount": 50
+  },
+  {
+    "id": "run002",
+    "period": "Aug 16–31, 2023",
+    "cutoffStart": "2023-08-16",
+    "cutoffEnd": "2023-08-31",
+    "payDate": "2023-09-05",
+    "status": "released",
+    "type": "semi-monthly",
+    "totalGross": 1534800,
+    "totalDeductions": 233100,
+    "totalNetPay": 1301700,
+    "employeeCount": 50
+  },
+  {
+    "id": "run003",
+    "period": "Sep 1–15, 2023",
+    "cutoffStart": "2023-09-01",
+    "cutoffEnd": "2023-09-15",
+    "payDate": "2023-09-20",
+    "status": "released",
+    "type": "semi-monthly",
+    "totalGross": 1518950,
+    "totalDeductions": 228600,
+    "totalNetPay": 1290350,
+    "employeeCount": 50
+  },
+  {
+    "id": "run004",
+    "period": "Sep 16–30, 2023",
+    "cutoffStart": "2023-09-16",
+    "cutoffEnd": "2023-09-30",
+    "payDate": "2023-10-05",
+    "status": "released",
+    "type": "semi-monthly",
+    "totalGross": 1526700,
+    "totalDeductions": 231400,
+    "totalNetPay": 1295300,
+    "employeeCount": 50
+  },
+  {
+    "id": "run005",
+    "period": "Oct 1–15, 2023",
+    "cutoffStart": "2023-10-01",
+    "cutoffEnd": "2023-10-15",
+    "payDate": "2023-10-20",
+    "status": "released",
+    "type": "semi-monthly",
+    "totalGross": 1531200,
+    "totalDeductions": 232750,
+    "totalNetPay": 1298450,
+    "employeeCount": 50
+  },
+  {
+    "id": "run006",
+    "period": "Oct 16–31, 2023",
+    "cutoffStart": "2023-10-16",
+    "cutoffEnd": "2023-10-31",
+    "payDate": "2023-11-05",
+    "status": "released",
+    "type": "semi-monthly",
+    "totalGross": 1542300,
+    "totalDeductions": 231850,
+    "totalNetPay": 1310450,
+    "employeeCount": 50
+  },
+  {
+    "id": "run007",
+    "period": "Nov 1–15, 2023",
+    "cutoffStart": "2023-11-01",
+    "cutoffEnd": "2023-11-15",
+    "payDate": "2023-11-20",
+    "status": "draft",
+    "type": "semi-monthly",
+    "totalGross": 1538605,
+    "totalDeductions": 235160,
+    "totalNetPay": 1303445,
+    "employeeCount": 50
+  }
+]

@@ -1,0 +1,113 @@
+
+[
+  {
+    "id": "cat001",
+    "name": "Travel",
+    "icon": "Plane",
+    "description": "Business travel expenses including airfare, hotel, and per diem",
+    "monthlyBudget": 150000,
+    "requiresReceipt": true,
+    "receiptThreshold": 500,
+    "escalationThreshold": 20000,
+    "color": "#0038a8"
+  },
+  {
+    "id": "cat002",
+    "name": "Meals & Entertainment",
+    "icon": "UtensilsCrossed",
+    "description": "Client meals, team lunches, and business entertainment",
+    "monthlyBudget": 80000,
+    "requiresReceipt": true,
+    "receiptThreshold": 300,
+    "escalationThreshold": 5000,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "cat003",
+    "name": "Office Supplies",
+    "icon": "Package",
+    "description": "Stationery, printer supplies, and office consumables",
+    "monthlyBudget": 50000,
+    "requiresReceipt": true,
+    "receiptThreshold": 1000,
+    "escalationThreshold": 10000,
+    "color": "#6366f1"
+  },
+  {
+    "id": "cat004",
+    "name": "Transportation",
+    "icon": "Car",
+    "description": "Grab, taxi, fuel, parking, and toll fees",
+    "monthlyBudget": 60000,
+    "requiresReceipt": true,
+    "receiptThreshold": 0,
+    "escalationThreshold": 5000,
+    "color": "#0891b2"
+  },
+  {
+    "id": "cat005",
+    "name": "Software & Tools",
+    "icon": "Monitor",
+    "description": "Software subscriptions, SaaS tools, and licenses",
+    "monthlyBudget": 100000,
+    "requiresReceipt": true,
+    "receiptThreshold": 0,
+    "escalationThreshold": 20000,
+    "color": "#7c3aed"
+  },
+  {
+    "id": "cat006",
+    "name": "Training & Development",
+    "icon": "GraduationCap",
+    "description": "Workshops, courses, certifications, and conference fees",
+    "monthlyBudget": 75000,
+    "requiresReceipt": true,
+    "receiptThreshold": 2000,
+    "escalationThreshold": 15000,
+    "color": "#059669"
+  },
+  {
+    "id": "cat007",
+    "name": "Utilities",
+    "icon": "Zap",
+    "description": "Electricity, water, internet, and phone bills",
+    "monthlyBudget": 120000,
+    "requiresReceipt": false,
+    "receiptThreshold": 0,
+    "escalationThreshold": 0,
+    "color": "#dc2626"
+  },
+  {
+    "id": "cat008",
+    "name": "Maintenance",
+    "icon": "Wrench",
+    "description": "Office repairs, equipment maintenance, and janitorial",
+    "monthlyBudget": 40000,
+    "requiresReceipt": true,
+    "receiptThreshold": 5000,
+    "escalationThreshold": 15000,
+    "color": "#64748b"
+  },
+  {
+    "id": "cat009",
+    "name": "Events",
+    "icon": "CalendarDays",
+    "description": "Company events, team building, and celebrations",
+    "monthlyBudget": 90000,
+    "requiresReceipt": true,
+    "receiptThreshold": 1000,
+    "escalationThreshold": 20000,
+    "color": "#db2777"
+  },
+  {
+    "id": "cat010",
+    "name": "Miscellaneous",
+    "icon": "MoreHorizontal",
+    "description": "Other business expenses not covered by other categories",
+    "monthlyBudget": 35000,
+    "requiresReceipt": true,
+    "receiptThreshold": 500,
+    "escalationThreshold": 10000,
+    "color": "#ca8a04"
+  }
+]

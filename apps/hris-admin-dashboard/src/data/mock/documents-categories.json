@@ -1,0 +1,91 @@
+
+[
+  {
+    "id": "dcat001",
+    "name": "Employment Contracts",
+    "icon": "FileCheck",
+    "description": "Employment agreements, offer letters, and appointment documents",
+    "color": "#0038a8",
+    "accessLevel": "hr_admin",
+    "requiredFor201": true,
+    "retentionMonths": 60,
+    "requireESignature": true
+  },
+  {
+    "id": "dcat002",
+    "name": "Government Forms",
+    "icon": "Building2",
+    "description": "SSS, Pag-IBIG, PhilHealth, BIR, and other statutory forms",
+    "color": "#dc2626",
+    "accessLevel": "hr_admin",
+    "requiredFor201": true,
+    "retentionMonths": 120,
+    "requireESignature": false
+  },
+  {
+    "id": "dcat003",
+    "name": "Certificates",
+    "icon": "Award",
+    "description": "Employment certificates, training certificates, and clearances",
+    "color": "#059669",
+    "accessLevel": "department",
+    "requiredFor201": true,
+    "retentionMonths": 36,
+    "requireESignature": false
+  },
+  {
+    "id": "dcat004",
+    "name": "Company Policies",
+    "icon": "ScrollText",
+    "description": "HR policies, code of conduct, employee handbook, and memos",
+    "color": "#7c3aed",
+    "accessLevel": "public",
+    "requiredFor201": false,
+    "retentionMonths": 0,
+    "requireESignature": true
+  },
+  {
+    "id": "dcat005",
+    "name": "IDs & Clearances",
+    "icon": "IdCard",
+    "description": "Government IDs, NBI clearance, police clearance, medical certificates",
+    "color": "#f59e0b",
+    "accessLevel": "hr_admin",
+    "requiredFor201": true,
+    "retentionMonths": 24,
+    "requireESignature": false
+  },
+  {
+    "id": "dcat006",
+    "name": "Performance Reviews",
+    "icon": "TrendingUp",
+    "description": "Performance appraisals, KPI reviews, and evaluation forms",
+    "color": "#6366f1",
+    "accessLevel": "manager",
+    "requiredFor201": true,
+    "retentionMonths": 60,
+    "requireESignature": true
+  },
+  {
+    "id": "dcat007",
+    "name": "Training Records",
+    "icon": "GraduationCap",
+    "description": "Training completion certificates, seminar attendance, workshop records",
+    "color": "#0891b2",
+    "accessLevel": "department",
+    "requiredFor201": true,
+    "retentionMonths": 36,
+    "requireESignature": false
+  },
+  {
+    "id": "dcat008",
+    "name": "Disciplinary Records",
+    "icon": "AlertTriangle",
+    "description": "Notices to explain, incident reports, and disciplinary actions",
+    "color": "#ce1126",
+    "accessLevel": "confidential",
+    "requiredFor201": true,
+    "retentionMonths": 84,
+    "requireESignature": true
+  }
+]

@@ -1,0 +1,51 @@
+
+[
+  {
+    "id": "cycle001",
+    "name": "Mid-Year 2023",
+    "period": "January - June 2023",
+    "status": "completed",
+    "selfAssessmentStart": "2023-06-15",
+    "selfAssessmentEnd": "2023-06-30",
+    "managerReviewStart": "2023-07-01",
+    "managerReviewEnd": "2023-07-15",
+    "calibrationStart": "2023-07-15",
+    "calibrationEnd": "2023-07-20",
+    "departments": ["Engineering", "HR", "Finance", "Operations", "Sales", "IT", "Admin"],
+    "totalParticipants": 48,
+    "completedReviews": 48,
+    "averageRating": 3.6
+  },
+  {
+    "id": "cycle002",
+    "name": "Year-End 2023",
+    "period": "July - December 2023",
+    "status": "active",
+    "selfAssessmentStart": "2023-12-01",
+    "selfAssessmentEnd": "2023-12-15",
+    "managerReviewStart": "2023-12-15",
+    "managerReviewEnd": "2023-12-30",
+    "calibrationStart": "2024-01-05",
+    "calibrationEnd": "2024-01-10",
+    "departments": ["Engineering", "HR", "Finance", "Operations", "Sales", "IT", "Admin"],
+    "totalParticipants": 50,
+    "completedReviews": 28,
+    "averageRating": 3.7
+  },
+  {
+    "id": "cycle003",
+    "name": "Mid-Year 2024",
+    "period": "January - June 2024",
+    "status": "upcoming",
+    "selfAssessmentStart": "2024-06-15",
+    "selfAssessmentEnd": "2024-06-30",
+    "managerReviewStart": "2024-07-01",
+    "managerReviewEnd": "2024-07-15",
+    "calibrationStart": "2024-07-15",
+    "calibrationEnd": "2024-07-20",
+    "departments": ["Engineering", "HR", "Finance", "Operations", "Sales", "IT", "Admin"],
+    "totalParticipants": 50,
+    "completedReviews": 0,
+    "averageRating": 0
+  }
+]

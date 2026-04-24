@@ -1,0 +1,74 @@
+[
+  {
+    "id": "pd001",
+    "runId": "run006",
+    "employeeId": "emp007",
+    "type": "overtime_not_credited",
+    "description": "2 hours overtime on Oct 19 not reflected in payslip. Approved OT request on file.",
+    "filedDate": "2023-11-03",
+    "status": "open",
+    "resolvedDate": null,
+    "resolution": null,
+    "amountDisputed": 580
+  },
+  {
+    "id": "pd002",
+    "runId": "run006",
+    "employeeId": "emp037",
+    "type": "tardiness_dispute",
+    "description": "Tardiness deduction of ₱215 is incorrect — attendance biometric malfunction on Oct 23 confirmed by IT.",
+    "filedDate": "2023-11-04",
+    "status": "review",
+    "resolvedDate": null,
+    "resolution": null,
+    "amountDisputed": 215
+  },
+  {
+    "id": "pd003",
+    "runId": "run005",
+    "employeeId": "emp019",
+    "type": "loan_double_deduction",
+    "description": "Company loan was deducted twice in Oct 1–15 cutoff. Original ₱2,000 deducted twice.",
+    "filedDate": "2023-10-25",
+    "status": "resolved",
+    "resolvedDate": "2023-10-28",
+    "resolution": "Verified double deduction. Credit of ₱2,000 applied to next payroll run.",
+    "amountDisputed": 2000
+  },
+  {
+    "id": "pd004",
+    "runId": "run006",
+    "employeeId": "emp009",
+    "type": "tardiness_dispute",
+    "description": "Tardiness of 155 minutes deducted incorrectly. Employee was on approved half-day leave Oct 25.",
+    "filedDate": "2023-11-06",
+    "status": "open",
+    "resolvedDate": null,
+    "resolution": null,
+    "amountDisputed": 155
+  },
+  {
+    "id": "pd005",
+    "runId": "run004",
+    "employeeId": "emp022",
+    "type": "allowance_missing",
+    "description": "Transportation allowance not included in Sep 16–30 payslip.",
+    "filedDate": "2023-10-09",
+    "status": "resolved",
+    "resolvedDate": "2023-10-11",
+    "resolution": "System configuration error confirmed. Allowance credited in the Oct 1–15 payroll run.",
+    "amountDisputed": 750
+  },
+  {
+    "id": "pd006",
+    "runId": "run006",
+    "employeeId": "emp013",
+    "type": "loan_excess",
+    "description": "Company loan balance is ₱4,500 remaining but ₱1,500 is being deducted instead of the agreed ₱1,000.",
+    "filedDate": "2023-11-05",
+    "status": "review",
+    "resolvedDate": null,
+    "resolution": null,
+    "amountDisputed": 500
+  }
+]

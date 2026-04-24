@@ -1,0 +1,21 @@
+
+[
+  {
+    "id":"rep001","type":"bir2316","name":"BIR Form 2316","fullName":"Certificate of Compensation Payment / Tax Withheld","agency":"BIR","frequency":"Annual","filingDeadline":"January 31","status":"filed","period":"2022","filedDate":"2023-01-25","employeeCount":48,"totalCompensation":3140000,"totalTaxWithheld":456800,"reference":"BIR2316-2022-001","nextDueDate":"2024-01-31"
+  },
+  {
+    "id":"rep002","type":"biralphalist","name":"BIR Alphalist of Employees","fullName":"Alphalist of Employees as of December 31","agency":"BIR","frequency":"Annual","filingDeadline":"February 28","status":"filed","period":"2022","filedDate":"2023-02-20","employeeCount":45,"totalCompensation":2950000,"totalTaxWithheld":425000,"reference":"BIR-AL-2022-001","nextDueDate":"2024-02-28"
+  },
+  {
+    "id":"rep003","type":"sssr3","name":"SSS R-3 Report","fullName":"Contribution Collection List","agency":"SSS","frequency":"Monthly","filingDeadline":"10th of following month","status":"filed","period":"October 2023","filedDate":"2023-11-08","employeeCount":50,"totalCompensation":0,"totalTaxWithheld":0,"reference":"SSS-R3-2023-10","nextDueDate":"2023-12-10"
+  },
+  {
+    "id":"rep004","type":"pagibigmcrf","name":"Pag-IBIG MCRF","fullName":"Monthly Contribution Remittance Form","agency":"Pag-IBIG","frequency":"Monthly","filingDeadline":"10th of following month","status":"pending","period":"November 2023","filedDate":"","employeeCount":50,"totalCompensation":0,"totalTaxWithheld":0,"reference":"","nextDueDate":"2023-12-10"
+  },
+  {
+    "id":"rep005","type":"philhealthrf1","name":"PhilHealth RF-1","fullName":"Report of Employee-Members","agency":"PhilHealth","frequency":"Monthly","filingDeadline":"15th of following month","status":"pending","period":"November 2023","filedDate":"","employeeCount":50,"totalCompensation":0,"totalTaxWithheld":0,"reference":"","nextDueDate":"2023-12-15"
+  },
+  {
+    "id":"rep006","type":"bir1601c","name":"BIR Form 1601C","fullName":"Monthly Remittance Return of Income Taxes Withheld on Compensation","agency":"BIR","frequency":"Monthly","filingDeadline":"10th of following month","status":"filed","period":"October 2023","filedDate":"2023-11-05","employeeCount":50,"totalCompensation":0,"totalTaxWithheld":0,"reference":"BIR-1601C-2023-10","nextDueDate":"2023-12-10"
+  }
+]

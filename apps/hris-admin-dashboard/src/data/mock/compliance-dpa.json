@@ -1,0 +1,11 @@
+
+[
+  {"id":"dpa001","requirement":"DS-01 Registration with NPC","category":"Registration","status":"compliant","completedDate":"2022-03-15","notes":"Data Processing System registered. Certificate No. NPC-DS01-2022-001234"},
+  {"id":"dpa002","requirement":"Privacy Notice Posted","category":"Transparency","status":"compliant","completedDate":"2022-04-01","notes":"Privacy notice posted on company website and employee onboarding portal"},
+  {"id":"dpa003","requirement":"Consent Forms Collected","category":"Consent","status":"compliant","completedDate":"2023-01-15","notes":"48 out of 50 employees with signed consent forms. 2 pending from new hires."},
+  {"id":"dpa004","requirement":"Data Inventory Completed","category":"Documentation","status":"compliant","completedDate":"2023-06-30","notes":"Personal data inventory updated semi-annually. 8 categories identified."},
+  {"id":"dpa005","requirement":"DPO Designated","category":"Organization","status":"compliant","completedDate":"2022-03-01","notes":"Data Protection Officer: emp036 (Bianca Aquino). Contact: dpo@company.com"},
+  {"id":"dpa006","requirement":"Privacy Impact Assessment","category":"Assessment","status":"compliant","completedDate":"2023-09-15","notes":"PIA conducted for HRIS implementation. Risk level: Low-Medium."},
+  {"id":"dpa007","requirement":"Breach Notification Protocol","category":"Security","status":"compliant","completedDate":"2022-05-01","notes":"Protocol documented. Incident response team identified. Annual drill completed."},
+  {"id":"dpa008","requirement":"Data Subject Rights Procedure","category":"Rights","status":"compliant","completedDate":"2022-06-01","notes":"Procedure for access, rectification, erasure, objection requests documented."}
+]

@@ -29,6 +29,12 @@ import OffboardingDetailPage from '@/pages/offboarding/OffboardingDetailPage';
 import AttendancePage from '@/pages/attendance/AttendancePage';
 import LeavesPage from '@/pages/leaves/LeavesPage';
 import SchedulePage from '@/pages/schedule/SchedulePage';
+import PayrollPage from '@/pages/payroll/PayrollPage';
+import BenefitsPage from '@/pages/benefits/BenefitsPage';
+import ExpensesPage from '@/pages/expenses/ExpensesPage';
+import DocumentsPage from '@/pages/documents/DocumentsPage';
+import PerformancePage from '@/pages/performance/PerformancePage';
+import CompliancePage from '@/pages/compliance/CompliancePage';
 import ComingSoonPage from '@/pages/ComingSoonPage';
 
 const queryClient = new QueryClient({
@@ -84,13 +90,13 @@ const router = createBrowserRouter([
       { path: 'attendance', element: <AttendancePage /> },
       { path: 'leaves', element: <LeavesPage /> },
       { path: 'schedule', element: <SchedulePage /> },
-      { path: 'payroll', element: <ComingSoonPage /> },
-      { path: 'benefits', element: <ComingSoonPage /> },
-      { path: 'expenses', element: <ComingSoonPage /> },
-      { path: 'documents', element: <ComingSoonPage /> },
-      { path: 'performance', element: <ComingSoonPage /> },
+      { path: 'payroll', element: <PayrollPage /> },
+      { path: 'benefits', element: <BenefitsPage /> },
+      { path: 'expenses', element: <ExpensesPage /> },
+      { path: 'documents', element: <DocumentsPage /> },
+      { path: 'performance', element: <PerformancePage /> },
       { path: 'recruitment', element: <ComingSoonPage /> },
-      { path: 'reports', element: <ComingSoonPage /> },
+      { path: 'reports', element: <CompliancePage /> },
       { path: 'analytics', element: <ComingSoonPage /> },
       { path: 'settings/*', element: <ComingSoonPage /> },
       { path: 'notifications', element: <ComingSoonPage /> },
