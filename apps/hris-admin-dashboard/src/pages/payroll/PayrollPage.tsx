@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Banknote, FileSpreadsheet, Receipt, BarChart2, MessageSquareWarning,
   ChevronDown, ChevronRight, Download, Send, Check, X, AlertTriangle,
-  PlayCircle, CheckCircle2, Building2, Printer,
+  PlayCircle, CheckCircle2, Building2, Printer, Plus, Gift,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
@@ -592,6 +592,31 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
 function ReportsTab({ runs }: { runs: PayrollRun[] }) {
   const maxGross = Math.max(...runs.map((r) => r.totalGross));
 
+  const [showAllThirteenth, setShowAllThirteenth] = useState(false);
+  const [bonuses, setBonuses] = useState([
+    { id: 'b1', type: '13th Month Pay', month: 'Dec 2023', totalAmount: 0, status: 'pending' as const },
+    { id: 'b2', type: 'Mid-Year Bonus', month: 'Jun 2023', totalAmount: 1_250_000, status: 'released' as const },
+  ]);
+
+  const thirteenthData = useMemo(() => {
+    const yearStart   = new Date('2023-01-01');
+    const cutoffDate  = new Date('2023-11-15');
+    return [...employeesData]
+      .map(emp => {
+        const hire = new Date(emp.hireDate);
+        const from = hire > yearStart ? hire : yearStart;
+        const ms   = Math.ceil((cutoffDate.getTime() - from.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+        const months = Math.min(Math.max(ms, 0), 11);
+        return { ...emp, months, thirteenth: Math.round(emp.salary * months / 12) };
+      })
+      .sort((a, b) => b.thirteenth - a.thirteenth);
+  }, []);
+
+  const totalThirteenth = useMemo(
+    () => thirteenthData.reduce((s, e) => s + e.thirteenth, 0),
+    [thirteenthData],
+  );
+
   const deptTotals = useMemo(() => {
     const map: Record<string, number> = {};
     for (const r of payrollRecordsData.filter((r) => r.runId === 'run007')) {
@@ -741,6 +766,156 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ── 13th Month Pay ── */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
+          <div>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-white">13th Month Pay — 2023</h3>
+            <p className="text-[10px] text-gray-400">
+              Total payout: {peso(totalThirteenth)} · {employeesData.length} employees · Jan–Nov 2023
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowAllThirteenth(v => !v)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              {showAllThirteenth ? 'Show Top 10' : `Show All (${employeesData.length})`}
+            </button>
+            <button
+              type="button"
+              onClick={() => toast.info('Generating 13th Month payroll run…')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />Generate Run
+            </button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 sticky left-0 bg-gray-50/80 dark:bg-gray-800/60">Employee</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Department</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Monthly Salary</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500">Months (2023)</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-[#0038a8] dark:text-blue-400">13th Month Pay</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(showAllThirteenth ? thirteenthData : thirteenthData.slice(0, 10)).map((emp, i, arr) => (
+                <tr key={emp.id} className={`${i < arr.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors`}>
+                  <td className="px-4 py-2.5 sticky left-0 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/20">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                        {getInitials(emp.name)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">{emp.name}</p>
+                        <p className="text-[9px] text-gray-400">{emp.position}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-gray-500">{emp.department}</td>
+                  <td className="px-4 py-2.5 text-right text-xs font-mono text-gray-600 dark:text-gray-400 tabular-nums">{peso(emp.salary)}</td>
+                  <td className="px-4 py-2.5 text-center text-xs text-gray-500">{emp.months}</td>
+                  <td className="px-4 py-2.5 text-right text-sm font-bold text-[#0038a8] dark:text-blue-400 tabular-nums">{peso(emp.thirteenth)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40">
+                <td colSpan={4} className="px-4 py-3 text-xs font-bold text-gray-600 dark:text-gray-400">
+                  TOTAL 13TH MONTH PAYOUT ({employeesData.length} employees)
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-extrabold text-[#0038a8] dark:text-blue-400 tabular-nums">
+                  {peso(totalThirteenth)}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Bonus Management ── */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Gift className="w-4 h-4 text-[#0038a8]" />
+            <h3 className="text-sm font-bold text-gray-800 dark:text-white">Bonus Management — 2023</h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setBonuses(prev => [...prev, {
+                id: `b${Date.now()}`,
+                type: 'Performance Bonus',
+                month: 'Dec 2023',
+                totalAmount: Math.round(totalThirteenth * 0.1),
+                status: 'pending' as const,
+              }]);
+              toast.success('Performance Bonus added');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />Add Bonus
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Bonus Type</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Target Month</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Total Amount</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bonuses.map((bonus, i) => {
+                const amount = bonus.type === '13th Month Pay' ? totalThirteenth : bonus.totalAmount;
+                return (
+                  <tr key={bonus.id} className={`${i < bonuses.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors`}>
+                    <td className="px-4 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200">{bonus.type}</td>
+                    <td className="px-4 py-2.5 text-xs text-gray-500">{bonus.month}</td>
+                    <td className="px-4 py-2.5 text-right text-xs font-bold font-mono text-[#0038a8] dark:text-blue-400 tabular-nums">
+                      {peso(amount)}
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                        bonus.status === 'released'
+                          ? 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800'
+                          : 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+                      }`}>
+                        {bonus.status === 'released' ? 'Released' : 'For Processing'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      {bonus.status !== 'released' ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBonuses(prev => prev.map(b => b.id === bonus.id ? { ...b, status: 'released' as const, totalAmount: amount } : b));
+                            toast.success(`${bonus.type} marked as released`);
+                          }}
+                          className="text-[10px] font-semibold text-[#0038a8] dark:text-blue-400 hover:underline"
+                        >
+                          Mark Released
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-gray-400">Completed</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
