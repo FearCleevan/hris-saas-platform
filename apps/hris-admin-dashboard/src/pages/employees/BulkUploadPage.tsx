@@ -153,8 +153,8 @@ export default function BulkUploadPage() {
                 exit={{ opacity: 0 }}
                 className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors cursor-pointer ${
                   dragOver
-                    ? 'border-[#0038a8] bg-[#0038a8]/5'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-[#0038a8]/50 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                    ? 'border-brand-blue bg-brand-blue/5'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-brand-blue/50 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 }`}
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
@@ -162,6 +162,7 @@ export default function BulkUploadPage() {
                 onClick={() => inputRef.current?.click()}
               >
                 <input
+                  title='file'
                   ref={inputRef}
                   type="file"
                   accept=".csv"
@@ -187,12 +188,12 @@ export default function BulkUploadPage() {
               </motion.div>
             ) : (
               <motion.div key="file-info" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                <FileSpreadsheet className="w-8 h-8 text-[#0038a8] shrink-0" />
+                <FileSpreadsheet className="w-8 h-8 text-brand-blue shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{file?.name}</p>
                   <p className="text-xs text-gray-400">{rows.length} rows detected</p>
                 </div>
-                <button onClick={reset} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                <button title='Select' onClick={reset} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </motion.div>
@@ -258,7 +259,7 @@ export default function BulkUploadPage() {
                 size="sm"
                 onClick={handleUpload}
                 disabled={status === 'uploading' || validCount === 0}
-                className="flex items-center gap-1.5 bg-[#0038a8] hover:bg-[#002d8a] text-white"
+                className="flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white"
               >
                 {status === 'uploading' ? (
                   <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Uploading…</>

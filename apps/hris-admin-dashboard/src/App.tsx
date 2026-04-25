@@ -20,6 +20,7 @@ import DashboardPage from '@/pages/dashboard/DashboardPage';
 import EmployeeListPage from '@/pages/employees/EmployeeListPage';
 import EmployeeProfilePage from '@/pages/employees/EmployeeProfilePage';
 import NewEmployeePage from '@/pages/employees/NewEmployeePage';
+import EditEmployeePage from '@/pages/employees/EditEmployeePage';
 import BulkUploadPage from '@/pages/employees/BulkUploadPage';
 import OrgChartPage from '@/pages/employees/OrgChartPage';
 import OnboardingPage from '@/pages/onboarding/OnboardingPage';
@@ -85,7 +86,7 @@ const router = createBrowserRouter([
       { path: 'employees/upload', element: <BulkUploadPage /> },
       { path: 'employees/org-chart', element: <OrgChartPage /> },
       { path: 'employees/:id', element: <EmployeeProfilePage /> },
-      { path: 'employees/:id/edit', element: <ComingSoonPage /> },
+      { path: 'employees/:id/edit', element: <EditEmployeePage /> },
       { path: 'onboarding', element: <OnboardingPage /> },
       { path: 'onboarding/:id', element: <OnboardingDetailPage /> },
       { path: 'offboarding', element: <OffboardingPage /> },

@@ -66,8 +66,8 @@ function pct(v: number, total: number) { return total > 0 ? `${Math.round((v / t
 function KpiCard({ label, value, icon: IconC, sub, color, trend }: { label: string; value: string | number; icon: React.ElementType; sub?: string; color?: string; trend?: 'up' | 'down' | 'flat' }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
-        <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
+        <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-brand-blue'}`} />
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-1">
@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
           <button onClick={() => toast.success('Dashboard refreshed')} className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 hover:bg-gray-50">
             <RefreshCw className="w-3.5 h-3.5 inline mr-1" />Refresh
           </button>
-          <button onClick={() => toast.success('Report exported')} className="px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold">
+          <button onClick={() => toast.success('Report exported')} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold">
             <Download className="w-3.5 h-3.5 inline mr-1" />Export
           </button>
         </div>
@@ -209,7 +209,7 @@ export default function AnalyticsPage() {
 
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-[#0038a8] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <Icon className="w-4 h-4" />{tab.label}
           </button>
         );})}
@@ -239,7 +239,7 @@ export default function AnalyticsPage() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <span className="text-xs font-bold text-gray-600">{v}</span>
-                          <div className="w-full bg-[#0038a8] rounded-t-md" style={{ height: `${pctVal}%`, minHeight: '4px' }} />
+                          <div className="w-full bg-brand-blue rounded-t-md" style={{ height: `${pctVal}%`, minHeight: '4px' }} />
                           <span className="text-[10px] text-gray-400">{MONTHS[i]}</span>
                         </div>
                       );
@@ -253,7 +253,7 @@ export default function AnalyticsPage() {
                       <div key={dept.name} className="flex items-center gap-2">
                         <span className="text-[10px] text-gray-500 w-20 truncate">{dept.name}</span>
                         <div className="flex-1 h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#0038a8] rounded-full flex items-center justify-end pr-1" style={{ width: `${(dept.count / workforce.maxDept) * 100}%` }}>
+                          <div className="h-full bg-brand-blue rounded-full flex items-center justify-end pr-1" style={{ width: `${(dept.count / workforce.maxDept) * 100}%` }}>
                             <span className="text-[8px] font-bold text-white">{dept.count}</span>
                           </div>
                         </div>
