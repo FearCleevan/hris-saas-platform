@@ -18,9 +18,9 @@ import payrollRunsData from '@/data/mock/payroll-runs.json';
 import attendanceLogsData from '@/data/mock/attendance-logs.json';
 import leaveRequestsData from '@/data/mock/leave-requests.json';
 import leaveBalancesData from '@/data/mock/leave-balances.json';
-import leaveTypesData from '@/data/mock/leave-types.json';
 import documentsLibraryData from '@/data/mock/documents-library.json';
 import performanceReviewsData from '@/data/mock/performance-reviews.json';
+import overtimeRequestsData from '@/data/mock/overtime-requests.json';
 
 type Employee = typeof employeesData[number];
 type EmployeeDetail = typeof employeeDetailsData[number];
@@ -306,12 +306,6 @@ function LeavesTab({ employeeId }: { employeeId: string }) {
     [employeeId]
   );
 
-  const typesMap = useMemo(() => {
-    const m: Record<string, string> = {};
-    leaveTypesData.forEach((t: { id: string; name: string }) => { m[t.id] = t.name; });
-    return m;
-  }, []);
-
   const leaveStatusCls: Record<string, string> = {
     approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     pending:  'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -588,7 +582,7 @@ function PerformanceTab({ employeeId }: { employeeId: string }) {
 }
 
 // ─── TAB: 201 FILE ─────────────────────────────────────────────────────────────
-function File201Tab({ employeeId, employee, details }: {
+function File201Tab({ employeeId, employee: _employee, details }: {
   employeeId: string;
   employee: Employee;
   details: EmployeeDetail | undefined;
@@ -710,6 +704,149 @@ function File201Tab({ employeeId, employee, details }: {
   );
 }
 
+// ─── TAB: ACTIVITY TIMELINE ────────────────────────────────────────────────────
+function ActivityTimelineTab({ employeeId }: { employeeId: string }) {
+  type TEvent = {
+    id: string; date: Date; icon: React.ElementType;
+    dotCls: string; title: string; desc: string;
+    tag: string; tagCls: string;
+  };
+
+  const events = useMemo<TEvent[]>(() => {
+    const out: TEvent[] = [];
+
+    // Leave requests
+    leaveRequestsData
+      .filter((r) => r.employeeId === employeeId)
+      .forEach((r) => {
+        const tagCls =
+          r.status === 'approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+          r.status === 'rejected' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+          'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+        out.push({
+          id: `leave-${r.id}`,
+          date: new Date(r.submittedAt),
+          icon: Calendar,
+          dotCls: r.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
+                  r.status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30 text-red-500' :
+                  'bg-amber-100 dark:bg-amber-900/30 text-amber-500',
+          title: `Leave Request: ${r.leaveTypeName}`,
+          desc: `${r.days} day${r.days !== 1 ? 's' : ''} · ${format(new Date(r.startDate), 'MMM d')} – ${format(new Date(r.endDate), 'MMM d, yyyy')}${r.reason ? ` · "${r.reason}"` : ''}`,
+          tag: r.status,
+          tagCls,
+        });
+      });
+
+    // Payroll records
+    const runsMap: Record<string, typeof payrollRunsData[number]> = {};
+    payrollRunsData.forEach((r) => { runsMap[r.id] = r; });
+    payrollRecordsData
+      .filter((r) => r.employeeId === employeeId)
+      .forEach((r) => {
+        const run = runsMap[r.runId];
+        if (!run?.payDate) return;
+        out.push({
+          id: `payroll-${r.id}`,
+          date: new Date(run.payDate),
+          icon: Banknote,
+          dotCls: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+          title: 'Payslip Released',
+          desc: `${run.period} · Net Pay: ₱${r.netPay.toLocaleString()} · Gross: ₱${r.grossPay.toLocaleString()}`,
+          tag: 'payroll',
+          tagCls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        });
+      });
+
+    // Overtime requests
+    overtimeRequestsData
+      .filter((r) => r.employeeId === employeeId)
+      .forEach((r) => {
+        out.push({
+          id: `ot-${r.id}`,
+          date: new Date(r.date),
+          icon: Clock,
+          dotCls: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+          title: `Overtime Filed: ${r.hours}h (${r.type})`,
+          desc: `${r.startTime} – ${r.endTime}${r.reason ? ` · ${r.reason}` : ''}`,
+          tag: r.status,
+          tagCls: r.status === 'approved'
+            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        });
+      });
+
+    // Performance reviews
+    performanceReviewsData
+      .filter((r) => r.employeeId === employeeId)
+      .forEach((r) => {
+        const rawDate = r.managerReview?.reviewDate;
+        const date = rawDate ? new Date(rawDate) : null;
+        if (!date || isNaN(date.getTime())) return;
+        out.push({
+          id: `perf-${r.id}`,
+          date,
+          icon: TrendingUp,
+          dotCls: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+          title: 'Performance Review Completed',
+          desc: `Cycle ${r.cycleId} · Final Rating: ${r.finalRating > 0 ? `${r.finalRating.toFixed(1)}/5` : 'Pending'}`,
+          tag: r.status.replace('_', ' '),
+          tagCls: r.status === 'completed'
+            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+            : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+        });
+      });
+
+    return out.sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [employeeId]);
+
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <Clock className="w-10 h-10 text-gray-200 dark:text-gray-700 mb-3" />
+        <p className="text-sm text-gray-400">No activity recorded yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative pl-8">
+      <div className="absolute left-3.5 top-3 bottom-3 w-px bg-gray-100 dark:bg-gray-800" />
+      {events.map((event, i) => {
+        const Icon = event.icon;
+        return (
+          <motion.div
+            key={event.id}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.02, duration: 0.2 }}
+            className="relative flex gap-4 pb-5 last:pb-0"
+          >
+            <div className={`absolute -left-8 mt-0.5 w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${event.dotCls}`}>
+              <Icon className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex-1 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{event.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{event.desc}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize whitespace-nowrap ${event.tagCls}`}>
+                    {event.tag}
+                  </span>
+                  <p className="text-[10px] text-gray-400 whitespace-nowrap">
+                    {format(event.date, 'MMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function EmployeeProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -822,6 +959,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="file201">201 File</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
           </TabsList>
         </div>
 
@@ -1032,6 +1170,11 @@ export default function EmployeeProfilePage() {
         {/* ── 201 File ── */}
         <TabsContent value="file201">
           <File201Tab employeeId={employee.id} employee={employee} details={details} />
+        </TabsContent>
+
+        {/* ── Timeline ── */}
+        <TabsContent value="timeline">
+          <ActivityTimelineTab employeeId={employee.id} />
         </TabsContent>
       </Tabs>
     </motion.div>

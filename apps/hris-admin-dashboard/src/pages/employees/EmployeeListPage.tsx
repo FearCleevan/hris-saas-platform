@@ -4,15 +4,17 @@ import {
   DataGrid,
   type GridColDef,
   type GridRowParams,
+  type GridRowSelectionModel,
   GridToolbarContainer,
   GridToolbarQuickFilter,
 } from '@mui/x-data-grid';
 import { Box, Chip } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   UserPlus, Download, Upload, Filter, Users,
-  TrendingUp, UserCheck, Clock, ChevronDown,
+  TrendingUp, UserCheck, Clock, ChevronDown, X, Check,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { format, differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import employeesData from '@/data/mock/employees.json';
@@ -85,6 +87,33 @@ export default function EmployeeListPage() {
   const [department, setDepartment] = useState('All');
   const [status, setStatus] = useState('All');
   const [type, setType] = useState('All');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDept, setBulkDept] = useState('');
+  const [bulkStatus, setBulkStatus] = useState('');
+  const [bulkType, setBulkType] = useState('');
+
+  const handleSelectionChange = useCallback((model: GridRowSelectionModel) => {
+    const ids = model.type === 'include'
+      ? Array.from(model.ids as Set<string>)
+      : [];
+    setSelectedIds(ids);
+  }, []);
+
+  const applyBulkUpdate = useCallback(() => {
+    if (!bulkDept && !bulkStatus && !bulkType) {
+      toast.error('Select at least one field to update');
+      return;
+    }
+    const changes: string[] = [];
+    if (bulkDept) changes.push(`Department → ${bulkDept}`);
+    if (bulkStatus) changes.push(`Status → ${statusConfig[bulkStatus as keyof typeof statusConfig]?.label ?? bulkStatus}`);
+    if (bulkType) changes.push(`Type → ${typeConfig[bulkType as keyof typeof typeConfig]?.label ?? bulkType}`);
+    toast.success(`Updated ${selectedIds.length} employee${selectedIds.length !== 1 ? 's' : ''}: ${changes.join(', ')}`);
+    setSelectedIds([]);
+    setBulkDept('');
+    setBulkStatus('');
+    setBulkType('');
+  }, [selectedIds, bulkDept, bulkStatus, bulkType]);
 
   const filtered = useMemo(() => {
     return employeesData.filter((e) => {
@@ -256,6 +285,78 @@ export default function EmployeeListPage() {
         <span className="text-xs text-gray-400 ml-auto">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
+      {/* Bulk Actions Toolbar */}
+      <AnimatePresence>
+        {selectedIds.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-3 bg-gray-900 dark:bg-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700"
+          >
+            <span className="text-sm font-semibold shrink-0">
+              {selectedIds.length} selected
+            </span>
+            <div className="w-px h-5 bg-gray-600 shrink-0" />
+
+            <select
+              value={bulkDept}
+              onChange={(e) => setBulkDept(e.target.value)}
+              title="Bulk Department"
+              className="h-8 appearance-none px-2 rounded-lg bg-gray-700 border border-gray-600 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+            >
+              <option value="">Department…</option>
+              {DEPARTMENTS.filter((d) => d !== 'All').map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+
+            <select
+              value={bulkStatus}
+              onChange={(e) => setBulkStatus(e.target.value)}
+              title="Bulk Status"
+              className="h-8 appearance-none px-2 rounded-lg bg-gray-700 border border-gray-600 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+            >
+              <option value="">Status…</option>
+              {STATUSES.filter((s) => s !== 'All').map((s) => (
+                <option key={s} value={s}>{statusConfig[s as keyof typeof statusConfig]?.label ?? s}</option>
+              ))}
+            </select>
+
+            <select
+              value={bulkType}
+              onChange={(e) => setBulkType(e.target.value)}
+              title="Bulk Type"
+              className="h-8 appearance-none px-2 rounded-lg bg-gray-700 border border-gray-600 text-xs text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+            >
+              <option value="">Type…</option>
+              {TYPES.filter((t) => t !== 'All').map((t) => (
+                <option key={t} value={t}>{typeConfig[t as keyof typeof typeConfig]?.label ?? t}</option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={applyBulkUpdate}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-900 text-xs font-semibold hover:bg-gray-100 transition-colors shrink-0"
+            >
+              <Check className="w-3.5 h-3.5" />
+              Apply
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              title="Clear selection"
+              className="p-1.5 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* DataGrid */}
       <Box
         sx={{
@@ -284,8 +385,10 @@ export default function EmployeeListPage() {
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           slots={{ toolbar: CustomToolbar }}
           slotProps={{ toolbar: { showQuickFilter: true } }}
+          checkboxSelection
           disableColumnMenu
-          disableRowSelectionOnClick={false}
+          disableRowSelectionOnClick
+          onRowSelectionModelChange={handleSelectionChange}
         />
       </Box>
     </motion.div>

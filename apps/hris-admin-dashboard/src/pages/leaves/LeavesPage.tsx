@@ -2,11 +2,11 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palmtree, Activity, CalendarDays, BookOpen, BarChart2,
-  CheckCircle2, Clock, XCircle, AlertCircle,
+  CheckCircle2, XCircle, AlertCircle,
   ChevronLeft, ChevronRight, ChevronDown,
   Check, X, FileText, Shield, AlertTriangle, Users,
 } from 'lucide-react';
-import { format, parseISO, getDaysInMonth, startOfMonth, getDay, eachDayOfInterval, isWeekend } from 'date-fns';
+import { format, parseISO, getDaysInMonth, startOfMonth, getDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { toast } from 'sonner';
 import leaveRequests from '@/data/mock/leave-requests.json';
 import leaveBalances from '@/data/mock/leave-balances.json';
@@ -53,22 +53,41 @@ function LeaveCodeBadge({ code }: { code: string }) {
   );
 }
 
+type DatePreset = 'all' | 'month' | '30d' | '90d';
+
+const DATE_PRESETS: { id: DatePreset; label: string }[] = [
+  { id: 'all',   label: 'All Time' },
+  { id: 'month', label: 'This Month' },
+  { id: '30d',   label: 'Last 30 Days' },
+  { id: '90d',   label: 'Last 90 Days' },
+];
+
+const LATEST_REQUEST_DATE = leaveRequests
+  .map((r) => new Date(r.submittedAt))
+  .reduce((max, d) => (d > max ? d : max), new Date('2000-01-01'));
+
 /* ─── Requests Tab ─── */
 function RequestsTab() {
   const [filter, setFilter] = useState<StatusFilter>('all');
+  const [datePreset, setDatePreset] = useState<DatePreset>('all');
   const [statuses, setStatuses] = useState<Record<string, string>>(
     () => Object.fromEntries(leaveRequests.map((r) => [r.id, r.status])),
   );
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [docModal, setDocModal] = useState<string | null>(null);
 
-  const filtered = useMemo(
-    () =>
-      leaveRequests
-        .filter((r) => filter === 'all' || statuses[r.id] === filter)
-        .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()),
-    [filter, statuses],
-  );
+  const filtered = useMemo(() => {
+    const cutoff =
+      datePreset === 'month' ? startOfMonth(LATEST_REQUEST_DATE) :
+      datePreset === '30d'   ? subDays(LATEST_REQUEST_DATE, 30) :
+      datePreset === '90d'   ? subDays(LATEST_REQUEST_DATE, 90) :
+      null;
+
+    return leaveRequests
+      .filter((r) => filter === 'all' || statuses[r.id] === filter)
+      .filter((r) => !cutoff || new Date(r.submittedAt) >= cutoff)
+      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+  }, [filter, datePreset, statuses]);
 
   const pendingCount = Object.values(statuses).filter((s) => s === 'pending').length;
 
@@ -143,6 +162,30 @@ function RequestsTab() {
 
   return (
     <div className="relative pb-20">
+      {/* Date Range Shortcuts */}
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <span className="text-xs font-semibold text-gray-400">Period:</span>
+        {DATE_PRESETS.map(({ id, label }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setDatePreset(id)}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${
+              datePreset === id
+                ? 'bg-[#0038a8] text-white shadow-sm'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+        {datePreset !== 'all' && (
+          <span className="text-xs text-gray-400 ml-auto">
+            {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
       {/* Filters + Select All */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         {(['all', 'pending', 'approved', 'rejected'] as const).map((f) => (

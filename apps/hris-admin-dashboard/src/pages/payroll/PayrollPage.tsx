@@ -2,9 +2,10 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Banknote, FileSpreadsheet, Receipt, BarChart2, MessageSquareWarning,
-  ChevronDown, ChevronRight, Download, Send, Check, X, AlertTriangle,
-  PlayCircle, CheckCircle2, Building2, Printer, Plus, Gift,
+  ChevronDown, ChevronRight, Download, Send, Check, AlertTriangle,
+  PlayCircle, CheckCircle2, Building2, Printer, Plus, Gift, BotMessageSquare,
 } from 'lucide-react';
+import { PayrollAnomalyReport } from './components/PayrollAnomalyReport';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import payrollRunsData from '@/data/mock/payroll-runs.json';
@@ -13,7 +14,7 @@ import payrollDisputesData from '@/data/mock/payroll-disputes.json';
 import employeesData from '@/data/mock/employees.json';
 
 /* ─── Types ─── */
-type TabId = 'runs' | 'register' | 'payslip' | 'reports' | 'disputes';
+type TabId = 'runs' | 'register' | 'payslip' | 'reports' | 'disputes' | 'ai-audit';
 type RunStatus = 'draft' | 'review' | 'approved' | 'released';
 type DisputeStatus = 'open' | 'review' | 'resolved';
 
@@ -39,12 +40,13 @@ interface PayrollDispute {
 }
 
 /* ─── Constants ─── */
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
+const TABS: { id: TabId; label: string; icon: React.ElementType; highlight?: boolean }[] = [
   { id: 'runs',     label: 'Payroll Runs', icon: Banknote },
   { id: 'register', label: 'Register',     icon: FileSpreadsheet },
   { id: 'payslip',  label: 'Payslip',      icon: Receipt },
   { id: 'reports',  label: 'Reports',      icon: BarChart2 },
   { id: 'disputes', label: 'Disputes',     icon: MessageSquareWarning },
+  { id: 'ai-audit', label: 'AI Audit',     icon: BotMessageSquare, highlight: true },
 ];
 
 const RUN_STATUS_CFG: Record<RunStatus, { label: string; color: string; bg: string }> = {
@@ -426,9 +428,6 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
   const rec = records.find((r) => r.employeeId === selectedEmpId && r.runId === selectedRunId);
   const emp = employeesData.find((e) => e.id === selectedEmpId);
   const run = payrollRunsData.find((r) => r.id === selectedRunId);
-  const loans = rec ? rec.sssLoan + rec.pagibigLoan + rec.companyLoan : 0;
-  const allowances = rec ? rec.transportationAllowance + rec.mealAllowance : 0;
-
   const sortedEmps = [...employeesData].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -1103,20 +1102,30 @@ export default function PayrollPage() {
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map((tab) => {
           const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-[#0038a8] text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                isActive
+                  ? tab.highlight
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-[#0038a8] text-white shadow-sm'
+                  : tab.highlight
+                    ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
-              {tab.id === 'disputes' && openDisputes > 0 && activeTab !== 'disputes' && (
+              {tab.highlight && !isActive && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+                  AI
+                </span>
+              )}
+              {tab.id === 'disputes' && openDisputes > 0 && !isActive && (
                 <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                   {openDisputes}
                 </span>
@@ -1140,6 +1149,20 @@ export default function PayrollPage() {
           {activeTab === 'payslip'  && <PayslipTab records={records} />}
           {activeTab === 'reports'  && <ReportsTab runs={runs} />}
           {activeTab === 'disputes' && <DisputesTab />}
+          {activeTab === 'ai-audit' && (
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl">
+                <BotMessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-indigo-700 dark:text-indigo-300">AI Payroll Audit</p>
+                  <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70">
+                    Powered by Gemini · Detects gross pay mismatches, missing statutory contributions, TRAIN Law violations, and 7 other anomaly types.
+                  </p>
+                </div>
+              </div>
+              <PayrollAnomalyReport />
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
     </motion.div>

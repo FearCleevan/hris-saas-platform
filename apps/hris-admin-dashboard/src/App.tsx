@@ -38,6 +38,8 @@ import PerformancePage from '@/pages/performance/PerformancePage';
 import CompliancePage from '@/pages/compliance/CompliancePage';
 import RecruitmentPage from '@/pages/recruitment/RecruitmentPage';
 import AnalyticsPage from '@/pages/analytics/AnalyticsPage';
+import HRPolicyPage from '@/pages/hr-policy/HRPolicyPage';
+import NotificationsPage from '@/pages/notifications/NotificationsPage';
 import SettingsPage from '@/pages/settings/SettingsPage';
 import ComingSoonPage from '@/pages/ComingSoonPage';
 
@@ -102,8 +104,9 @@ const router = createBrowserRouter([
       { path: 'recruitment', element: <RecruitmentPage /> },
       { path: 'reports', element: <CompliancePage /> },
       { path: 'analytics', element: <AnalyticsPage /> },
+      { path: 'hr-policy', element: <HRPolicyPage /> },
       { path: 'settings/*', element: <SettingsPage /> },
-      { path: 'notifications', element: <ComingSoonPage /> },
+      { path: 'notifications', element: <NotificationsPage /> },
       { path: '*', element: <ComingSoonPage /> },
     ],
   },

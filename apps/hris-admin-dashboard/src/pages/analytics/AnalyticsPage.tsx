@@ -5,15 +5,15 @@ import {
   BarChart3, Users, DollarSign, Clock, Sparkles, Layout,
   TrendingUp, TrendingDown, ChevronDown, Download, RefreshCw,
   AlertTriangle, CheckCircle2, Lightbulb, Eye, EyeOff, ThumbsUp,
-  Briefcase, HeartPulse, FileCheck, CreditCard, Target, Shield,
-  ArrowUpRight, ArrowDownRight, Minus, Building, Calendar, XCircle,
+  Briefcase, CreditCard, Shield, BotMessageSquare,
+  ArrowUpRight, ArrowDownRight, Minus, Calendar, XCircle,
 } from 'lucide-react';
+import { AttritionRiskPredictor } from './components/AttritionRiskPredictor';
 import { format, differenceInYears, differenceInMonths } from 'date-fns';
 import { toast } from 'sonner';
 import employeesData from '@/data/mock/employees.json';
 import attendanceLogs from '@/data/mock/attendance-logs.json';
 import payrollRun from '@/data/mock/payroll-runs.json';
-import benefitsEnrollments from '@/data/mock/benefits-enrollments.json';
 import loans from '@/data/mock/benefits-loans.json';
 import jobPostings from '@/data/mock/recruitment-jobs.json';
 import doleData from '@/data/mock/compliance-dole.json';
@@ -22,7 +22,7 @@ import dashboards from '@/data/mock/analytics-dashboards.json';
 import insights from '@/data/mock/analytics-insights.json';
 
 /* ─── Types ─── */
-type TabId = 'overview' | 'workforce' | 'payroll' | 'attendance' | 'insights' | 'custom';
+type TabId = 'overview' | 'workforce' | 'payroll' | 'attendance' | 'insights' | 'custom' | 'attrition';
 
 interface Insight {
   id: string; type: string; module: string; severity: string;
@@ -31,13 +31,14 @@ interface Insight {
 }
 
 /* ─── Constants ─── */
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'overview', label: 'Overview', icon: BarChart3 },
-  { id: 'workforce', label: 'Workforce', icon: Users },
-  { id: 'payroll', label: 'Payroll', icon: DollarSign },
-  { id: 'attendance', label: 'Attendance', icon: Clock },
-  { id: 'insights', label: 'AI Insights', icon: Sparkles },
-  { id: 'custom', label: 'Custom Dashboards', icon: Layout },
+const TABS: { id: TabId; label: string; icon: React.ElementType; highlight?: boolean }[] = [
+  { id: 'overview',   label: 'Overview',          icon: BarChart3 },
+  { id: 'workforce',  label: 'Workforce',          icon: Users },
+  { id: 'payroll',    label: 'Payroll',            icon: DollarSign },
+  { id: 'attendance', label: 'Attendance',         icon: Clock },
+  { id: 'insights',   label: 'AI Insights',        icon: Sparkles },
+  { id: 'custom',     label: 'Custom Dashboards',  icon: Layout },
+  { id: 'attrition',  label: 'Attrition Risk',     icon: BotMessageSquare, highlight: true },
 ];
 
 const MONTHS = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
@@ -208,11 +209,22 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
-        {TABS.map(tab => { const Icon = tab.icon; return (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <Icon className="w-4 h-4" />{tab.label}
-          </button>
-        );})}
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+              isActive
+                ? tab.highlight ? 'bg-indigo-600 text-white shadow-sm' : 'bg-brand-blue text-white shadow-sm'
+                : tab.highlight ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}>
+              <Icon className="w-4 h-4" />{tab.label}
+              {tab.highlight && !isActive && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">AI</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <AnimatePresence mode="wait">
@@ -551,6 +563,22 @@ export default function AnalyticsPage() {
                   </motion.div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* ===== ATTRITION RISK TAB ===== */}
+          {activeTab === 'attrition' && (
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl">
+                <BotMessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-indigo-700 dark:text-indigo-300">AI Attrition Risk Predictor</p>
+                  <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70">
+                    Powered by Gemini · Analyzes tenure, performance ratings, salary bands, leave patterns, and overtime to predict flight risk for every active employee.
+                  </p>
+                </div>
+              </div>
+              <AttritionRiskPredictor />
             </div>
           )}
 

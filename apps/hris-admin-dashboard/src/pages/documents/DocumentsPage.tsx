@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FolderOpen, FileUser, Upload, PenTool, Clock, GitBranch,
-  Search, ChevronDown, Download, Plus, X, Check, Eye,
+  Search, ChevronDown, Download, Plus, X,
   FileText, FileSpreadsheet, FileImage, File, Grid3X3, List,
   AlertTriangle, CheckCircle2, FileCheck, Building2, Award,
   ScrollText, IdCard, TrendingUp, GraduationCap,

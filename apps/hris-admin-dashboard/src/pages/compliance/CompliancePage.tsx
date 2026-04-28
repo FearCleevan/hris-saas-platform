@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Building2, FileSpreadsheet, Lock, ScrollText, FileBarChart, Calendar,
   ChevronDown, CheckCircle2, XCircle, Clock, AlertTriangle, Download, Eye,
-  Search, ChevronLeft, ChevronRight, Filter,
+  Search, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { format, getDaysInMonth, startOfMonth, getDay, addMonths, subMonths } from 'date-fns';
 import { toast } from 'sonner';

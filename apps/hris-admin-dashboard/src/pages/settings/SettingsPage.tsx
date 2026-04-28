@@ -2,9 +2,9 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Building2, MapPin, Layers, Shield, CheckCheck, Mail, Bell, Plug, ScrollText, Database,
-  ChevronDown, Save, Edit3, Plus, X, Check, ToggleLeft, ToggleRight,
-  Eye, EyeOff, Download, Upload, RotateCcw, Trash2, Clock,
+  Building2, MapPin, Layers, Shield, CheckCheck, Mail, Bell, Plug, Database,
+  ChevronDown, Save, ToggleLeft, ToggleRight,
+  Eye, Download, RotateCcw, Clock,
   DollarSign,
   MessageSquare,
 } from 'lucide-react';

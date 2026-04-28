@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, UserPlus, UserMinus, Clock, Calendar, CalendarDays,
   DollarSign, Heart, Receipt, FileText, Target, Briefcase, BarChart2,
-  TrendingUp, Settings, type LucideIcon,
+  TrendingUp, Settings, BookOpen, type LucideIcon,
 } from 'lucide-react';
 import type { UserRole } from '@/types';
 
@@ -62,6 +62,7 @@ export const navSections: NavSection[] = [
     items: [
       { label: 'Reports', icon: BarChart2, path: '/reports' },
       { label: 'Analytics', icon: TrendingUp, path: '/analytics', roles: ['super_admin', 'hr_manager', 'accountant'] },
+      { label: 'HR Policy Q&A', icon: BookOpen, path: '/hr-policy' },
     ],
   },
   {

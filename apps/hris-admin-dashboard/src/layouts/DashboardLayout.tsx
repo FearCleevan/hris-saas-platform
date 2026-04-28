@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -6,11 +6,25 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { NotificationDrawer } from '@/components/layout/NotificationDrawer';
 import { GlobalSearch } from '@/components/layout/GlobalSearch';
+import { AIChatWidget } from '@/components/ai/AIChatWidget';
+import { CommandPalette } from '@/components/ui/CommandPalette';
 import { useUIStore } from '@/store/uiStore';
 
 export function DashboardLayout() {
   const { sidebarOpen } = useUIStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cmdOpen, setCmdOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdOpen(v => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
@@ -33,6 +47,8 @@ export function DashboardLayout() {
       {/* Global overlays */}
       <NotificationDrawer />
       <GlobalSearch />
+      <AIChatWidget />
+      <CommandPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
     </div>
   );
 }

@@ -3,9 +3,9 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardList, Target, UserCheck, Star, Users2, History, TrendingUp,
-  Search, ChevronDown, Check, AlertTriangle, CheckCircle2, Clock,
-  StarIcon, ArrowUpRight, ArrowDownRight, Edit3, Eye, MessageSquare,
-  Trophy, ThumbsUp, AlertCircle,
+  ChevronDown, AlertTriangle, CheckCircle2, Clock,
+  StarIcon, Edit3,
+  Trophy, BotMessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -14,9 +14,11 @@ import cyclesData from '@/data/mock/performance-cycles.json';
 import reviewsData from '@/data/mock/performance-reviews.json';
 import goalsData from '@/data/mock/performance-goals.json';
 import feedbackData from '@/data/mock/performance-feedback.json';
+import { ReviewWriter } from './components/ReviewWriter';
+import { SentimentAnalyzer } from './components/SentimentAnalyzer';
 
 /* ─── Types ─── */
-type TabId = 'reviews' | 'goals' | 'self' | 'evaluations' | 'feedback' | 'history' | 'promotions';
+type TabId = 'reviews' | 'goals' | 'self' | 'evaluations' | 'feedback' | 'history' | 'promotions' | 'ai-tools';
 
 interface Cycle {
   id: string; name: string; period: string; status: string;
@@ -45,14 +47,15 @@ interface Feedback {
 }
 
 /* ─── Constants ─── */
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'reviews', label: 'Reviews', icon: ClipboardList },
-  { id: 'goals', label: 'Goals', icon: Target },
-  { id: 'self', label: 'Self-Assessment', icon: UserCheck },
-  { id: 'evaluations', label: 'Evaluations', icon: Star },
-  { id: 'feedback', label: '360 Feedback', icon: Users2 },
-  { id: 'history', label: 'History', icon: History },
-  { id: 'promotions', label: 'Promotions', icon: TrendingUp },
+const TABS: { id: TabId; label: string; icon: React.ElementType; highlight?: boolean }[] = [
+  { id: 'reviews',     label: 'Reviews',         icon: ClipboardList },
+  { id: 'goals',       label: 'Goals',            icon: Target },
+  { id: 'self',        label: 'Self-Assessment',  icon: UserCheck },
+  { id: 'evaluations', label: 'Evaluations',      icon: Star },
+  { id: 'feedback',    label: '360 Feedback',     icon: Users2 },
+  { id: 'history',     label: 'History',          icon: History },
+  { id: 'promotions',  label: 'Promotions',       icon: TrendingUp },
+  { id: 'ai-tools',    label: 'AI Tools',         icon: BotMessageSquare, highlight: true },
 ];
 
 const COMPETENCIES = [
@@ -138,7 +141,6 @@ export default function PerformancePage() {
 
   /* ─── Goals Tab ─── */
   const empGoals = useMemo(() => goals.filter(g => g.employeeId === selectedEmployee && g.cycleId === selectedCycle).map(g => ({ ...g })), [selectedEmployee, selectedCycle]);
-  const selectedGoalEmp = useMemo(() => employeesData.find(e => e.id === selectedEmployee)!, [selectedEmployee]);
   const goalKPIs = useMemo(() => ({
     active: empGoals.filter(g => g.status !== 'completed').length,
     completed: empGoals.filter(g => g.status === 'completed').length,
@@ -204,8 +206,17 @@ export default function PerformancePage() {
 
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-[#0038a8] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+          <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors
+              ${activeTab === tab.id
+                ? 'bg-[#0038a8] text-white shadow-sm'
+                : tab.highlight
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <Icon className="w-4 h-4" />{tab.label}
+            {tab.highlight && activeTab !== tab.id && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-600 text-white">AI</span>
+            )}
           </button>
         );})}
       </div>
@@ -396,7 +407,7 @@ export default function PerformancePage() {
                 <div className="mb-5">
                   <p className="text-sm font-bold text-gray-800 dark:text-white mb-3">Pending Manager Reviews ({pendingEvaluations.length})</p>
                   <div className="flex flex-col gap-3">
-                    {pendingEvaluations.map((r, i) => (
+                    {pendingEvaluations.map((r) => (
                       <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
@@ -411,7 +422,7 @@ export default function PerformancePage() {
               <div>
                 <p className="text-sm font-bold text-gray-800 dark:text-white mb-3">Completed Evaluations ({completedEvaluations.length})</p>
                 <div className="flex flex-col gap-2">
-                  {completedEvaluations.map((r, i) => (
+                  {completedEvaluations.map((r) => (
                     <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
@@ -490,7 +501,7 @@ export default function PerformancePage() {
                 </div>
                 {historyReviews.length > 0 && (
                   <div className="flex items-end gap-2 h-24">
-                    {historyReviews.map((r, i) => {
+                    {historyReviews.map((r) => {
                       const rating = r.finalRating || r.managerReview?.overallRating || 0;
                       const pct = (rating / 5) * 100;
                       return (
@@ -508,7 +519,7 @@ export default function PerformancePage() {
                 <p className="text-center py-12 text-sm text-gray-400">No historical reviews available</p>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {historyReviews.map((r, i) => {
+                  {historyReviews.map((r) => {
                     const rating = r.finalRating || r.managerReview?.overallRating || 0;
                     return (
                       <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
@@ -576,6 +587,33 @@ export default function PerformancePage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===== AI TOOLS TAB ===== */}
+          {activeTab === 'ai-tools' && (
+            <div className="flex flex-col gap-8">
+              <div className="flex items-start gap-3 p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl">
+                <span className="text-2xl">🤖</span>
+                <div>
+                  <p className="text-sm font-bold text-indigo-800 dark:text-indigo-300">Gemini AI Performance Tools</p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5">
+                    Powered by Google Gemini (free tier). Requires <code className="bg-indigo-100 dark:bg-indigo-900 px-1 rounded text-[10px]">VITE_GEMINI_API_KEY</code> in your <code className="bg-indigo-100 dark:bg-indigo-900 px-1 rounded text-[10px]">.env</code> file.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-base font-bold text-gray-800 dark:text-white mb-1">Performance Review Writer</h2>
+                <p className="text-xs text-gray-400 mb-4">Rate each competency → AI drafts a complete, formal appraisal ready to save or print.</p>
+                <ReviewWriter />
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-gray-800 pt-8">
+                <h2 className="text-base font-bold text-gray-800 dark:text-white mb-1">Employee Sentiment Analyzer</h2>
+                <p className="text-xs text-gray-400 mb-4">AI reads all 360° feedback for an employee and generates a sentiment score, key themes, and HR recommendation.</p>
+                <SentimentAnalyzer />
               </div>
             </div>
           )}

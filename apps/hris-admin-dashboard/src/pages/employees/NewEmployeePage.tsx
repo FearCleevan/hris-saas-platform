@@ -99,11 +99,6 @@ interface Beneficiary {
   type: 'primary' | 'contingent';
 }
 
-interface UploadedFile {
-  key: string;
-  file: File | null;
-}
-
 const DOC_TYPES: { key: string; label: string; required: boolean; hint: string }[] = [
   { key: 'resume',    label: 'Resume / CV',              required: true,  hint: 'PDF or Word document' },
   { key: 'photo',     label: '2x2 ID Photo',             required: true,  hint: 'JPEG or PNG, white background' },

@@ -3,21 +3,21 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase, Columns3, Users, CalendarClock, FileCheck, TrendingUp,
-  Search, ChevronDown, Plus, Star, MapPin, Clock, Phone, Monitor,
-  CheckCircle2, XCircle, Download, Eye, MessageSquare, Check, X,
-  ArrowRight, ArrowLeft, Filter, Building,
+  Search, ChevronDown, Plus, Star, Clock,
+  CheckCircle2, Building, BotMessageSquare,
 } from 'lucide-react';
-import { format, addDays, differenceInDays } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
 import employeesData from '@/data/mock/employees.json';
 import jobsData from '@/data/mock/recruitment-jobs.json';
 import applicantsData from '@/data/mock/recruitment-applicants.json';
-import pipelineData from '@/data/mock/recruitment-pipeline.json';
 import interviewsData from '@/data/mock/recruitment-interviews.json';
 import offersData from '@/data/mock/recruitment-offers.json';
+import { JobDescriptionGenerator } from './components/JobDescriptionGenerator';
+import { ResumeAnalyzer } from './components/ResumeAnalyzer';
 
 /* ─── Types ─── */
-type TabId = 'jobs' | 'pipeline' | 'applicants' | 'interviews' | 'offers' | 'analytics';
+type TabId = 'jobs' | 'pipeline' | 'applicants' | 'interviews' | 'offers' | 'analytics' | 'ai-tools';
 
 interface Job {
   id: string; title: string; department: string; type: string; location: string;
@@ -49,13 +49,14 @@ interface Offer {
 }
 
 /* ─── Constants ─── */
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
+const TABS: { id: TabId; label: string; icon: React.ElementType; highlight?: boolean }[] = [
   { id: 'jobs', label: 'Jobs', icon: Briefcase },
   { id: 'pipeline', label: 'Pipeline', icon: Columns3 },
   { id: 'applicants', label: 'Applicants', icon: Users },
   { id: 'interviews', label: 'Interviews', icon: CalendarClock },
   { id: 'offers', label: 'Offers', icon: FileCheck },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+  { id: 'ai-tools', label: 'AI Tools', icon: BotMessageSquare, highlight: true },
 ];
 
 const STAGE_CFG: Record<string, { label: string; color: string }> = {
@@ -118,8 +119,6 @@ export default function RecruitmentPage() {
   const interviews = interviewsData as Interview[];
   const offers = offersData as Offer[];
 
-  const selectedJobData = useMemo(() => jobs.find(j => j.id === selectedJob)!, [selectedJob]);
-
   /* ─── Jobs Tab ─── */
   const filteredJobs = useMemo(() => {
     return jobs.filter(j => jobFilter === 'All' || j.status === jobFilter);
@@ -150,7 +149,6 @@ export default function RecruitmentPage() {
   const filteredApplicants = useMemo(() => {
     const q = search.toLowerCase();
     return applicants.filter(a => {
-      const job = jobs.find(j => j.id === a.jobId);
       if (jobFilter !== 'All' && a.jobId !== jobFilter) return false;
       if (stageFilter !== 'All' && a.stage !== stageFilter) return false;
       if (q && !`${a.firstName} ${a.lastName}`.toLowerCase().includes(q) && !a.email.toLowerCase().includes(q) && !a.tags.some(t => t.includes(q))) return false;
@@ -223,8 +221,17 @@ export default function RecruitmentPage() {
 
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-[#0038a8] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+          <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors
+              ${activeTab === tab.id
+                ? 'bg-[#0038a8] text-white shadow-sm'
+                : tab.highlight
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <Icon className="w-4 h-4" />{tab.label}
+            {tab.highlight && activeTab !== tab.id && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-600 text-white">AI</span>
+            )}
           </button>
         );})}
       </div>
@@ -408,7 +415,7 @@ export default function RecruitmentPage() {
               </div>
               <p className="text-sm font-bold text-gray-800 dark:text-white mb-3">Upcoming Interviews ({upcomingInterviews.length})</p>
               <div className="flex flex-col gap-3 mb-5">
-                {upcomingInterviews.map((intv, i) => (
+                {upcomingInterviews.map((intv) => (
                   <div key={intv.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -528,6 +535,34 @@ export default function RecruitmentPage() {
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===== AI TOOLS TAB ===== */}
+          {activeTab === 'ai-tools' && (
+            <div className="flex flex-col gap-8">
+              <div className="flex items-start gap-3 p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl">
+                <span className="text-2xl">🤖</span>
+                <div>
+                  <p className="text-sm font-bold text-indigo-800 dark:text-indigo-300">Gemini AI Recruitment Tools</p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5">
+                    Powered by Google Gemini (free tier). Requires <code className="bg-indigo-100 dark:bg-indigo-900 px-1 rounded text-[10px]">VITE_GEMINI_API_KEY</code> in your <code className="bg-indigo-100 dark:bg-indigo-900 px-1 rounded text-[10px]">.env</code> file.
+                    Get a free key at <span className="font-semibold">aistudio.google.com</span> — no credit card needed.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-base font-bold text-gray-800 dark:text-white mb-1">Job Description Generator</h2>
+                <p className="text-xs text-gray-400 mb-4">Enter role details → AI writes a complete, DOLE-compliant job posting ready to publish.</p>
+                <JobDescriptionGenerator />
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-gray-800 pt-8">
+                <h2 className="text-base font-bold text-gray-800 dark:text-white mb-1">Resume / CV Analyzer</h2>
+                <p className="text-xs text-gray-400 mb-4">Paste a candidate's CV → AI scores their match, flags gaps, and gives a hiring recommendation.</p>
+                <ResumeAnalyzer />
               </div>
             </div>
           )}

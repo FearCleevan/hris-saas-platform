@@ -1076,7 +1076,7 @@ export default function SchedulePage() {
         // Remove any existing assignments for employees being added to this shift
         updated = updated.filter((a) => !data.assignedEmployeeIds.includes(a.employeeId));
         // Add new assignments
-        const newAssignments: ShiftAssignment[] = data.assignedEmployeeIds.map((empId, idx) => ({
+        const newAssignments: ShiftAssignment[] = data.assignedEmployeeIds.map((empId) => ({
           id: `${updatedId}-${empId}`,
           employeeId: empId,
           shiftId: updatedId,

@@ -6,7 +6,7 @@ import {
   ChevronLeft, ChevronRight, ChevronDown,
   Check, X, Plus, Search, UserPlus, UserMinus,
 } from 'lucide-react';
-import { format, parseISO, getDaysInMonth, startOfMonth, getDay } from 'date-fns';
+import { format, parseISO, getDaysInMonth, startOfMonth, startOfWeek, getDay } from 'date-fns';
 import { toast } from 'sonner';
 import attendanceLogs from '@/data/mock/attendance-logs.json';
 import employeesData from '@/data/mock/employees.json';
@@ -1200,6 +1200,44 @@ export default function AttendancePage() {
           )}
         </div>
       </div>
+
+      {/* Smart Date Shortcuts — only on Daily tab */}
+      {activeTab === 'daily' && (() => {
+        const latest = ALL_DATES[ALL_DATES.length - 1];
+        const latestDate = parseISO(latest);
+        const weekStart = format(startOfWeek(latestDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        const monthStart = format(startOfMonth(latestDate), 'yyyy-MM-dd');
+        const shortcuts = [
+          { label: 'Today', date: latest },
+          { label: 'This Week', date: weekStart, sub: format(parseISO(weekStart), 'MMM d') },
+          { label: 'This Month', date: monthStart, sub: format(parseISO(monthStart), 'MMM yyyy') },
+        ];
+        return (
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <span className="text-xs font-semibold text-gray-400 mr-1">Jump to:</span>
+            {shortcuts.map(({ label, date, sub }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setSelectedDate(date)}
+                className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${
+                  selectedDate === date
+                    ? 'bg-[#0038a8] text-white shadow-sm'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                {label}
+                {sub && selectedDate !== date && (
+                  <span className="opacity-60">({sub})</span>
+                )}
+              </button>
+            ))}
+            <span className="text-xs text-gray-400 ml-auto">
+              Viewing: <span className="font-semibold text-gray-600 dark:text-gray-300">{format(parseISO(selectedDate), 'EEEE, MMMM d, yyyy')}</span>
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Tab Navigation */}
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
