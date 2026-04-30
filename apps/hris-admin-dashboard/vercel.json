@@ -1,5 +1,8 @@
 {
-  "buildCommand": "pnpm --filter=landing-page build",
-  "outputDirectory": "apps/landing-page/.next",
-  "installCommand": "pnpm install"
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
