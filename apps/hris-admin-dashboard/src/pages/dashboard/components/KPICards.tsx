@@ -1,71 +1,84 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, UserCheck, CalendarOff, Clock, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/utils';
-import employeesData from '@/data/mock/employees.json';
-
-const totalEmployees = employeesData.length;
-const onLeave = employeesData.filter((e) => e.status === 'on_leave').length;
-const active = employeesData.filter((e) => e.status === 'active').length;
-const presentToday = Math.round(active * 0.94);
-const totalPayroll = employeesData.reduce((sum, e) => sum + e.salary, 0);
-
-const cards = [
-  {
-    title: 'Total Employees',
-    value: totalEmployees,
-    change: '+3 this month',
-    trend: 'up',
-    icon: Users,
-    iconBg: 'bg-[#0038a8]/10',
-    iconColor: 'text-[#0038a8]',
-    link: '/employees',
-  },
-  {
-    title: 'Present Today',
-    value: presentToday,
-    change: `${Math.round((presentToday / totalEmployees) * 100)}% attendance rate`,
-    trend: 'up',
-    icon: UserCheck,
-    iconBg: 'bg-green-100 dark:bg-green-950/30',
-    iconColor: 'text-green-600 dark:text-green-400',
-    link: '/attendance',
-  },
-  {
-    title: 'On Leave Today',
-    value: onLeave + 2,
-    change: '2 pending approval',
-    trend: 'neutral',
-    icon: CalendarOff,
-    iconBg: 'bg-amber-100 dark:bg-amber-950/30',
-    iconColor: 'text-amber-600 dark:text-amber-400',
-    link: '/leaves',
-  },
-  {
-    title: 'Pending Approvals',
-    value: 7,
-    change: '2 urgent',
-    trend: 'down',
-    icon: Clock,
-    iconBg: 'bg-[#ce1126]/10',
-    iconColor: 'text-[#ce1126]',
-    link: '/leaves',
-  },
-  {
-    title: 'Monthly Payroll',
-    value: formatCurrency(totalPayroll),
-    change: '+2.1% vs last month',
-    trend: 'up',
-    icon: DollarSign,
-    iconBg: 'bg-purple-100 dark:bg-purple-950/30',
-    iconColor: 'text-purple-600 dark:text-purple-400',
-    link: '/payroll',
-  },
-];
+import { cn, formatCurrency } from '@/lib/utils';
+import { useEmployeeStats } from '@/hooks/useEmployees';
 
 export function KPICards() {
   const navigate = useNavigate();
+  const { data: stats, isLoading } = useEmployeeStats();
+
+  const presentToday = stats ? Math.round(stats.active * 0.94) : 0;
+
+  const cards = [
+    {
+      title: 'Total Employees',
+      value: stats?.total ?? '—',
+      change: stats ? `+${stats.newThisMonth} this month` : '…',
+      trend: 'up' as const,
+      icon: Users,
+      iconBg: 'bg-[#0038a8]/10',
+      iconColor: 'text-[#0038a8]',
+      link: '/employees',
+    },
+    {
+      title: 'Present Today',
+      value: stats ? presentToday : '—',
+      change: stats && stats.total
+        ? `${Math.round((presentToday / stats.total) * 100)}% attendance rate`
+        : '…',
+      trend: 'up' as const,
+      icon: UserCheck,
+      iconBg: 'bg-green-100 dark:bg-green-950/30',
+      iconColor: 'text-green-600 dark:text-green-400',
+      link: '/attendance',
+    },
+    {
+      title: 'On Leave Today',
+      value: stats?.onLeave ?? '—',
+      change: 'approved leaves',
+      trend: 'neutral' as const,
+      icon: CalendarOff,
+      iconBg: 'bg-amber-100 dark:bg-amber-950/30',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      link: '/leaves',
+    },
+    {
+      title: 'Pending Approvals',
+      value: '—',
+      change: 'leaves & overtime',
+      trend: 'down' as const,
+      icon: Clock,
+      iconBg: 'bg-[#ce1126]/10',
+      iconColor: 'text-[#ce1126]',
+      link: '/leaves',
+    },
+    {
+      title: 'Monthly Payroll',
+      value: stats ? formatCurrency(stats.totalMonthlySalary) : '—',
+      change: 'total basic salaries',
+      trend: 'up' as const,
+      icon: DollarSign,
+      iconBg: 'bg-purple-100 dark:bg-purple-950/30',
+      iconColor: 'text-purple-600 dark:text-purple-400',
+      link: '/payroll',
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 animate-pulse">
+            <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-700 mb-4" />
+            <div className="h-8 w-16 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+            <div className="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800 mb-1.5" />
+            <div className="h-3 w-20 rounded bg-gray-100 dark:bg-gray-800" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">

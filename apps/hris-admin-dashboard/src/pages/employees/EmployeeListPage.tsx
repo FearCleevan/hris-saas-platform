@@ -17,9 +17,10 @@ import {
 import { toast } from 'sonner';
 import { format, differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import employeesData from '@/data/mock/employees.json';
+import { useEmployees } from '@/hooks/useEmployees';
+import type { EmployeeRow } from '@/services/employees';
 
-type Employee = typeof employeesData[number];
+type Employee = EmployeeRow;
 
 const DEPARTMENTS = ['All', 'Engineering', 'HR', 'Finance', 'Operations', 'Sales', 'IT', 'Admin'];
 const STATUSES = ['All', 'active', 'on_leave', 'terminated'];
@@ -84,6 +85,7 @@ function CustomToolbar() {
 
 export default function EmployeeListPage() {
   const navigate = useNavigate();
+  const { data: employees = [], isLoading } = useEmployees();
   const [department, setDepartment] = useState('All');
   const [status, setStatus] = useState('All');
   const [type, setType] = useState('All');
@@ -116,20 +118,20 @@ export default function EmployeeListPage() {
   }, [selectedIds, bulkDept, bulkStatus, bulkType]);
 
   const filtered = useMemo(() => {
-    return employeesData.filter((e) => {
+    return employees.filter((e) => {
       if (department !== 'All' && e.department !== department) return false;
       if (status !== 'All' && e.status !== status) return false;
       if (type !== 'All' && e.type !== type) return false;
       return true;
     });
-  }, [department, status, type]);
+  }, [employees, department, status, type]);
 
   const kpis = useMemo(() => ({
-    total: employeesData.length,
-    active: employeesData.filter((e) => e.status === 'active').length,
-    onLeave: employeesData.filter((e) => e.status === 'on_leave').length,
-    newThisYear: employeesData.filter((e) => new Date(e.hireDate).getFullYear() === 2023).length,
-  }), []);
+    total: employees.length,
+    active: employees.filter((e) => e.status === 'active').length,
+    onLeave: employees.filter((e) => e.status === 'on_leave').length,
+    newThisYear: employees.filter((e) => new Date(e.hireDate).getFullYear() === new Date().getFullYear()).length,
+  }), [employees]);
 
   const columns: GridColDef<Employee>[] = useMemo(() => [
     {
@@ -221,7 +223,7 @@ export default function EmployeeListPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Employees</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Manage your workforce — {employeesData.length} total employees
+            Manage your workforce — {isLoading ? '…' : `${employees.length} total employees`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -242,10 +244,22 @@ export default function EmployeeListPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KpiCard label="Total Employees" value={kpis.total} icon={Users} />
-        <KpiCard label="Active" value={kpis.active} icon={UserCheck} sub={`${Math.round(kpis.active / kpis.total * 100)}% of workforce`} />
-        <KpiCard label="On Leave" value={kpis.onLeave} icon={Clock} />
-        <KpiCard label="Hired in 2023" value={kpis.newThisYear} icon={TrendingUp} sub="New hires" />
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 mb-3" />
+              <div className="h-7 w-16 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+              <div className="h-4 w-28 rounded bg-gray-100 dark:bg-gray-800" />
+            </div>
+          ))
+        ) : (
+          <>
+            <KpiCard label="Total Employees" value={kpis.total} icon={Users} />
+            <KpiCard label="Active" value={kpis.active} icon={UserCheck} sub={kpis.total ? `${Math.round(kpis.active / kpis.total * 100)}% of workforce` : undefined} />
+            <KpiCard label="On Leave" value={kpis.onLeave} icon={Clock} />
+            <KpiCard label={`Hired in ${new Date().getFullYear()}`} value={kpis.newThisYear} icon={TrendingUp} sub="New hires" />
+          </>
+        )}
       </div>
 
       {/* Filters */}
@@ -378,6 +392,7 @@ export default function EmployeeListPage() {
         <DataGrid
           rows={filtered}
           columns={columns}
+          loading={isLoading}
           getRowId={(row) => row.id}
           onRowClick={handleRowClick}
           rowHeight={60}

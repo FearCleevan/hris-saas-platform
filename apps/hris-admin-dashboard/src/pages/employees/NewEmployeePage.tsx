@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod/v4';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, Check, User, Phone, Briefcase, Shield,
@@ -12,6 +13,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { addEmployee } from '@/services/addEmployee';
 
 const STEPS = [
   { id: 'personal',      label: 'Personal',      icon: User },
@@ -371,6 +373,7 @@ function DocumentsStep({
 
 export default function NewEmployeePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [allData, setAllData] = useState<AllFormData>({});
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
@@ -404,10 +407,50 @@ export default function NewEmployeePage() {
 
   const handleFinalSubmit = async () => {
     setFinalSubmitting(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setFinalSubmitting(false);
-    toast.success('Employee added successfully!');
-    navigate('/employees');
+    try {
+      await addEmployee({
+        firstName: allData.firstName!,
+        lastName: allData.lastName!,
+        middleName: allData.middleName,
+        birthday: allData.birthday!,
+        gender: allData.gender! as 'Male' | 'Female',
+        civilStatus: allData.civilStatus!,
+        nationality: allData.nationality!,
+        personalEmail: allData.personalEmail!,
+        companyEmail: allData.companyEmail!,
+        mobile: allData.mobile!,
+        landline: allData.landline,
+        street: allData.street!,
+        city: allData.city!,
+        province: allData.province!,
+        zip: allData.zip!,
+        emergencyName: allData.emergencyName!,
+        emergencyRelationship: allData.emergencyRelationship!,
+        emergencyPhone: allData.emergencyPhone!,
+        position: allData.position!,
+        department: allData.department!,
+        type: allData.type!,
+        hireDate: allData.hireDate!,
+        salary: allData.salary!,
+        sss: allData.sss,
+        philhealth: allData.philhealth,
+        pagibig: allData.pagibig,
+        tin: allData.tin,
+        bankName: allData.bankName,
+        accountNumber: allData.accountNumber,
+        accountName: allData.accountName,
+        accountType: allData.accountType,
+        beneficiaries,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast.success('Employee added successfully!');
+      navigate('/employees');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add employee');
+    } finally {
+      setFinalSubmitting(false);
+    }
   };
 
   const personalFields: FormField[] = [

@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import type { Tenant } from '@/types';
+import { createOrganization } from '@/services/organizations';
 
 // ─── Step data ────────────────────────────────────────────────────────────────
 
@@ -168,20 +169,22 @@ export default function CompanySetupPage() {
               isLoading={isLoading}
               onNext={async (data) => {
                 setIsLoading(true);
-                await new Promise((r) => setTimeout(r, 900));
-                const newTenant: Tenant = {
-                  id: `t-${Date.now()}`,
-                  name: step1Data.companyName,
-                  slug: step1Data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-                  plan: data.plan,
-                  employeeCount: 0,
-                  logoUrl: null,
-                  industry: step1Data.industry,
-                  location: step1Data.location,
-                };
-                setTenant(newTenant);
-                setStep(2);
-                setIsLoading(false);
+                try {
+                  const newTenant = await createOrganization({
+                    name: step1Data.companyName,
+                    industry: step1Data.industry,
+                    companySize: step1Data.employeeCount,
+                    plan: data.plan,
+                  });
+
+                  setTenant(newTenant);
+                  toast.success(`Organization "${newTenant.name}" created.`);
+                  setStep(2);
+                } catch (error: any) {
+                  toast.error(error.message || 'Failed to create organization');
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               onBack={() => setStep(0)}
             />
@@ -408,7 +411,7 @@ function Step2Panel({
             ))}
           </div>
           <p className="text-[10px] text-gray-400">
-            You&apos;re starting a free 30-day trial. No credit card required.
+            You’re starting a free 30-day trial. No credit card required.
           </p>
         </div>
 
@@ -456,7 +459,7 @@ function SuccessPanel({ companyName, onGo }: { companyName: string; onGo: () => 
       </motion.div>
 
       <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">
-        You&apos;re all set!
+        You’re all set!
       </h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
         <span className="font-semibold text-gray-800 dark:text-gray-200">{companyName}</span> is ready on HRISPH.

@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Search, Users, ChevronRight, LogOut, Plus } from 'lucide-react';
+import {
+  Building2, Search, Users, ChevronRight, LogOut, Plus,
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import tenantsData from '@/data/mock/tenants.json';
+import { getUserOrganizations } from '@/services/organizations';
+import { supabase } from '@/lib/supabase';
 import type { Tenant } from '@/types';
 
-const planConfig = {
-  starter: { label: 'Starter', variant: 'secondary' as const },
-  pro: { label: 'Pro', variant: 'default' as const },
-  enterprise: { label: 'Enterprise', variant: 'success' as const },
+const planConfig: Record<string, { label: string; variant: 'secondary' | 'default' | 'success' }> = {
+  starter: { label: 'Starter', variant: 'secondary' },
+  pro: { label: 'Pro', variant: 'default' },
+  enterprise: { label: 'Enterprise', variant: 'success' },
 };
 
 export default function TenantSelectorPage() {
@@ -21,22 +25,41 @@ export default function TenantSelectorPage() {
   const [search, setSearch] = useState('');
   const [selecting, setSelecting] = useState<string | null>(null);
 
-  const accessibleTenants = tenantsData.filter((t) =>
-    user?.tenantIds.includes(t.id)
-  );
+  // Fetch real organisations from the database
+  const { data: accessibleTenants = [], isLoading } = useQuery({
+    queryKey: ['user-organizations'],
+    queryFn: getUserOrganizations,
+    staleTime: 1000 * 60 * 5,
+  });
 
   const filtered = accessibleTenants.filter((t) =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.industry.toLowerCase().includes(search.toLowerCase())
+    (t.industry ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSelect = async (tenant: typeof tenantsData[0]) => {
+  const handleSelect = async (tenant: Tenant) => {
     setSelecting(tenant.id);
-    await new Promise((r) => setTimeout(r, 500));
-    setTenant(tenant as Tenant);
-    toast.success(`Welcome to ${tenant.name}`);
-    navigate('/');
-    setSelecting(null);
+    try {
+      // Update the active organisation in the database so the JWT picks it up
+      if (user?.id) {
+        await supabase
+          .from('user_profiles')
+          .upsert(
+            { id: user.id, organization_id: tenant.id },
+            { onConflict: 'id' }
+          );
+        // Refresh the session to get a new JWT with the updated organisation
+        await supabase.auth.refreshSession();
+      }
+
+      setTenant(tenant);
+      toast.success(`Switched to ${tenant.name}`);
+      navigate('/');
+    } catch (error: any) {
+      toast.error('Failed to switch organisation');
+    } finally {
+      setSelecting(null);
+    }
   };
 
   return (
@@ -59,7 +82,7 @@ export default function TenantSelectorPage() {
             Select company
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Hi {user?.name?.split(' ')[0]}! Choose the company you&apos;d like to manage.
+            Hi {user?.name?.split(' ')[0]}! Choose the company you’d like to manage.
           </p>
         </div>
 
@@ -77,60 +100,76 @@ export default function TenantSelectorPage() {
           </div>
         )}
 
+        {/* Loading state */}
+        {isLoading && (
+          <div className="text-center py-10 text-sm text-gray-400">
+            Loading organisations…
+          </div>
+        )}
+
         {/* Tenant list */}
-        <div className="flex flex-col gap-3">
-          {filtered.length === 0 ? (
-            <div className="text-center py-10 text-sm text-gray-400">
-              No companies found.
-            </div>
-          ) : (
-            filtered.map((tenant, i) => (
-              <motion.button
-                key={tenant.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                onClick={() => handleSelect(tenant)}
-                disabled={!!selecting}
-                className="group w-full flex items-center gap-4 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl hover:border-[#0038a8] hover:shadow-md transition-all duration-200 text-left cursor-pointer disabled:opacity-70"
-              >
-                {/* Logo placeholder */}
-                <div className="w-11 h-11 rounded-xl bg-[#0038a8]/10 flex items-center justify-center shrink-0">
-                  <Building2 className="w-5 h-5 text-[#0038a8]" />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                      {tenant.name}
-                    </span>
-                    <Badge variant={planConfig[tenant.plan as keyof typeof planConfig]?.variant ?? 'secondary'} className="shrink-0">
-                      {planConfig[tenant.plan as keyof typeof planConfig]?.label ?? tenant.plan}
-                    </Badge>
+        {!isLoading && (
+          <div className="flex flex-col gap-3">
+            {filtered.length === 0 ? (
+              <div className="text-center py-10 text-sm text-gray-400">
+                No companies found.
+              </div>
+            ) : (
+              filtered.map((tenant, i) => (
+                <motion.button
+                  key={tenant.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  onClick={() => handleSelect(tenant)}
+                  disabled={!!selecting}
+                  className="group w-full flex items-center gap-4 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl hover:border-[#0038a8] hover:shadow-md transition-all duration-200 text-left cursor-pointer disabled:opacity-70"
+                >
+                  {/* Logo placeholder */}
+                  <div className="w-11 h-11 rounded-xl bg-[#0038a8]/10 flex items-center justify-center shrink-0">
+                    <Building2 className="w-5 h-5 text-[#0038a8]" />
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {tenant.employeeCount} employees
-                    </span>
-                    <span>{tenant.industry}</span>
-                    <span className="truncate hidden sm:block">{tenant.location}</span>
-                  </div>
-                </div>
 
-                {/* Arrow */}
-                <div className="shrink-0">
-                  {selecting === tenant.id ? (
-                    <span className="w-5 h-5 border-2 border-[#0038a8]/30 border-t-[#0038a8] rounded-full animate-spin block" />
-                  ) : (
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#0038a8] group-hover:translate-x-0.5 transition-all" />
-                  )}
-                </div>
-              </motion.button>
-            ))
-          )}
-        </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                        {tenant.name}
+                      </span>
+                      <Badge
+                        variant={
+                          planConfig[tenant.plan]?.variant ?? 'secondary'
+                        }
+                        className="shrink-0"
+                      >
+                        {planConfig[tenant.plan]?.label ?? tenant.plan}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {tenant.employeeCount} employees
+                      </span>
+                      <span>{tenant.industry}</span>
+                      <span className="truncate hidden sm:block">
+                        {tenant.location}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="shrink-0">
+                    {selecting === tenant.id ? (
+                      <span className="w-5 h-5 border-2 border-[#0038a8]/30 border-t-[#0038a8] rounded-full animate-spin block" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#0038a8] group-hover:translate-x-0.5 transition-all" />
+                    )}
+                  </div>
+                </motion.button>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Set up new company */}
         <div className="mt-4">
@@ -165,7 +204,10 @@ export default function TenantSelectorPage() {
         {/* Sign out */}
         <button
           type="button"
-          onClick={() => { logout(); navigate('/login'); }}
+          onClick={() => {
+            logout();
+            navigate('/login');
+          }}
           className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mx-auto mt-6"
         >
           <LogOut className="w-4 h-4" />
