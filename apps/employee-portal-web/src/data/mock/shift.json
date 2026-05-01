@@ -1,0 +1,8 @@
+{
+  "employeeId": "emp001",
+  "shiftName": "Day Shift",
+  "startTime": "08:00",
+  "endTime": "17:00",
+  "breakMinutes": 60,
+  "workDays": ["Mon", "Tue", "Wed", "Thu", "Fri"]
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "rev001", "employeeId": "emp001", "cycleId": "cycle2022-annual",
+    "cycleName": "Annual Review 2022", "status": "completed",
+    "finalRating": 4.2, "reviewDate": "2023-01-15",
+    "managerName": "Jose Rizal",
+    "managerComments": "Juan has shown exceptional technical skills and has been a reliable team member. Ready for more leadership responsibilities.",
+    "strengths": "Strong problem-solving, excellent code quality, reliable delivery.",
+    "improvements": "Could improve communication with non-technical stakeholders.",
+    "selfRatings": { "qualityOfWork": 4, "productivity": 4, "communication": 3, "teamwork": 4, "leadership": 3, "initiative": 4, "technicalSkills": 5, "attendance": 4 },
+    "managerRatings": { "qualityOfWork": 4, "productivity": 4, "communication": 4, "teamwork": 4, "leadership": 4, "initiative": 4, "technicalSkills": 5, "attendance": 4 }
+  },
+  {
+    "id": "rev002", "employeeId": "emp001", "cycleId": "cycle2021-annual",
+    "cycleName": "Annual Review 2021", "status": "completed",
+    "finalRating": 3.8, "reviewDate": "2022-01-20",
+    "managerName": "Jose Rizal",
+    "managerComments": "Good performance in first full year. Technical skills are above average. Continue building leadership skills.",
+    "strengths": "Quick learner, strong technical foundation, collaborative.",
+    "improvements": "Take more initiative in proposing solutions. Build stakeholder management skills.",
+    "selfRatings": { "qualityOfWork": 4, "productivity": 3, "communication": 3, "teamwork": 4, "leadership": 2, "initiative": 3, "technicalSkills": 4, "attendance": 5 },
+    "managerRatings": { "qualityOfWork": 4, "productivity": 4, "communication": 3, "teamwork": 4, "leadership": 3, "initiative": 3, "technicalSkills": 4, "attendance": 5 }
+  }
+]

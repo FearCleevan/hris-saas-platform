@@ -1,0 +1,65 @@
+[
+  {
+    "id": "ann001",
+    "title": "Labor Day Holiday — May 1, 2025",
+    "body": "The office will be closed on May 1, 2025 in observance of Labor Day. Employees on field work or with client commitments should coordinate with their managers. Work completed on this holiday will be subject to holiday pay premiums per DOLE guidelines.",
+    "category": "holiday",
+    "date": "2025-04-28",
+    "author": "HR Department",
+    "pinned": true
+  },
+  {
+    "id": "ann002",
+    "title": "Q2 2025 Company Town Hall — May 16",
+    "body": "Our Q2 Town Hall will be held on May 16, 2025 at 10:00 AM via Zoom. The CEO will discuss company performance, upcoming projects, and answer your questions. Attendance is encouraged. Zoom link will be sent via email.",
+    "category": "event",
+    "date": "2025-04-25",
+    "author": "Admin Team",
+    "pinned": true
+  },
+  {
+    "id": "ann003",
+    "title": "Updated HMO Annual Limit — Effective June 2025",
+    "body": "We are pleased to announce that our HMO annual limit will increase from ₱200,000 to ₱250,000 effective June 1, 2025. This applies to all regular employees on the Executive Plus plan. Dependent coverage limits are also increased proportionally.",
+    "category": "benefits",
+    "date": "2025-04-22",
+    "author": "HR Department",
+    "pinned": false
+  },
+  {
+    "id": "ann004",
+    "title": "May Payroll Cutoff Schedule",
+    "body": "Payroll cutoff for May 1–15, 2025 will be on May 15 at 5:00 PM. All overtime and reimbursement claims must be submitted before the deadline. Late submissions will be processed in the next cutoff period.",
+    "category": "payroll",
+    "date": "2025-04-18",
+    "author": "Payroll Team",
+    "pinned": false
+  },
+  {
+    "id": "ann005",
+    "title": "Hybrid Work Policy Update — May 2025",
+    "body": "Effective May 5, 2025, the WFH policy is updated to 3 WFH days per week for Level 3 and above. Employees must log their WFH days through the portal. Please review the full policy document in the Documents section.",
+    "category": "policy",
+    "date": "2025-04-15",
+    "author": "HR Department",
+    "pinned": false
+  },
+  {
+    "id": "ann006",
+    "title": "Mental Health Awareness Month — May Activities",
+    "body": "In celebration of Mental Health Awareness Month, HR has organized free counseling sessions, webinars, and wellness activities throughout May. Check your company email for the schedule. Participation is voluntary but encouraged.",
+    "category": "wellness",
+    "date": "2025-04-10",
+    "author": "HR Department",
+    "pinned": false
+  },
+  {
+    "id": "ann007",
+    "title": "IT Security Reminder — Phishing Awareness",
+    "body": "The IT team has observed an increase in phishing emails targeting company accounts. Please do not click suspicious links. If you receive a suspicious email, forward it immediately to security@hris-demo.ph. Never share your credentials via email.",
+    "category": "general",
+    "date": "2025-04-05",
+    "author": "IT Department",
+    "pinned": false
+  }
+]

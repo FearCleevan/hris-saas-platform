@@ -6,24 +6,54 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { FormField } from '@/components/ui/FormField';
+import { createClient } from '@/lib/supabase/client';
+
+const ADMIN_URL =
+  process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://adminhrisph.vercel.app';
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    // Stub: in production this would call Supabase auth
-    console.log('[Login]', { email });
+
+    const supabase = createClient();
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(
+        authError.message === 'Invalid login credentials'
+          ? 'Incorrect email or password. Please try again.'
+          : authError.message
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Session is now set in the browser cookie.
+    // Redirect to admin dashboard — Supabase session is in localStorage/cookie
+    // and will be picked up by the admin dashboard on load.
+    window.location.href = `${ADMIN_URL}/`;
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {error && (
+        <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
       <FormField
         id="email"
         label="Email Address"
@@ -74,7 +104,11 @@ export function LoginForm() {
         disabled={loading}
         className="w-full bg-[#0038a8] hover:bg-[#002580] text-white font-semibold h-11 mt-2"
       >
-        {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in…</> : 'Sign In'}
+        {loading ? (
+          <><Loader2 className="h-4 w-4 animate-spin" /> Signing in…</>
+        ) : (
+          'Sign In'
+        )}
       </Button>
 
       <div className="relative">

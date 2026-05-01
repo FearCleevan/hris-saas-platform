@@ -1,0 +1,10 @@
+[
+  { "id": "cat01", "name": "Transportation", "icon": "car", "color": "blue", "limit": 5000 },
+  { "id": "cat02", "name": "Meals & Entertainment", "icon": "utensils", "color": "orange", "limit": 3000 },
+  { "id": "cat03", "name": "Office Supplies", "icon": "package", "color": "purple", "limit": 2000 },
+  { "id": "cat04", "name": "Communication", "icon": "phone", "color": "cyan", "limit": 1500 },
+  { "id": "cat05", "name": "Professional Development", "icon": "book-open", "color": "green", "limit": 10000 },
+  { "id": "cat06", "name": "Medical", "icon": "heart-pulse", "color": "red", "limit": 5000 },
+  { "id": "cat07", "name": "Accommodation", "icon": "building", "color": "amber", "limit": 8000 },
+  { "id": "cat08", "name": "Other", "icon": "more-horizontal", "color": "gray", "limit": 2000 }
+]

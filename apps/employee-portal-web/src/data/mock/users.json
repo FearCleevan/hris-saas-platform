@@ -1,0 +1,38 @@
+[
+  {
+    "id": "emp001",
+    "name": "Juan dela Cruz",
+    "email": "juan.delacruz@hris-demo.ph",
+    "password": "Employee@123",
+    "role": "employee",
+    "employeeId": "EMP-001",
+    "department": "Engineering",
+    "position": "Software Engineer",
+    "mustChangePassword": false,
+    "darkMode": false
+  },
+  {
+    "id": "emp002",
+    "name": "Maria Santos",
+    "email": "maria.santos@hris-demo.ph",
+    "password": "Manager@123",
+    "role": "manager",
+    "employeeId": "EMP-002",
+    "department": "HR",
+    "position": "HR Manager",
+    "mustChangePassword": false,
+    "darkMode": false
+  },
+  {
+    "id": "emp003",
+    "name": "Jose Rizal",
+    "email": "jose.rizal@hris-demo.ph",
+    "password": "Lead@123",
+    "role": "team_lead",
+    "employeeId": "EMP-003",
+    "department": "Engineering",
+    "position": "Team Lead",
+    "mustChangePassword": true,
+    "darkMode": false
+  }
+]

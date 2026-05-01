@@ -1,0 +1,18 @@
+{
+  "employeeId": "emp001",
+  "channels": {
+    "email": true,
+    "inApp": true,
+    "sms": false
+  },
+  "categories": {
+    "payroll": { "label": "Payroll & Payslip", "email": true, "inApp": true },
+    "leave": { "label": "Leave Requests", "email": true, "inApp": true },
+    "attendance": { "label": "Attendance Alerts", "email": false, "inApp": true },
+    "performance": { "label": "Performance & Reviews", "email": true, "inApp": true },
+    "expense": { "label": "Expense Claims", "email": true, "inApp": true },
+    "document": { "label": "Document Requests", "email": true, "inApp": true },
+    "announcement": { "label": "Announcements", "email": true, "inApp": true },
+    "system": { "label": "System Alerts", "email": false, "inApp": true }
+  }
+}

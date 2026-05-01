@@ -1,0 +1,82 @@
+[
+  {
+    "id": "n001",
+    "type": "payroll",
+    "title": "Payslip Available",
+    "message": "Your payslip for Apr 16–30, 2025 is now ready for download.",
+    "time": "2025-05-01T09:00:00",
+    "read": false
+  },
+  {
+    "id": "n002",
+    "type": "leave",
+    "title": "Leave Request Approved",
+    "message": "Your VL request for May 9, 2025 has been approved by Maria Santos.",
+    "time": "2025-04-30T14:22:00",
+    "read": false
+  },
+  {
+    "id": "n003",
+    "type": "expense",
+    "title": "Expense Claim Reimbursed",
+    "message": "Your meal expense of ₱850.00 on Apr 28 has been reimbursed.",
+    "time": "2025-04-29T10:15:00",
+    "read": false
+  },
+  {
+    "id": "n004",
+    "type": "announcement",
+    "title": "Labor Day Holiday Reminder",
+    "message": "May 1, 2025 is a national holiday. The office will be closed.",
+    "time": "2025-04-28T08:00:00",
+    "read": true
+  },
+  {
+    "id": "n005",
+    "type": "performance",
+    "title": "Self-Assessment Due Soon",
+    "message": "Your Q2 self-assessment is due on May 15, 2025. Please complete it.",
+    "time": "2025-04-25T09:00:00",
+    "read": true
+  },
+  {
+    "id": "n006",
+    "type": "attendance",
+    "title": "Attendance Correction Approved",
+    "message": "Your time correction for Apr 22 has been approved.",
+    "time": "2025-04-24T11:30:00",
+    "read": true
+  },
+  {
+    "id": "n007",
+    "type": "document",
+    "title": "COE Request Ready",
+    "message": "Your Certificate of Employment request is ready for pickup at HR.",
+    "time": "2025-04-20T16:00:00",
+    "read": true
+  },
+  {
+    "id": "n008",
+    "type": "leave",
+    "title": "Leave Balance Updated",
+    "message": "Your SIL balance has been credited with 1.25 days for April.",
+    "time": "2025-04-15T09:00:00",
+    "read": true
+  },
+  {
+    "id": "n009",
+    "type": "payroll",
+    "title": "Payslip Available",
+    "message": "Your payslip for Apr 1–15, 2025 is now ready.",
+    "time": "2025-04-16T09:00:00",
+    "read": true
+  },
+  {
+    "id": "n010",
+    "type": "announcement",
+    "title": "Q2 Town Hall — May 16",
+    "message": "Join our company-wide town hall on May 16 at 10AM via Zoom.",
+    "time": "2025-04-10T08:00:00",
+    "read": true
+  }
+]

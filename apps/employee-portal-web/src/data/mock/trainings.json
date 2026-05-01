@@ -1,0 +1,7 @@
+[
+  { "id": "tr001", "employeeId": "emp001", "title": "AWS Solutions Architect Associate — Online Course", "provider": "A Cloud Guru", "category": "technical", "type": "online", "startDate": "2023-08-01", "completionDate": null, "status": "in_progress", "hours": 40, "completedHours": 24, "certificate": false },
+  { "id": "tr002", "employeeId": "emp001", "title": "Effective Communication for Engineers", "provider": "Coursera", "category": "soft-skills", "type": "online", "startDate": "2023-06-01", "completionDate": "2023-07-15", "status": "completed", "hours": 8, "completedHours": 8, "certificate": true },
+  { "id": "tr003", "employeeId": "emp001", "title": "Q3 Security Awareness Training", "provider": "Internal", "category": "compliance", "type": "in-person", "startDate": "2023-07-20", "completionDate": "2023-07-20", "status": "completed", "hours": 4, "completedHours": 4, "certificate": false },
+  { "id": "tr004", "employeeId": "emp001", "title": "React Advanced Patterns Workshop", "provider": "Internal — Senior Dev Team", "category": "technical", "type": "workshop", "startDate": "2023-05-15", "completionDate": "2023-05-15", "status": "completed", "hours": 6, "completedHours": 6, "certificate": false },
+  { "id": "tr005", "employeeId": "emp001", "title": "Agile & Scrum Fundamentals", "provider": "Udemy", "category": "process", "type": "online", "startDate": "2023-03-01", "completionDate": "2023-04-10", "status": "completed", "hours": 12, "completedHours": 12, "certificate": true }
+]

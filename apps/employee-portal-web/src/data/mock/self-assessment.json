@@ -1,0 +1,21 @@
+{
+  "employeeId": "emp001",
+  "cycleId": "cycle2023-Q4",
+  "cycleName": "Q4 2023 Performance Review",
+  "dueDate": "2023-11-30",
+  "status": "draft",
+  "ratings": {
+    "qualityOfWork": 4,
+    "productivity": 4,
+    "communication": 3,
+    "teamwork": 4,
+    "leadership": 4,
+    "initiative": 4,
+    "technicalSkills": 5,
+    "attendance": 4
+  },
+  "accomplishments": "Launched the new authentication module ahead of schedule, reducing login time by 40%. Reduced API latency on 3 critical endpoints. Mentored 2 junior developers successfully.",
+  "improvements": "I want to improve my cross-team communication skills and public speaking confidence.",
+  "careerGoals": "Transition to a Senior Software Engineer role within the next 6 months, and eventually move toward a Tech Lead position.",
+  "lastSaved": "2023-11-08T10:30:00"
+}

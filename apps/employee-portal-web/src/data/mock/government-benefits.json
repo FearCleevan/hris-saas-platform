@@ -1,0 +1,66 @@
+{
+  "employeeId": "emp001",
+  "sss": {
+    "number": "04-1234567-8",
+    "memberSince": "2012-06-01",
+    "membershipType": "Regular",
+    "status": "active",
+    "totalContributionsYTD": 13200,
+    "employeeShareYTD": 5280,
+    "employerShareYTD": 7920,
+    "monthlyContribution": 1100,
+    "employeeMonthly": 440,
+    "employerMonthly": 660,
+    "creditedYears": 13,
+    "monthlyHistory": [
+      { "month": "Jan 2025", "employeeShare": 440, "employerShare": 660, "total": 1100, "status": "posted" },
+      { "month": "Feb 2025", "employeeShare": 440, "employerShare": 660, "total": 1100, "status": "posted" },
+      { "month": "Mar 2025", "employeeShare": 440, "employerShare": 660, "total": 1100, "status": "posted" },
+      { "month": "Apr 2025", "employeeShare": 440, "employerShare": 660, "total": 1100, "status": "posted" }
+    ]
+  },
+  "philhealth": {
+    "number": "02-123456789-0",
+    "memberSince": "2012-06-01",
+    "status": "active",
+    "totalContributionsYTD": 9000,
+    "employeeShareYTD": 4500,
+    "employerShareYTD": 4500,
+    "monthlyContribution": 750,
+    "employeeMonthly": 375,
+    "employerMonthly": 375,
+    "premiumRate": "5%",
+    "monthlyHistory": [
+      { "month": "Jan 2025", "employeeShare": 375, "employerShare": 375, "total": 750, "status": "posted" },
+      { "month": "Feb 2025", "employeeShare": 375, "employerShare": 375, "total": 750, "status": "posted" },
+      { "month": "Mar 2025", "employeeShare": 375, "employerShare": 375, "total": 750, "status": "posted" },
+      { "month": "Apr 2025", "employeeShare": 375, "employerShare": 375, "total": 750, "status": "posted" }
+    ]
+  },
+  "pagibig": {
+    "number": "1234-5678-9012",
+    "memberSince": "2012-06-01",
+    "status": "active",
+    "totalContributionsYTD": 1200,
+    "employeeShareYTD": 600,
+    "employerShareYTD": 600,
+    "monthlyContribution": 300,
+    "employeeMonthly": 100,
+    "employerMonthly": 200,
+    "hdmfShareMonthly": 100,
+    "monthlyHistory": [
+      { "month": "Jan 2025", "employeeShare": 100, "employerShare": 200, "total": 300, "status": "posted" },
+      { "month": "Feb 2025", "employeeShare": 100, "employerShare": 200, "total": 300, "status": "posted" },
+      { "month": "Mar 2025", "employeeShare": 100, "employerShare": 200, "total": 300, "status": "posted" },
+      { "month": "Apr 2025", "employeeShare": 100, "employerShare": 200, "total": 300, "status": "posted" }
+    ],
+    "savingsBalance": 156000,
+    "dividendsYTD": 8740
+  },
+  "bir": {
+    "tin": "123-456-789-000",
+    "taxableIncomeYTD": 504000,
+    "withholdingTaxYTD": 54000,
+    "monthlyWithholdingTax": 13500
+  }
+}

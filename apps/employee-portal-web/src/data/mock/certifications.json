@@ -1,0 +1,5 @@
+[
+  { "id": "cert001", "employeeId": "emp001", "name": "AWS Cloud Practitioner", "issuingOrg": "Amazon Web Services", "issueDate": "2022-11-15", "expiryDate": "2025-11-15", "credentialId": "AWS-CCP-12345", "status": "active", "category": "cloud" },
+  { "id": "cert002", "employeeId": "emp001", "name": "Effective Communication Certificate", "issuingOrg": "Coursera / UC Davis", "issueDate": "2023-07-15", "expiryDate": null, "credentialId": "COURSERA-COMM-67890", "status": "active", "category": "soft-skills" },
+  { "id": "cert003", "employeeId": "emp001", "name": "Agile Scrum Master", "issuingOrg": "Udemy", "issueDate": "2023-04-10", "expiryDate": null, "credentialId": "UDEMY-ASM-54321", "status": "active", "category": "process" }
+]

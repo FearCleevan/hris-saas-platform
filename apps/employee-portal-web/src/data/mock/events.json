@@ -1,0 +1,38 @@
+[
+  {
+    "id": "evt001",
+    "title": "Year-End Company Party",
+    "date": "2023-12-15",
+    "time": "06:00 PM",
+    "location": "Marriott Manila",
+    "category": "social",
+    "rsvp": true
+  },
+  {
+    "id": "evt002",
+    "title": "Q4 All-Hands Meeting",
+    "date": "2023-11-24",
+    "time": "10:00 AM",
+    "location": "Conference Room A",
+    "category": "meeting",
+    "rsvp": false
+  },
+  {
+    "id": "evt003",
+    "title": "Safety Training",
+    "date": "2023-11-20",
+    "time": "02:00 PM",
+    "location": "Training Room B",
+    "category": "training",
+    "rsvp": true
+  },
+  {
+    "id": "evt004",
+    "title": "Performance Review Deadline",
+    "date": "2023-11-30",
+    "time": "11:59 PM",
+    "location": "Online Portal",
+    "category": "deadline",
+    "rsvp": false
+  }
+]

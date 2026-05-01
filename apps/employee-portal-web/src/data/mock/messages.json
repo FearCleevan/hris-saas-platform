@@ -1,0 +1,110 @@
+{
+  "threads": [
+    {
+      "id": "thread001",
+      "subject": "Leave Balance Inquiry",
+      "with": "HR Department",
+      "withAvatar": "HR",
+      "lastMessage": "Your leave balances have been updated. Please check your portal.",
+      "lastTime": "2025-04-30T15:20:00",
+      "unread": true,
+      "messages": [
+        {
+          "id": "msg001",
+          "from": "employee",
+          "text": "Hi, I noticed my SIL balance seems off. I should have 5 days but it shows 3.75. Can you check?",
+          "time": "2025-04-30T10:15:00"
+        },
+        {
+          "id": "msg002",
+          "from": "hr",
+          "sender": "Anna Reyes",
+          "text": "Good morning Juan! Let me check your leave ledger.",
+          "time": "2025-04-30T10:45:00"
+        },
+        {
+          "id": "msg003",
+          "from": "hr",
+          "sender": "Anna Reyes",
+          "text": "I see the issue — the January carry-over wasn't applied yet. We'll correct it today.",
+          "time": "2025-04-30T11:00:00"
+        },
+        {
+          "id": "msg004",
+          "from": "hr",
+          "sender": "Anna Reyes",
+          "text": "Your leave balances have been updated. Please check your portal.",
+          "time": "2025-04-30T15:20:00"
+        }
+      ]
+    },
+    {
+      "id": "thread002",
+      "subject": "COE Request",
+      "with": "HR Department",
+      "withAvatar": "HR",
+      "lastMessage": "Your COE is ready for pickup at the HR office.",
+      "lastTime": "2025-04-20T16:00:00",
+      "unread": false,
+      "messages": [
+        {
+          "id": "msg005",
+          "from": "employee",
+          "text": "Good day! I need a Certificate of Employment for a bank loan application. Can you issue one with my current salary stated?",
+          "time": "2025-04-18T09:00:00"
+        },
+        {
+          "id": "msg006",
+          "from": "hr",
+          "sender": "Rina Castillo",
+          "text": "Hi Juan! Sure, we can process that. Please fill out the COE Request form in the Documents tab. Processing takes 3–5 business days.",
+          "time": "2025-04-18T10:30:00"
+        },
+        {
+          "id": "msg007",
+          "from": "employee",
+          "text": "Done! I just submitted the form. Thank you!",
+          "time": "2025-04-18T10:45:00"
+        },
+        {
+          "id": "msg008",
+          "from": "hr",
+          "sender": "Rina Castillo",
+          "text": "Your COE is ready for pickup at the HR office.",
+          "time": "2025-04-20T16:00:00"
+        }
+      ]
+    },
+    {
+      "id": "thread003",
+      "subject": "Expense Reimbursement Follow-Up",
+      "with": "Finance Team",
+      "withAvatar": "FN",
+      "lastMessage": "The reimbursement has been processed and will reflect in your next payslip.",
+      "lastTime": "2025-04-15T14:00:00",
+      "unread": false,
+      "messages": [
+        {
+          "id": "msg009",
+          "from": "employee",
+          "text": "Hi, I submitted my meal expense claim (EXP-003) on April 5 but haven't seen the reimbursement yet. Can you check the status?",
+          "time": "2025-04-14T09:30:00"
+        },
+        {
+          "id": "msg010",
+          "from": "hr",
+          "sender": "Finance Team",
+          "text": "Hi Juan! The claim is currently pending manager approval. Once approved, finance will process it within 3–5 days.",
+          "time": "2025-04-14T11:00:00"
+        },
+        {
+          "id": "msg011",
+          "from": "hr",
+          "sender": "Finance Team",
+          "text": "The reimbursement has been processed and will reflect in your next payslip.",
+          "time": "2025-04-15T14:00:00"
+        }
+      ]
+    }
+  ]
+}

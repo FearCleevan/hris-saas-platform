@@ -1,0 +1,4 @@
+[
+  { "id": "cr001", "employeeId": "emp001", "date": "2023-11-02", "type": "time_in", "original": "09:15", "requested": "08:05", "reason": "Biometric reader error — had IT ticket", "status": "approved", "submittedAt": "2023-11-02T10:00:00" },
+  { "id": "cr002", "employeeId": "emp001", "date": "2023-10-18", "type": "time_out", "original": null, "requested": "17:10", "reason": "Forgot to time out, was still in office", "status": "pending", "submittedAt": "2023-10-18T18:00:00" }
+]

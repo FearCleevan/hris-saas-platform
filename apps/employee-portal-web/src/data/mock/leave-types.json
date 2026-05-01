@@ -1,0 +1,9 @@
+[
+  { "code": "VL", "name": "Vacation Leave", "entitled": 15, "withPay": true, "carryOver": true, "maxCarryOver": 10, "minNoticeDays": 3, "description": "For rest, recreation, and personal business. Must be filed at least 3 days in advance." },
+  { "code": "SL", "name": "Sick Leave", "entitled": 15, "withPay": true, "carryOver": false, "maxCarryOver": 0, "minNoticeDays": 0, "description": "For illness, injury, or medical appointments. Medical certificate required for 3+ consecutive days." },
+  { "code": "SIL", "name": "Service Incentive Leave", "entitled": 5, "withPay": true, "carryOver": false, "maxCarryOver": 0, "minNoticeDays": 1, "description": "Mandated by the Labor Code (Art. 95). Convertible to cash if unused at year-end." },
+  { "code": "ML", "name": "Maternity Leave", "entitled": 105, "withPay": true, "carryOver": false, "maxCarryOver": 0, "minNoticeDays": 30, "description": "Per RA 11210 (105-Day Expanded Maternity Leave). Applicable to female employees." },
+  { "code": "PL", "name": "Paternity Leave", "entitled": 7, "withPay": true, "carryOver": false, "maxCarryOver": 0, "minNoticeDays": 7, "description": "Per RA 8187. For married male employees, first 4 deliveries." },
+  { "code": "SPL", "name": "Solo Parent Leave", "entitled": 7, "withPay": true, "carryOver": false, "maxCarryOver": 0, "minNoticeDays": 3, "description": "Per RA 8972. Must present Solo Parent ID." },
+  { "code": "EL", "name": "Emergency Leave", "entitled": 3, "withPay": false, "carryOver": false, "maxCarryOver": 0, "minNoticeDays": 0, "description": "For urgent personal or family emergencies. Without pay. Supporting documents required." }
+]

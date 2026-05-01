@@ -1,0 +1,5 @@
+[
+  { "id": "req001", "employeeId": "emp001", "type": "COE", "typeName": "Certificate of Employment", "purpose": "Visa application", "requestedAt": "2023-06-10T09:00:00", "status": "completed", "completedAt": "2023-06-15T14:00:00", "notes": "Released via email" },
+  { "id": "req002", "employeeId": "emp001", "type": "PAYSLIP_CERT", "typeName": "Payslip Certification", "purpose": "Bank loan application", "requestedAt": "2023-09-05T10:00:00", "status": "completed", "completedAt": "2023-09-08T11:00:00", "notes": "3 months payslip certification" },
+  { "id": "req003", "employeeId": "emp001", "type": "COE", "typeName": "Certificate of Employment", "purpose": "Condo rental requirement", "requestedAt": "2023-11-01T14:00:00", "status": "processing", "completedAt": null, "notes": null }
+]

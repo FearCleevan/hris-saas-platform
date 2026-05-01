@@ -1,0 +1,50 @@
+[
+  {
+    "id": "c001",
+    "name": "Maria Santos",
+    "department": "HR",
+    "position": "HR Manager",
+    "birthday": "1990-11-10",
+    "hireDate": "2018-11-10"
+  },
+  {
+    "id": "c002",
+    "name": "Jose Rizal",
+    "department": "Engineering",
+    "position": "Team Lead",
+    "birthday": "1988-11-15",
+    "hireDate": "2020-11-10"
+  },
+  {
+    "id": "c003",
+    "name": "Ana Reyes",
+    "department": "Finance",
+    "position": "Finance Analyst",
+    "birthday": "1992-11-22",
+    "hireDate": "2019-11-05"
+  },
+  {
+    "id": "c004",
+    "name": "Carlos Mendoza",
+    "department": "Operations",
+    "position": "Operations Manager",
+    "birthday": "1985-11-18",
+    "hireDate": "2017-11-12"
+  },
+  {
+    "id": "c005",
+    "name": "Liza Torres",
+    "department": "Marketing",
+    "position": "Marketing Specialist",
+    "birthday": "1994-11-28",
+    "hireDate": "2021-11-15"
+  },
+  {
+    "id": "c006",
+    "name": "Ramon Aquino",
+    "department": "Engineering",
+    "position": "Senior Developer",
+    "birthday": "1991-11-07",
+    "hireDate": "2022-11-01"
+  }
+]

@@ -1,0 +1,95 @@
+{
+  "employeeId": "emp001",
+  "provider": "Maxicare Healthcare Corporation",
+  "plan": "Executive Plus",
+  "cardNumber": "MAX-2024-EMP-001-001",
+  "memberSince": "2021-04-01",
+  "validUntil": "2026-03-31",
+  "annualLimit": 200000,
+  "roomAndBoard": 3000,
+  "status": "active",
+  "coverage": {
+    "inpatient": true,
+    "outpatient": true,
+    "emergency": true,
+    "dental": true,
+    "vision": false,
+    "maternity": true,
+    "preventive": true,
+    "laboratory": true,
+    "pharmacy": true
+  },
+  "utilizationYTD": {
+    "used": 28500,
+    "remaining": 171500,
+    "claims": [
+      {
+        "id": "CLM-001",
+        "date": "2025-02-12",
+        "hospital": "St. Luke's Medical Center",
+        "type": "Outpatient",
+        "amount": 4500,
+        "status": "settled"
+      },
+      {
+        "id": "CLM-002",
+        "date": "2025-03-20",
+        "hospital": "Makati Medical Center",
+        "type": "Laboratory",
+        "amount": 3200,
+        "status": "settled"
+      },
+      {
+        "id": "CLM-003",
+        "date": "2025-04-08",
+        "hospital": "Asian Hospital",
+        "type": "Dental",
+        "amount": 8800,
+        "status": "settled"
+      },
+      {
+        "id": "CLM-004",
+        "date": "2025-04-25",
+        "hospital": "St. Luke's Medical Center",
+        "type": "Outpatient",
+        "amount": 12000,
+        "status": "processing"
+      }
+    ]
+  },
+  "dependents": [
+    {
+      "id": "dep001",
+      "name": "Maria Santos dela Cruz",
+      "relationship": "Spouse",
+      "birthday": "1993-08-22",
+      "cardNumber": "MAX-2024-EMP-001-002",
+      "status": "active"
+    },
+    {
+      "id": "dep002",
+      "name": "Gabriel Luis dela Cruz",
+      "relationship": "Child",
+      "birthday": "2018-03-10",
+      "cardNumber": "MAX-2024-EMP-001-003",
+      "status": "active"
+    },
+    {
+      "id": "dep003",
+      "name": "Isabella Rose dela Cruz",
+      "relationship": "Child",
+      "birthday": "2021-11-05",
+      "cardNumber": "MAX-2024-EMP-001-004",
+      "status": "active"
+    }
+  ],
+  "accreditedHospitals": [
+    { "name": "St. Luke's Medical Center — BGC", "city": "Taguig" },
+    { "name": "St. Luke's Medical Center — QC", "city": "Quezon City" },
+    { "name": "Makati Medical Center", "city": "Makati" },
+    { "name": "Asian Hospital & Medical Center", "city": "Muntinlupa" },
+    { "name": "The Medical City", "city": "Pasig" },
+    { "name": "Perpetual Help Medical Center", "city": "Las Piñas" },
+    { "name": "Cardinal Santos Medical Center", "city": "San Juan" }
+  ]
+}

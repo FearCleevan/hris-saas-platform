@@ -1,0 +1,10 @@
+[
+  { "id": "doc001", "employeeId": "emp001", "name": "Employment Contract", "category": "employment", "fileType": "pdf", "fileSize": "245 KB", "uploadedDate": "2020-03-01", "expiryDate": null, "status": "active", "downloadable": true },
+  { "id": "doc002", "employeeId": "emp001", "name": "Certificate of Employment", "category": "certificates", "fileType": "pdf", "fileSize": "128 KB", "uploadedDate": "2023-06-15", "expiryDate": null, "status": "active", "downloadable": true },
+  { "id": "doc003", "employeeId": "emp001", "name": "BIR Form 2316 (2022)", "category": "tax", "fileType": "pdf", "fileSize": "189 KB", "uploadedDate": "2023-02-28", "expiryDate": null, "status": "active", "downloadable": true },
+  { "id": "doc004", "employeeId": "emp001", "name": "NBI Clearance", "category": "government", "fileType": "pdf", "fileSize": "312 KB", "uploadedDate": "2020-02-15", "expiryDate": "2021-02-15", "status": "expired", "downloadable": true },
+  { "id": "doc005", "employeeId": "emp001", "name": "Medical Certificate (Pre-employment)", "category": "medical", "fileType": "pdf", "fileSize": "156 KB", "uploadedDate": "2020-02-20", "expiryDate": null, "status": "active", "downloadable": true },
+  { "id": "doc006", "employeeId": "emp001", "name": "SSS E-1 Form", "category": "government", "fileType": "pdf", "fileSize": "98 KB", "uploadedDate": "2020-03-01", "expiryDate": null, "status": "active", "downloadable": true },
+  { "id": "doc007", "employeeId": "emp001", "name": "Diploma — BS Computer Science", "category": "credentials", "fileType": "pdf", "fileSize": "420 KB", "uploadedDate": "2020-02-18", "expiryDate": null, "status": "active", "downloadable": true },
+  { "id": "doc008", "employeeId": "emp001", "name": "AWS Cloud Practitioner Certificate", "category": "credentials", "fileType": "pdf", "fileSize": "203 KB", "uploadedDate": "2023-08-10", "expiryDate": "2026-08-10", "status": "active", "downloadable": true }
+]

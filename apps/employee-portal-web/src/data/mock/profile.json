@@ -1,0 +1,73 @@
+{
+  "employeeId": "emp001",
+  "personal": {
+    "firstName": "Juan",
+    "middleName": "Reyes",
+    "lastName": "dela Cruz",
+    "suffix": null,
+    "gender": "Male",
+    "civilStatus": "Married",
+    "birthday": "1992-05-15",
+    "birthPlace": "Manila, Philippines",
+    "nationality": "Filipino",
+    "religion": "Roman Catholic",
+    "bloodType": "O+",
+    "address": {
+      "street": "123 Rizal Street",
+      "barangay": "Barangay 15",
+      "city": "Quezon City",
+      "province": "Metro Manila",
+      "zip": "1100"
+    }
+  },
+  "contact": {
+    "companyEmail": "juan.delacruz@hris-demo.ph",
+    "personalEmail": "juan.delacruz@gmail.com",
+    "mobile": "+63 917 123 4567",
+    "landline": null
+  },
+  "employment": {
+    "employeeId": "EMP-001",
+    "position": "Software Engineer",
+    "department": "Engineering",
+    "type": "regular",
+    "hireDate": "2020-03-01",
+    "regularizationDate": "2020-09-01",
+    "branch": "Head Office",
+    "supervisor": "Jose Rizal",
+    "workSchedule": "Day Shift (8AM–5PM)",
+    "salary": 50000
+  },
+  "governmentIds": {
+    "sss": "03-1234567-8",
+    "philhealth": "12-345678901-2",
+    "pagibig": "1234-5678-9012",
+    "tin": "123-456-789-000"
+  },
+  "bank": {
+    "bankName": "BDO Unibank",
+    "accountName": "Juan R. dela Cruz",
+    "accountNumber": "****-****-7890",
+    "accountType": "Savings"
+  },
+  "emergencyContacts": [
+    {
+      "id": "ec001",
+      "name": "Maria dela Cruz",
+      "relationship": "Spouse",
+      "mobile": "+63 917 987 6543",
+      "address": "123 Rizal Street, Quezon City"
+    },
+    {
+      "id": "ec002",
+      "name": "Pedro dela Cruz",
+      "relationship": "Father",
+      "mobile": "+63 920 111 2222",
+      "address": "456 Mabini Street, Marikina City"
+    }
+  ],
+  "dependents": [
+    { "id": "dep001", "name": "Maria Grace dela Cruz", "relationship": "Spouse", "birthday": "1993-07-20", "beneficiary": true, "percentage": 60 },
+    { "id": "dep002", "name": "Juan Miguel dela Cruz", "relationship": "Child", "birthday": "2018-02-10", "beneficiary": true, "percentage": 40 }
+  ]
+}

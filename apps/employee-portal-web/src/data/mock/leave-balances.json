@@ -1,0 +1,8 @@
+[{
+  "employeeId": "emp001",
+  "year": 2023,
+  "VL": { "entitled": 15, "used": 5, "remaining": 10, "carryOver": 2, "convertible": 0 },
+  "SL": { "entitled": 15, "used": 3, "remaining": 12, "carryOver": 0, "convertible": 0 },
+  "SIL": { "entitled": 5, "used": 0, "remaining": 5, "carryOver": 0, "convertible": 5 },
+  "EL": { "entitled": 3, "used": 1, "remaining": 2, "carryOver": 0, "convertible": 0 }
+}]

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Tenant } from '@/types';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AuthStore {
   user: User | null;
@@ -42,14 +43,22 @@ export const useAuthStore = create<AuthStore>()(
 
       setTenant: (tenant) => set({ tenant }),
 
-      logout: () =>
+      logout: () => {
+        // Sign out from Supabase if configured; always clear local state
+        if (isSupabaseConfigured && supabase) {
+          supabase.auth.signOut().catch(() => {});
+        }
         set({
           user: null,
           tenant: null,
           isAuthenticated: false,
           isTwoFactorVerified: false,
           pendingEmail: null,
-        }),
+        });
+        // Redirect to landing page login after sign-out
+        const landingUrl = import.meta.env.VITE_LANDING_URL as string | undefined;
+        window.location.href = landingUrl ? `${landingUrl}/login` : '/login';
+      },
 
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
     }),

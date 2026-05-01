@@ -9,7 +9,9 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured, fetchUserContext } from '@/lib/supabase';
 import usersData from '@/data/mock/users.json';
+import type { User, Tenant } from '@/types';
 
 interface LoginForm {
   email: string;
@@ -39,22 +41,81 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
+
+    // ── Real Supabase auth (production) ──────────────────────────
+    if (isSupabaseConfigured && supabase) {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email:    data.email,
+        password: data.password,
+      });
+
+      if (error || !authData.session) {
+        toast.error(
+          error?.message === 'Invalid login credentials'
+            ? 'Invalid email or password.'
+            : (error?.message ?? 'Sign-in failed. Please try again.')
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      const { profile, org, role } = await fetchUserContext(authData.session.user.id);
+
+      if (!profile) {
+        toast.error('Could not load your profile. Please contact support.');
+        setIsLoading(false);
+        return;
+      }
+
+      const user: User = {
+        id:        authData.session.user.id,
+        email:     authData.session.user.email!,
+        name:      profile.full_name,
+        role:      (role ?? 'hr_staff') as User['role'],
+        avatar:    profile.avatar_url ?? undefined,
+        tenantIds: org ? [org.id] : [],
+      };
+
+      storeLogin(user, true);
+
+      if (org) {
+        const tenant: Tenant = {
+          id:            org.id,
+          name:          org.name,
+          slug:          org.slug,
+          plan:          org.plan === 'trial' ? 'starter' : org.plan,
+          employeeCount: 0,
+          logoUrl:       org.logo_url ?? undefined,
+          industry:      org.industry ?? '',
+          location:      '',
+        };
+        useAuthStore.getState().setTenant(tenant);
+        navigate('/');
+      } else {
+        navigate('/setup-company');
+      }
+
+      setIsLoading(false);
+      return;
+    }
+
+    // ── Mock auth fallback (local dev without Supabase) ───────────
     await new Promise((r) => setTimeout(r, 800));
 
-    const user = usersData.find(
+    const mockUser = usersData.find(
       (u) => u.email === data.email && u.password === data.password
     );
 
-    if (!user) {
+    if (!mockUser) {
       toast.error('Invalid email or password. Try admin@hris-demo.ph / Admin@123');
       setIsLoading(false);
       return;
     }
 
-    const { password: _pw, twoFactorCode: _tfc, ...safeUser } = user;
+    const { password: _pw, twoFactorCode: _tfc, ...safeUser } = mockUser;
 
-    if (user.twoFactorEnabled) {
-      setPendingEmail(user.email);
+    if (mockUser.twoFactorEnabled) {
+      setPendingEmail(mockUser.email);
       storeLogin(safeUser as Parameters<typeof storeLogin>[0], false);
       navigate('/verify-2fa');
     } else {

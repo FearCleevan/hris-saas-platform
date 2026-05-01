@@ -3,19 +3,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { Toaster } from 'sonner';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ProtectedRoute } from '@/components/router/ProtectedRoute';
 import { useAuthStore } from '@/store/authStore';
 import { lightTheme, darkTheme } from '@/lib/theme';
+import { supabase, isSupabaseConfigured, fetchUserContext } from '@/lib/supabase';
+import type { User, Tenant } from '@/types';
 
 import LoginPage from '@/pages/auth/LoginPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import TwoFactorPage from '@/pages/auth/TwoFactorPage';
 import TenantSelectorPage from '@/pages/auth/TenantSelectorPage';
 import CompanySetupPage from '@/pages/auth/CompanySetupPage';
+import AuthCallbackPage from '@/pages/auth/AuthCallbackPage';
 import DashboardPage from '@/pages/dashboard/DashboardPage';
 import EmployeeListPage from '@/pages/employees/EmployeeListPage';
 import EmployeeProfilePage from '@/pages/employees/EmployeeProfilePage';
@@ -50,6 +53,9 @@ const queryClient = new QueryClient({
 });
 
 const router = createBrowserRouter([
+  // Public auth callback — no layout wrapper needed
+  { path: '/auth/callback', element: <AuthCallbackPage /> },
+
   {
     element: <AuthLayout />,
     children: [
@@ -113,11 +119,80 @@ const router = createBrowserRouter([
   { path: '*', element: <Navigate to="/login" replace /> },
 ]);
 
+// Syncs dark mode class on <html> with Zustand state
 function DarkModeSync() {
   const darkMode = useAuthStore((s) => s.darkMode);
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
+  return null;
+}
+
+// On mount, checks for an existing Supabase session and hydrates the auth store.
+// This makes the admin dashboard pick up sessions from the landing page redirect
+// without requiring the user to log in again.
+function SupabaseSessionSync() {
+  const { login, setTenant, isAuthenticated } = useAuthStore();
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      setChecked(true);
+      return;
+    }
+
+    async function syncSession() {
+      if (!supabase) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session && !isAuthenticated) {
+        const { profile, org, role } = await fetchUserContext(session.user.id);
+
+        if (profile) {
+          const user: User = {
+            id:        session.user.id,
+            email:     session.user.email!,
+            name:      profile.full_name,
+            role:      (role ?? 'hr_staff') as User['role'],
+            avatar:    profile.avatar_url ?? undefined,
+            tenantIds: org ? [org.id] : [],
+          };
+          login(user, true);
+
+          if (org) {
+            const tenant: Tenant = {
+              id:            org.id,
+              name:          org.name,
+              slug:          org.slug,
+              plan:          org.plan === 'trial' ? 'starter' : org.plan,
+              employeeCount: 0,
+              logoUrl:       org.logo_url ?? undefined,
+              industry:      org.industry ?? '',
+              location:      '',
+            };
+            setTenant(tenant);
+          }
+        }
+      }
+
+      setChecked(true);
+    }
+
+    syncSession();
+
+    // Keep the store in sync with Supabase auth events (token refresh, sign-out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        useAuthStore.getState().logout();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // While checking the session, show nothing (the ProtectedRoute handles redirects)
+  if (!checked && isSupabaseConfigured) return null;
   return null;
 }
 
@@ -129,6 +204,7 @@ export default function App() {
       <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
         <CssBaseline />
         <DarkModeSync />
+        <SupabaseSessionSync />
         <RouterProvider router={router} />
         <Toaster position="top-right" richColors closeButton />
       </ThemeProvider>

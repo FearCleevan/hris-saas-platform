@@ -1,0 +1,12 @@
+[
+  { "id": "chk001", "name": "Government-issued ID (front)", "category": "identity", "required": true, "submitted": true, "submittedDate": "2020-03-01" },
+  { "id": "chk002", "name": "Government-issued ID (back)", "category": "identity", "required": true, "submitted": true, "submittedDate": "2020-03-01" },
+  { "id": "chk003", "name": "SSS E-1 / E-4 Form", "category": "government", "required": true, "submitted": true, "submittedDate": "2020-03-01" },
+  { "id": "chk004", "name": "PhilHealth MDR Form", "category": "government", "required": true, "submitted": true, "submittedDate": "2020-03-01" },
+  { "id": "chk005", "name": "Pag-IBIG Membership Form", "category": "government", "required": true, "submitted": true, "submittedDate": "2020-03-01" },
+  { "id": "chk006", "name": "BIR TIN / Form 1902", "category": "government", "required": true, "submitted": true, "submittedDate": "2020-03-01" },
+  { "id": "chk007", "name": "NBI Clearance (valid)", "category": "clearance", "required": true, "submitted": false, "submittedDate": null },
+  { "id": "chk008", "name": "Medical Certificate", "category": "medical", "required": true, "submitted": true, "submittedDate": "2020-02-20" },
+  { "id": "chk009", "name": "Transcript of Records / Diploma", "category": "credentials", "required": false, "submitted": true, "submittedDate": "2020-02-18" },
+  { "id": "chk010", "name": "Updated Resume / CV", "category": "credentials", "required": false, "submitted": false, "submittedDate": null }
+]

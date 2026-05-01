@@ -1,0 +1,14 @@
+[
+  { "id": "run001", "period": "Nov 1–15, 2023", "cutoffStart": "2023-11-01", "cutoffEnd": "2023-11-15", "payDate": "2023-11-20", "status": "released" },
+  { "id": "run002", "period": "Oct 16–31, 2023", "cutoffStart": "2023-10-16", "cutoffEnd": "2023-10-31", "payDate": "2023-11-05", "status": "released" },
+  { "id": "run003", "period": "Oct 1–15, 2023", "cutoffStart": "2023-10-01", "cutoffEnd": "2023-10-15", "payDate": "2023-10-20", "status": "released" },
+  { "id": "run004", "period": "Sep 16–30, 2023", "cutoffStart": "2023-09-16", "cutoffEnd": "2023-09-30", "payDate": "2023-10-05", "status": "released" },
+  { "id": "run005", "period": "Sep 1–15, 2023", "cutoffStart": "2023-09-01", "cutoffEnd": "2023-09-15", "payDate": "2023-09-20", "status": "released" },
+  { "id": "run006", "period": "Aug 16–31, 2023", "cutoffStart": "2023-08-16", "cutoffEnd": "2023-08-31", "payDate": "2023-09-05", "status": "released" },
+  { "id": "run007", "period": "Aug 1–15, 2023", "cutoffStart": "2023-08-01", "cutoffEnd": "2023-08-15", "payDate": "2023-08-20", "status": "released" },
+  { "id": "run008", "period": "Jul 16–31, 2023", "cutoffStart": "2023-07-16", "cutoffEnd": "2023-07-31", "payDate": "2023-08-05", "status": "released" },
+  { "id": "run009", "period": "Jul 1–15, 2023", "cutoffStart": "2023-07-01", "cutoffEnd": "2023-07-15", "payDate": "2023-07-20", "status": "released" },
+  { "id": "run010", "period": "Jun 16–30, 2023", "cutoffStart": "2023-06-16", "cutoffEnd": "2023-06-30", "payDate": "2023-07-05", "status": "released" },
+  { "id": "run011", "period": "Jun 1–15, 2023", "cutoffStart": "2023-06-01", "cutoffEnd": "2023-06-15", "payDate": "2023-06-20", "status": "released" },
+  { "id": "run012", "period": "Jan 1–15, 2023", "cutoffStart": "2023-01-01", "cutoffEnd": "2023-01-15", "payDate": "2023-01-20", "status": "released" }
+]
