@@ -55,9 +55,7 @@ export const useAuthStore = create<AuthStore>()(
           isTwoFactorVerified: false,
           pendingEmail: null,
         });
-        // Redirect to landing page login after sign-out
-        const landingUrl = import.meta.env.VITE_LANDING_URL as string | undefined;
-        window.location.href = landingUrl ? `${landingUrl}/login` : '/login';
+        window.location.href = '/login';
       },
 
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
