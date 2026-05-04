@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
+import { Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useEmployeeStats } from '@/hooks/useEmployees';
 import { KPICards } from './components/KPICards';
 import { AttendanceHeatmap } from './components/AttendanceHeatmap';
 import { DepartmentChart } from './components/DepartmentChart';
@@ -18,6 +20,7 @@ const greetingByHour = () => {
 
 export default function DashboardPage() {
   const { user, tenant } = useAuth();
+  const { data: stats } = useEmployeeStats();
 
   return (
     <motion.div
@@ -36,11 +39,17 @@ export default function DashboardPage() {
             Here&apos;s what&apos;s happening at{' '}
             <span className="font-medium text-gray-700 dark:text-gray-300">{tenant?.name}</span> today.
           </p>
+          {stats && (
+            <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-brand-blue/8 text-xs font-medium text-brand-blue">
+              <Users className="w-3.5 h-3.5" />
+              {stats.total.toLocaleString()} employee{stats.total !== 1 ? 's' : ''} · {stats.active.toLocaleString()} active
+            </div>
+          )}
         </div>
         <div className="hidden sm:block text-right">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Today</p>
           <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
-            {new Date('2026-04-22').toLocaleDateString('en-PH', {
+            {new Date().toLocaleDateString('en-PH', {
               weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
             })}
           </p>

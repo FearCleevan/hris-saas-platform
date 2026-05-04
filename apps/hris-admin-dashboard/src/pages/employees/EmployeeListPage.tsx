@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DataGrid,
@@ -110,7 +110,11 @@ function FilterSelect({
 
 export default function EmployeeListPage() {
   const navigate = useNavigate();
-  const { data: employees = [], isLoading } = useEmployees();
+  const { data: employees = [], isLoading, error } = useEmployees();
+
+  useEffect(() => {
+    if (error) toast.error(`Failed to load employees: ${(error as Error).message}`);
+  }, [error]);
 
   // Filter state
   const [search,         setSearch]         = useState('');
@@ -351,6 +355,7 @@ export default function EmployeeListPage() {
           {search && (
             <button
               type="button"
+              title="Clear search"
               onClick={() => setSearch('')}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >

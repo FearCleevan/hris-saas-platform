@@ -1,5 +1,26 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
+// ── Shared: resolve the current user's org ID ─────────────────────
+async function getAuthOrgId(): Promise<string> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const orgId = (user.app_metadata?.org_id as string | undefined)
+    ?? (user.user_metadata?.org_id as string | undefined);
+  if (orgId) return orgId;
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile?.organization_id) throw new Error('Organization not found');
+  return profile.organization_id;
+}
+
 // ── Display row (list view) ───────────────────────────────────────
 export type EmployeeRow = {
   id: string;
@@ -28,6 +49,14 @@ export type EmployeeStats = {
 };
 
 // ── Full employee detail (profile / edit) ─────────────────────────
+export type EmployeeBeneficiary = {
+  id: string;
+  name: string;
+  relationship: string;
+  birthday: string | null;
+  type: 'primary' | 'contingent';
+};
+
 export type EmployeeDetail = {
   id: string;
   name: string;
@@ -72,6 +101,7 @@ export type EmployeeDetail = {
   emergencyName: string | null;
   emergencyRelationship: string | null;
   emergencyPhone: string | null;
+  beneficiaries: EmployeeBeneficiary[];
 };
 
 // ── Update payload (matches EditEmployeePage form fields) ─────────
@@ -162,12 +192,14 @@ function mapRow(row: SupabaseEmployeeRow): EmployeeRow {
 export async function getEmployees(): Promise<EmployeeRow[]> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
 
+  const orgId = await getAuthOrgId();
+
   const { data, error } = await supabase
     .from('employees')
     .select(`
       id, employee_no, first_name, last_name, middle_name,
       date_of_birth, avatar_url, status, work_email,
-      employee_employment(
+      employee_employment!employee_id(
         date_hired, is_current, direct_manager_id,
         departments(name),
         positions(title),
@@ -175,6 +207,7 @@ export async function getEmployees(): Promise<EmployeeRow[]> {
       ),
       employee_compensation(basic_salary, is_current)
     `)
+    .eq('organization_id', orgId)
     .eq('is_active', true)
     .order('last_name');
 
@@ -186,91 +219,147 @@ export async function getEmployees(): Promise<EmployeeRow[]> {
 export async function getEmployee(id: string): Promise<EmployeeDetail | null> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
 
-  const { data, error } = await supabase
-    .from('employees')
-    .select(`
-      id, employee_no, first_name, middle_name, last_name, suffix,
-      gender, civil_status, date_of_birth, nationality,
-      personal_email, work_email, mobile_number, phone_number,
-      address_line1, city, province, zip_code,
-      avatar_url, status,
-      employee_employment(
-        date_hired, date_regularized, is_current, direct_manager_id,
-        departments(id, name),
-        positions(id, title),
-        employment_types(id, name, code)
-      ),
-      employee_compensation(basic_salary, rate_type, is_current),
-      employee_government_ids(sss_number, tin_number, pagibig_number, philhealth_number),
-      employee_bank_accounts(bank_name, account_name, account_number, account_type, is_primary),
-      employee_emergency_contacts(name, relationship, mobile_number, is_primary)
-    `)
-    .eq('id', id)
-    .single();
+  // Run all queries in parallel. Gov IDs and beneficiaries are fetched directly
+  // (not via join) to avoid RLS policies that may block embedded-resource access.
+  const [mainRes, govRes, benRes] = await Promise.all([
+    supabase
+      .from('employees')
+      .select(`
+        id, employee_no, first_name, middle_name, last_name, suffix,
+        gender, civil_status, date_of_birth, nationality,
+        personal_email, work_email, mobile_number, phone_number,
+        address_line1, city, province, zip_code,
+        avatar_url, status,
+        employee_employment!employee_id(
+          date_hired, date_regularized, is_current, direct_manager_id,
+          departments(id, name),
+          positions(id, title),
+          employment_types(id, name, code)
+        ),
+        employee_compensation(basic_salary, rate_type, is_current),
+        employee_bank_accounts(bank_name, account_name, account_number, account_type, is_primary),
+        employee_emergency_contacts(name, relationship, mobile_number, is_primary)
+      `)
+      .eq('id', id)
+      .single(),
 
-  if (error) {
-    if (error.code === 'PGRST116') return null;
-    throw error;
+    supabase
+      .from('employee_government_ids')
+      .select('sss_number, tin_number, pagibig_number, philhealth_number')
+      .eq('employee_id', id)
+      .maybeSingle(),
+
+    supabase
+      .from('employee_beneficiaries')
+      .select('id, name, relationship, date_of_birth')
+      .eq('employee_id', id),
+  ]);
+
+  if (mainRes.error) {
+    if (mainRes.error.code === 'PGRST116') return null;
+    throw mainRes.error;
   }
-  if (!data) return null;
+  if (!mainRes.data) return null;
 
-  const d   = data as any;
-  const emp = d.employee_employment?.find((e: any) => e.is_current) ?? d.employee_employment?.[0];
+  const d    = mainRes.data as any;
+  const gov  = govRes.data;
+  const bens = benRes.data ?? [];
+  const emp  = d.employee_employment?.find((e: any) => e.is_current) ?? d.employee_employment?.[0];
   const comp = d.employee_compensation?.find((c: any) => c.is_current) ?? d.employee_compensation?.[0];
-  const gov  = d.employee_government_ids?.[0];
   const bank = d.employee_bank_accounts?.find((b: any) => b.is_primary) ?? d.employee_bank_accounts?.[0];
   const ec   = d.employee_emergency_contacts?.find((e: any) => e.is_primary) ?? d.employee_emergency_contacts?.[0];
 
   return {
-    id:                   d.id,
-    name:                 [d.first_name, d.last_name].filter(Boolean).join(' '),
-    firstName:            d.first_name,
-    middleName:           d.middle_name,
-    lastName:             d.last_name,
-    suffix:               d.suffix,
-    gender:               d.gender,
-    civilStatus:          d.civil_status,
-    birthday:             d.date_of_birth,
-    nationality:          d.nationality ?? 'Filipino',
-    personalEmail:        d.personal_email,
-    workEmail:            d.work_email,
-    mobile:               d.mobile_number,
-    landline:             d.phone_number,
-    addressLine1:         d.address_line1,
-    city:                 d.city,
-    province:             d.province,
-    zipCode:              d.zip_code,
-    avatarUrl:            d.avatar_url,
-    status:               d.status,
-    employeeNo:           d.employee_no,
-    position:             emp?.positions?.[0]?.title ?? null,
-    positionId:           emp?.positions?.[0]?.id ?? null,
-    department:           emp?.departments?.[0]?.name ?? null,
-    departmentId:         emp?.departments?.[0]?.id ?? null,
-    employmentType:       emp?.employment_types?.[0]?.code ?? null,
-    employmentTypeId:     emp?.employment_types?.[0]?.id ?? null,
-    dateHired:            emp?.date_hired ?? null,
-    dateRegularized:      emp?.date_regularized ?? null,
-    managerId:            emp?.direct_manager_id ?? null,
-    salary:               comp?.basic_salary ?? 0,
-    rateType:             comp?.rate_type ?? 'monthly',
-    sss:                  gov?.sss_number ?? null,
-    tin:                  gov?.tin_number ?? null,
-    pagibig:              gov?.pagibig_number ?? null,
-    philhealth:           gov?.philhealth_number ?? null,
-    bankName:             bank?.bank_name ?? null,
-    accountNumber:        bank?.account_number ?? null,
-    accountName:          bank?.account_name ?? null,
-    accountType:          bank?.account_type ?? null,
-    emergencyName:        ec?.name ?? null,
+    id:                    d.id,
+    name:                  [d.first_name, d.last_name].filter(Boolean).join(' '),
+    firstName:             d.first_name,
+    middleName:            d.middle_name,
+    lastName:              d.last_name,
+    suffix:                d.suffix,
+    gender:                d.gender,
+    civilStatus:           d.civil_status,
+    birthday:              d.date_of_birth,
+    nationality:           d.nationality ?? 'Filipino',
+    personalEmail:         d.personal_email,
+    workEmail:             d.work_email,
+    mobile:                d.mobile_number,
+    landline:              d.phone_number,
+    addressLine1:          d.address_line1,
+    city:                  d.city,
+    province:              d.province,
+    zipCode:               d.zip_code,
+    avatarUrl:             d.avatar_url,
+    status:                d.status,
+    employeeNo:            d.employee_no,
+    position:              emp?.positions?.[0]?.title ?? null,
+    positionId:            emp?.positions?.[0]?.id ?? null,
+    department:            emp?.departments?.[0]?.name ?? null,
+    departmentId:          emp?.departments?.[0]?.id ?? null,
+    employmentType:        emp?.employment_types?.[0]?.code ?? null,
+    employmentTypeId:      emp?.employment_types?.[0]?.id ?? null,
+    dateHired:             emp?.date_hired ?? null,
+    dateRegularized:       emp?.date_regularized ?? null,
+    managerId:             emp?.direct_manager_id ?? null,
+    salary:                comp?.basic_salary ?? 0,
+    rateType:              comp?.rate_type ?? 'monthly',
+    sss:                   gov?.sss_number ?? null,
+    tin:                   gov?.tin_number ?? null,
+    pagibig:               gov?.pagibig_number ?? null,
+    philhealth:            gov?.philhealth_number ?? null,
+    bankName:              bank?.bank_name ?? null,
+    accountNumber:         bank?.account_number ?? null,
+    accountName:           bank?.account_name ?? null,
+    accountType:           bank?.account_type ?? null,
+    emergencyName:         ec?.name ?? null,
     emergencyRelationship: ec?.relationship ?? null,
-    emergencyPhone:       ec?.mobile_number ?? null,
+    emergencyPhone:        ec?.mobile_number ?? null,
+    beneficiaries: bens.map((b: any) => ({
+      id:           b.id,
+      name:         b.name,
+      relationship: b.relationship,
+      birthday:     b.date_of_birth ?? null,
+      type:         'primary' as const,
+    })),
   };
+}
+
+// ── SYNC BENEFICIARIES (used by edit flow) ────────────────────────
+export async function syncBeneficiaries(
+  employeeId: string,
+  beneficiaries: EmployeeBeneficiary[],
+): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+
+  const orgId = await getAuthOrgId();
+
+  // Delete all existing then re-insert — simpler than diffing
+  const { error: delErr } = await supabase
+    .from('employee_beneficiaries')
+    .delete()
+    .eq('employee_id', employeeId);
+  if (delErr) throw delErr;
+
+  if (beneficiaries.length === 0) return;
+
+  const { error: insErr } = await supabase
+    .from('employee_beneficiaries')
+    .insert(
+      beneficiaries.map((b) => ({
+        employee_id:     employeeId,
+        organization_id: orgId,
+        name:            b.name,
+        relationship:    b.relationship,
+        date_of_birth:   b.birthday || null,
+      })),
+    );
+  if (insErr) throw insErr;
 }
 
 // ── STATS ─────────────────────────────────────────────────────────
 export async function getEmployeeStats(): Promise<EmployeeStats> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+
+  const orgId = await getAuthOrgId();
 
   const firstOfMonth = new Date();
   firstOfMonth.setDate(1);
@@ -279,11 +368,13 @@ export async function getEmployeeStats(): Promise<EmployeeStats> {
   const [allRes, compRes] = await Promise.all([
     supabase
       .from('employees')
-      .select('status, employee_employment(date_hired, is_current, employment_types(code))')
+      .select('status, employee_employment!employee_id(date_hired, is_current, employment_types(code))')
+      .eq('organization_id', orgId)
       .eq('is_active', true),
     supabase
       .from('employee_compensation')
       .select('basic_salary')
+      .eq('organization_id', orgId)
       .eq('is_current', true),
   ]);
 
@@ -313,9 +404,12 @@ export async function getEmployeeStats(): Promise<EmployeeStats> {
 export async function getDepartments(): Promise<DepartmentOption[]> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
 
+  const orgId = await getAuthOrgId();
+
   const { data, error } = await supabase
     .from('departments')
     .select('id, name')
+    .eq('organization_id', orgId)
     .eq('is_active', true)
     .order('name');
 
@@ -326,9 +420,12 @@ export async function getDepartments(): Promise<DepartmentOption[]> {
 export async function getPositions(): Promise<PositionOption[]> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
 
+  const orgId = await getAuthOrgId();
+
   const { data, error } = await supabase
     .from('positions')
     .select('id, title, department_id')
+    .eq('organization_id', orgId)
     .eq('is_active', true)
     .order('title');
 
@@ -344,92 +441,88 @@ export async function getPositions(): Promise<PositionOption[]> {
 export async function updateEmployee(id: string, payload: UpdateEmployeePayload): Promise<void> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
 
-  // 1. Update employees table
+  const orgId = await getAuthOrgId();
+
+  // 1. Update core employee fields
   const { error: empErr } = await supabase
     .from('employees')
     .update({
-      first_name:   payload.firstName,
-      middle_name:  payload.middleName || null,
-      last_name:    payload.lastName,
+      first_name:    payload.firstName,
+      middle_name:   payload.middleName || null,
+      last_name:     payload.lastName,
       date_of_birth: payload.birthday || null,
-      gender:       payload.gender.toLowerCase(),
-      civil_status: payload.civilStatus.toLowerCase(),
-      nationality:  payload.nationality,
+      gender:        payload.gender?.toLowerCase() ?? null,
+      civil_status:  payload.civilStatus?.toLowerCase() ?? null,
+      nationality:   payload.nationality,
       personal_email: payload.personalEmail,
-      work_email:   payload.companyEmail,
+      work_email:    payload.companyEmail,
       mobile_number: payload.mobile,
-      phone_number: payload.landline || null,
+      phone_number:  payload.landline || null,
       address_line1: payload.street,
-      city:         payload.city,
-      province:     payload.province,
-      zip_code:     payload.zip,
+      city:          payload.city,
+      province:      payload.province,
+      zip_code:      payload.zip,
     })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('organization_id', orgId);
   if (empErr) throw empErr;
 
-  // 2. Dept lookup
-  const { data: dept } = await supabase
-    .from('departments')
-    .select('id')
-    .eq('name', payload.department)
-    .maybeSingle();
+  // 2. Parallel lookups — scoped to this org so RLS can't return wrong rows
+  const [deptRes, posRes, empTypeRes] = await Promise.all([
+    supabase.from('departments').select('id').eq('name', payload.department).eq('organization_id', orgId).maybeSingle(),
+    supabase.from('positions').select('id').eq('title', payload.position).eq('organization_id', orgId).maybeSingle(),
+    supabase.from('employment_types').select('id').eq('code', payload.type).maybeSingle(),
+  ]);
 
-  // 3. Position lookup
-  const { data: pos } = await supabase
-    .from('positions')
-    .select('id')
-    .eq('title', payload.position)
-    .maybeSingle();
+  // 3. Build employment update — only overwrite an ID when the lookup actually found a row
+  const empUpdatePayload: Record<string, unknown> = { date_hired: payload.hireDate };
+  if (deptRes.data?.id)    empUpdatePayload.department_id      = deptRes.data.id;
+  if (posRes.data?.id)     empUpdatePayload.position_id        = posRes.data.id;
+  if (empTypeRes.data?.id) empUpdatePayload.employment_type_id = empTypeRes.data.id;
 
-  // 4. Employment type lookup
-  const { data: empType } = await supabase
-    .from('employment_types')
-    .select('id')
-    .eq('code', payload.type)
-    .maybeSingle();
-
-  // 5. Update employee_employment (current record)
-  await supabase
+  const { error: empEmpErr } = await supabase
     .from('employee_employment')
-    .update({
-      department_id:      dept?.id ?? null,
-      position_id:        pos?.id ?? null,
-      employment_type_id: empType?.id ?? null,
-      date_hired:         payload.hireDate,
-    })
+    .update(empUpdatePayload)
     .eq('employee_id', id)
     .eq('is_current', true);
+  if (empEmpErr) throw empEmpErr;
 
-  // 6. Update employee_compensation (current record)
+  // 4. Update compensation
   const salaryNum = parseFloat(String(payload.salary).replace(/[^0-9.]/g, ''));
-  await supabase
-    .from('employee_compensation')
-    .update({ basic_salary: salaryNum })
-    .eq('employee_id', id)
-    .eq('is_current', true);
+  if (!isNaN(salaryNum) && salaryNum > 0) {
+    const { error: compErr } = await supabase
+      .from('employee_compensation')
+      .update({ basic_salary: salaryNum })
+      .eq('employee_id', id)
+      .eq('is_current', true);
+    if (compErr) throw compErr;
+  }
 
-  // 7. Upsert government IDs
-  await supabase
+  // 5. Upsert government IDs
+  const { error: govErr } = await supabase
     .from('employee_government_ids')
     .upsert({
-      employee_id:      id,
-      sss_number:       payload.sss || null,
+      employee_id:       id,
+      organization_id:   orgId,
+      sss_number:        payload.sss || null,
       philhealth_number: payload.philhealth || null,
-      pagibig_number:   payload.pagibig || null,
-      tin_number:       payload.tin || null,
+      pagibig_number:    payload.pagibig || null,
+      tin_number:        payload.tin || null,
     }, { onConflict: 'employee_id' });
+  if (govErr) throw govErr;
 
-  // 8. Upsert bank account (primary)
+  // 6. Upsert primary bank account
   if (payload.bankName && payload.accountNumber) {
-    const { data: existingBank } = await supabase
+    const { data: existingBank, error: bankFetchErr } = await supabase
       .from('employee_bank_accounts')
       .select('id')
       .eq('employee_id', id)
       .eq('is_primary', true)
       .maybeSingle();
+    if (bankFetchErr) throw bankFetchErr;
 
     if (existingBank) {
-      await supabase
+      const { error: bankUpdErr } = await supabase
         .from('employee_bank_accounts')
         .update({
           bank_name:      payload.bankName,
@@ -438,48 +531,55 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
           account_type:   payload.accountType || 'savings',
         })
         .eq('id', existingBank.id);
+      if (bankUpdErr) throw bankUpdErr;
     } else {
-      await supabase
+      const { error: bankInsErr } = await supabase
         .from('employee_bank_accounts')
         .insert({
           employee_id:    id,
+          organization_id: orgId,
           bank_name:      payload.bankName,
           account_name:   payload.accountName || '',
           account_number: payload.accountNumber,
           account_type:   payload.accountType || 'savings',
           is_primary:     true,
         });
+      if (bankInsErr) throw bankInsErr;
     }
   }
 
-  // 9. Upsert emergency contact (primary)
+  // 7. Upsert primary emergency contact
   if (payload.emergencyName) {
-    const { data: existing } = await supabase
+    const { data: existingEc, error: ecFetchErr } = await supabase
       .from('employee_emergency_contacts')
       .select('id')
       .eq('employee_id', id)
       .eq('is_primary', true)
       .maybeSingle();
+    if (ecFetchErr) throw ecFetchErr;
 
-    if (existing) {
-      await supabase
+    if (existingEc) {
+      const { error: ecUpdErr } = await supabase
         .from('employee_emergency_contacts')
         .update({
           name:          payload.emergencyName,
           relationship:  payload.emergencyRelationship,
           mobile_number: payload.emergencyPhone,
         })
-        .eq('id', existing.id);
+        .eq('id', existingEc.id);
+      if (ecUpdErr) throw ecUpdErr;
     } else {
-      await supabase
+      const { error: ecInsErr } = await supabase
         .from('employee_emergency_contacts')
         .insert({
-          employee_id:   id,
-          name:          payload.emergencyName,
-          relationship:  payload.emergencyRelationship,
-          mobile_number: payload.emergencyPhone,
-          is_primary:    true,
+          employee_id:    id,
+          organization_id: orgId,
+          name:           payload.emergencyName,
+          relationship:   payload.emergencyRelationship,
+          mobile_number:  payload.emergencyPhone,
+          is_primary:     true,
         });
+      if (ecInsErr) throw ecInsErr;
     }
   }
 }

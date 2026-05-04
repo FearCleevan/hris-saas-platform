@@ -1,13 +1,14 @@
 -- ============================================================
--- RLS POLICIES + SECURITY DEFINER FUNCTION
--- Run this entire script in the Supabase SQL Editor once.
+-- RLS POLICIES + SECURITY DEFINER FUNCTIONS
+-- Safe to re-run: every CREATE POLICY is preceded by DROP IF EXISTS.
+-- Paste the entire file into the Supabase SQL Editor and click Run.
 -- ============================================================
 
--- ── 0. Fix helper functions (JWT claims are empty until refresh) ──
--- get_my_org_id: tries JWT first, falls back to user_profiles row.
--- is_admin: tries JWT role first, falls back to user_roles DB query.
--- Both declared SECURITY DEFINER so they can bypass RLS on
--- user_profiles / user_roles during the bootstrap window.
+-- ── 0. Helper functions ───────────────────────────────────────────
+-- get_my_org_id: JWT claim first, falls back to user_profiles row.
+-- get_my_role:   JWT claim first, falls back to user_roles query.
+-- is_admin:      true when role is super_admin or hr_manager.
+-- All three are SECURITY DEFINER so they bypass RLS on bootstrap tables.
 
 CREATE OR REPLACE FUNCTION public.get_my_org_id()
 RETURNS UUID LANGUAGE sql STABLE SECURITY DEFINER
@@ -40,9 +41,9 @@ SET search_path = public AS $$
   SELECT get_my_role() IN ('super_admin', 'hr_manager');
 $$;
 
--- ── 1. SECURITY DEFINER function ─────────────────────────────
--- Runs as the DB owner, bypassing RLS so it can atomically
--- insert org → roles → user_roles → user_profiles in one go.
+-- ── 1. create_organization (SECURITY DEFINER) ─────────────────────
+-- Atomically inserts org → roles → user_roles → user_profiles.
+-- Runs as DB owner so it bypasses RLS on all bootstrap tables.
 
 CREATE OR REPLACE FUNCTION public.create_organization(
   p_name         text,
@@ -66,12 +67,10 @@ BEGIN
     RAISE EXCEPTION 'Not authenticated';
   END IF;
 
-  -- Insert the organization
   INSERT INTO public.organizations (name, slug, plan, industry, company_size)
   VALUES (p_name, p_slug, p_plan, p_industry, p_company_size)
   RETURNING id INTO v_org_id;
 
-  -- Seed the four system roles
   INSERT INTO public.roles (organization_id, name, slug, is_system)
   VALUES
     (v_org_id, 'Super Admin', 'super_admin', true),
@@ -79,21 +78,17 @@ BEGIN
     (v_org_id, 'HR Staff',    'hr_staff',    true),
     (v_org_id, 'Accountant',  'accountant',  true);
 
-  -- Grab the super_admin role id
   SELECT id INTO v_super_admin_role
   FROM public.roles
   WHERE organization_id = v_org_id AND slug = 'super_admin';
 
-  -- Assign the creator as Super Admin
   INSERT INTO public.user_roles (user_id, role_id, organization_id)
   VALUES (v_user_id, v_super_admin_role, v_org_id);
 
-  -- Point the user profile at this org
   INSERT INTO public.user_profiles (id, organization_id)
   VALUES (v_user_id, v_org_id)
   ON CONFLICT (id) DO UPDATE SET organization_id = EXCLUDED.organization_id;
 
-  -- Return the org row as JSON
   RETURN (
     SELECT json_build_object(
       'id',           o.id,
@@ -110,9 +105,13 @@ BEGIN
 END;
 $$;
 
--- ── 2. RLS: organizations ─────────────────────────────────────
+-- ── 2. RLS: organizations ─────────────────────────────────────────
 
--- Members can read their own orgs
+ALTER TABLE public.organizations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select"          ON public.organizations;
+DROP POLICY IF EXISTS "super_admins_can_update_org"     ON public.organizations;
+
 CREATE POLICY "org_members_can_select"
   ON public.organizations FOR SELECT
   TO authenticated
@@ -122,7 +121,6 @@ CREATE POLICY "org_members_can_select"
     )
   );
 
--- Super admins can update their org
 CREATE POLICY "super_admins_can_update_org"
   ON public.organizations FOR UPDATE
   TO authenticated
@@ -135,9 +133,12 @@ CREATE POLICY "super_admins_can_update_org"
     )
   );
 
--- ── 3. RLS: roles ────────────────────────────────────────────
+-- ── 3. RLS: roles ─────────────────────────────────────────────────
 
--- Members can read roles in their org
+ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_roles" ON public.roles;
+
 CREATE POLICY "org_members_can_select_roles"
   ON public.roles FOR SELECT
   TO authenticated
@@ -147,31 +148,248 @@ CREATE POLICY "org_members_can_select_roles"
     )
   );
 
--- ── 4. RLS: user_roles ───────────────────────────────────────
+-- ── 4. RLS: user_roles ────────────────────────────────────────────
 
--- Users can read their own role assignments
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_can_select_own_user_roles" ON public.user_roles;
+
 CREATE POLICY "users_can_select_own_user_roles"
   ON public.user_roles FOR SELECT
   TO authenticated
   USING (user_id = auth.uid());
 
--- ── 5. RLS: user_profiles ────────────────────────────────────
+-- ── 5. RLS: user_profiles ─────────────────────────────────────────
 
--- Users can read their own profile
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_can_select_own_profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "users_can_insert_own_profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "users_can_update_own_profile" ON public.user_profiles;
+
 CREATE POLICY "users_can_select_own_profile"
   ON public.user_profiles FOR SELECT
   TO authenticated
   USING (id = auth.uid());
 
--- Users can insert their own profile (sign-up flow)
 CREATE POLICY "users_can_insert_own_profile"
   ON public.user_profiles FOR INSERT
   TO authenticated
   WITH CHECK (id = auth.uid());
 
--- Users can update their own profile
 CREATE POLICY "users_can_update_own_profile"
   ON public.user_profiles FOR UPDATE
   TO authenticated
   USING (id = auth.uid())
   WITH CHECK (id = auth.uid());
+
+-- ── 6. RLS: employees ─────────────────────────────────────────────
+
+ALTER TABLE public.employees ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_employees" ON public.employees;
+DROP POLICY IF EXISTS "admins_can_insert_employees"      ON public.employees;
+DROP POLICY IF EXISTS "admins_can_update_employees"      ON public.employees;
+
+CREATE POLICY "org_members_can_select_employees"
+  ON public.employees FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_employees"
+  ON public.employees FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_update_employees"
+  ON public.employees FOR UPDATE
+  TO authenticated
+  USING (organization_id = get_my_org_id())
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 7. RLS: employee_employment ───────────────────────────────────
+
+ALTER TABLE public.employee_employment ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_employment" ON public.employee_employment;
+DROP POLICY IF EXISTS "admins_can_insert_employment"      ON public.employee_employment;
+DROP POLICY IF EXISTS "admins_can_update_employment"      ON public.employee_employment;
+
+CREATE POLICY "org_members_can_select_employment"
+  ON public.employee_employment FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_employment"
+  ON public.employee_employment FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_update_employment"
+  ON public.employee_employment FOR UPDATE
+  TO authenticated
+  USING (organization_id = get_my_org_id())
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 8. RLS: employee_compensation ────────────────────────────────
+
+ALTER TABLE public.employee_compensation ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_compensation" ON public.employee_compensation;
+DROP POLICY IF EXISTS "admins_can_insert_compensation"      ON public.employee_compensation;
+DROP POLICY IF EXISTS "admins_can_update_compensation"      ON public.employee_compensation;
+
+CREATE POLICY "org_members_can_select_compensation"
+  ON public.employee_compensation FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_compensation"
+  ON public.employee_compensation FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_update_compensation"
+  ON public.employee_compensation FOR UPDATE
+  TO authenticated
+  USING (organization_id = get_my_org_id())
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 9. RLS: departments ───────────────────────────────────────────
+
+ALTER TABLE public.departments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_departments" ON public.departments;
+DROP POLICY IF EXISTS "admins_can_insert_departments"      ON public.departments;
+
+CREATE POLICY "org_members_can_select_departments"
+  ON public.departments FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_departments"
+  ON public.departments FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 10. RLS: positions ────────────────────────────────────────────
+
+ALTER TABLE public.positions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_positions" ON public.positions;
+DROP POLICY IF EXISTS "admins_can_insert_positions"      ON public.positions;
+
+CREATE POLICY "org_members_can_select_positions"
+  ON public.positions FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_positions"
+  ON public.positions FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 11. RLS: employment_types ─────────────────────────────────────
+
+ALTER TABLE public.employment_types ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_employment_types" ON public.employment_types;
+
+CREATE POLICY "org_members_can_select_employment_types"
+  ON public.employment_types FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+-- ── 12. RLS: employee_government_ids ─────────────────────────────
+
+ALTER TABLE public.employee_government_ids ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_gov_ids" ON public.employee_government_ids;
+DROP POLICY IF EXISTS "admins_can_insert_gov_ids"      ON public.employee_government_ids;
+DROP POLICY IF EXISTS "admins_can_update_gov_ids"      ON public.employee_government_ids;
+
+CREATE POLICY "org_members_can_select_gov_ids"
+  ON public.employee_government_ids FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_gov_ids"
+  ON public.employee_government_ids FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_update_gov_ids"
+  ON public.employee_government_ids FOR UPDATE
+  TO authenticated
+  USING (organization_id = get_my_org_id())
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 13. RLS: employee_bank_accounts ──────────────────────────────
+
+ALTER TABLE public.employee_bank_accounts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_bank_accounts" ON public.employee_bank_accounts;
+DROP POLICY IF EXISTS "admins_can_insert_bank_accounts"      ON public.employee_bank_accounts;
+DROP POLICY IF EXISTS "admins_can_update_bank_accounts"      ON public.employee_bank_accounts;
+
+CREATE POLICY "org_members_can_select_bank_accounts"
+  ON public.employee_bank_accounts FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_bank_accounts"
+  ON public.employee_bank_accounts FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_update_bank_accounts"
+  ON public.employee_bank_accounts FOR UPDATE
+  TO authenticated
+  USING (organization_id = get_my_org_id())
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 14. RLS: employee_emergency_contacts ─────────────────────────
+
+ALTER TABLE public.employee_emergency_contacts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_emergency_contacts" ON public.employee_emergency_contacts;
+DROP POLICY IF EXISTS "admins_can_insert_emergency_contacts"      ON public.employee_emergency_contacts;
+DROP POLICY IF EXISTS "admins_can_update_emergency_contacts"      ON public.employee_emergency_contacts;
+
+CREATE POLICY "org_members_can_select_emergency_contacts"
+  ON public.employee_emergency_contacts FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_emergency_contacts"
+  ON public.employee_emergency_contacts FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_update_emergency_contacts"
+  ON public.employee_emergency_contacts FOR UPDATE
+  TO authenticated
+  USING (organization_id = get_my_org_id())
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── 15. RLS: employee_beneficiaries ──────────────────────────────
+
+ALTER TABLE public.employee_beneficiaries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "org_members_can_select_beneficiaries" ON public.employee_beneficiaries;
+DROP POLICY IF EXISTS "admins_can_insert_beneficiaries"      ON public.employee_beneficiaries;
+
+CREATE POLICY "org_members_can_select_beneficiaries"
+  ON public.employee_beneficiaries FOR SELECT
+  TO authenticated
+  USING (organization_id = get_my_org_id());
+
+CREATE POLICY "admins_can_insert_beneficiaries"
+  ON public.employee_beneficiaries FOR INSERT
+  TO authenticated
+  WITH CHECK (organization_id = get_my_org_id());
+
+-- ── AFTER RUNNING: fix any employees missing is_active ────────────
+-- Run this separately if you added employees before this fix:
+--
+--   UPDATE public.employees SET is_active = true WHERE is_active IS NULL OR is_active = false;
