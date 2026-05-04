@@ -6,6 +6,8 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface ForgotForm {
   email: string;
@@ -24,7 +26,21 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: ForgotForm) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
+
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      });
+
+      if (error) {
+        toast.error(error.message || 'Failed to send reset link. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+    } else {
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+
     setSubmittedEmail(data.email);
     setSubmitted(true);
     setIsLoading(false);
@@ -46,8 +62,8 @@ export default function ForgotPasswordPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="w-12 h-12 bg-[#0038a8]/10 rounded-2xl flex items-center justify-center mb-6">
-                <Mail className="w-6 h-6 text-[#0038a8]" />
+              <div className="w-12 h-12 bg-brand-blue/10 rounded-2xl flex items-center justify-center mb-6">
+                <Mail className="w-6 h-6 text-brand-blue" />
               </div>
 
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">
@@ -72,7 +88,7 @@ export default function ForgotPasswordPage() {
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-xs text-[#ce1126]">{errors.email.message}</p>
+                    <p className="text-xs text-brand-red">{errors.email.message}</p>
                   )}
                 </div>
 
@@ -121,8 +137,9 @@ export default function ForgotPasswordPage() {
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
                 Didn&apos;t receive it? Check your spam folder or{' '}
                 <button
+                  type="button"
                   onClick={() => setSubmitted(false)}
-                  className="text-[#0038a8] hover:underline dark:text-blue-400"
+                  className="text-brand-blue hover:underline dark:text-blue-400"
                 >
                   try a different email
                 </button>

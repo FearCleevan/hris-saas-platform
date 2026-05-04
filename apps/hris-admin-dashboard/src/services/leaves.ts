@@ -125,7 +125,7 @@ export async function getLeaveRequests(): Promise<LeaveRequestRow[]> {
 
   if (error) throw error;
 
-  return (data as SupabaseLeaveRequest[]).map((r) => ({
+  return (data as unknown as SupabaseLeaveRequest[]).map((r) => ({
     id: r.id,
     employeeId: r.employee_id,
     leaveTypeId: r.leave_type_id,
@@ -167,7 +167,7 @@ export async function getLeaveBalances(): Promise<LeaveBalanceRow[]> {
   if (error) throw error;
 
   const map: Record<string, LeaveBalanceRow> = {};
-  for (const b of data as SupabaseLeaveBalance[]) {
+  for (const b of (data as unknown) as SupabaseLeaveBalance[]) {
     if (!map[b.employee_id]) {
       map[b.employee_id] = {
         employeeId: b.employee_id,

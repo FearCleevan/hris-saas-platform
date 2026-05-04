@@ -1,7 +1,7 @@
 // src/services/addEmployee.ts
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
-// ─── Types (you can move to a shared types file) ─────────────────
+// ─── Types ────────────────────────────────────────────────────────
 export interface Beneficiary {
   id: string;
   name: string;
@@ -26,9 +26,9 @@ type AddEmployeePayload = {
   city: string;
   province: string;
   zip: string;
-  emergencyName: string;
-  emergencyRelationship: string;
-  emergencyPhone: string;
+  emergencyName?: string;
+  emergencyRelationship?: string;
+  emergencyPhone?: string;
   position: string;
   department: string;
   type: string;
@@ -47,21 +47,39 @@ type AddEmployeePayload = {
 
 // ─── Helper: get current user's organisation ID ─────────────────
 async function getOrgId(): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase not configured');
+  }
 
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  const orgId = user.app_metadata?.org_id as string | undefined;
+  // JWT claim is set after refresh; fall back to user_profiles row
+  const orgId = (user.app_metadata?.org_id as string | undefined)
+    ?? (user.user_metadata?.org_id as string | undefined);
 
-  if (!orgId)
+  if (orgId) return orgId;
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile?.organization_id) {
     throw new Error('Organization ID not found – please select a company first');
-
-  return orgId;
+  }
+  return profile.organization_id;
 }
 
 // ─── Main function ───────────────────────────────────────────────
 export async function addEmployee(payload: AddEmployeePayload): Promise<string> {
-  const orgId = await getOrgId();   // now async
+  // ‼️ Guard – same pattern as employees.ts
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase not configured');
+  }
+
+  const orgId = await getOrgId();   // now safe because we already checked
 
   // 1. Insert into employees ---------------------------------------
   const { data: employee, error: empErr } = await supabase
@@ -86,6 +104,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
       zip_code: payload.zip,
       country: 'Philippines',
       status: 'active',
+      is_active: true,
     })
     .select('id')
     .single();
@@ -93,7 +112,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
   if (empErr) throw empErr;
   const employeeId = employee.id;
 
-  // 2. Department & Position lookup / creation ----------------------
+  // 2. Department lookup or create (same pattern) -------------------
   const { data: dept } = await supabase
     .from('departments')
     .select('id')
@@ -102,7 +121,6 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     .maybeSingle();
 
   let departmentId = dept?.id ?? null;
-  // optionally create department if missing – skipped for brevity
 
   const { data: pos } = await supabase
     .from('positions')
@@ -125,7 +143,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     if (!posErr) positionId = newPos.id;
   }
 
-  // 3. Employment type lookup --------------------------------------
+  // 3. Employment type lookup ----------------------------------------
   const { data: empType } = await supabase
     .from('employment_types')
     .select('id')
@@ -135,7 +153,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
 
   const employmentTypeId = empType?.id ?? null;
 
-  // 4. Insert employee_employment ----------------------------------
+  // 4. Insert employee_employment -----------------------------------
   const { error: empRelErr } = await supabase
     .from('employee_employment')
     .insert({
@@ -147,10 +165,9 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
       date_hired: payload.hireDate,
       is_current: true,
     });
-
   if (empRelErr) throw empRelErr;
 
-  // 5. Insert employee_compensation ---------------------------------
+  // 5. Insert employee_compensation ----------------------------------
   const salaryNum = parseFloat(payload.salary.replace(/[^0-9.]/g, ''));
   const { error: compErr } = await supabase
     .from('employee_compensation')
@@ -165,7 +182,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     });
   if (compErr) throw compErr;
 
-  // 6. Government IDs -----------------------------------------------
+  // 6. Government IDs -------------------------------------------------
   if (payload.sss || payload.philhealth || payload.pagibig || payload.tin) {
     const { error: govErr } = await supabase
       .from('employee_government_ids')
@@ -180,7 +197,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     if (govErr) throw govErr;
   }
 
-  // 7. Bank account -------------------------------------------------
+  // 7. Bank account --------------------------------------------------
   if (payload.bankName && payload.accountNumber) {
     const { error: bankErr } = await supabase
       .from('employee_bank_accounts')
@@ -190,26 +207,28 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
         bank_name: payload.bankName,
         account_name: payload.accountName || '',
         account_number: payload.accountNumber,
-        account_type: payload.accountType || 'savings',
+        account_type: (payload.accountType || 'savings').toLowerCase(),
         is_primary: true,
       });
     if (bankErr) throw bankErr;
   }
 
-  // 8. Emergency contact --------------------------------------------
-  const { error: emergErr } = await supabase
-    .from('employee_emergency_contacts')
-    .insert({
-      employee_id: employeeId,
-      organization_id: orgId,
-      name: payload.emergencyName,
-      relationship: payload.emergencyRelationship,
-      mobile_number: payload.emergencyPhone,
-      is_primary: true,
-    });
-  if (emergErr) throw emergErr;
+  // 8. Emergency contact (optional — bulk upload may omit it) -------
+  if (payload.emergencyName && payload.emergencyPhone) {
+    const { error: emergErr } = await supabase
+      .from('employee_emergency_contacts')
+      .insert({
+        employee_id: employeeId,
+        organization_id: orgId,
+        name: payload.emergencyName,
+        relationship: payload.emergencyRelationship,
+        mobile_number: payload.emergencyPhone,
+        is_primary: true,
+      });
+    if (emergErr) throw emergErr;
+  }
 
-  // 9. Beneficiaries ------------------------------------------------
+  // 9. Beneficiaries -------------------------------------------------
   if (payload.beneficiaries.length > 0) {
     const benRows = payload.beneficiaries.map((b) => ({
       employee_id: employeeId,
@@ -218,7 +237,9 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
       relationship: b.relationship,
       date_of_birth: b.birthday || null,
     }));
-    const { error: benErr } = await supabase.from('employee_beneficiaries').insert(benRows);
+    const { error: benErr } = await supabase
+      .from('employee_beneficiaries')
+      .insert(benRows);
     if (benErr) throw benErr;
   }
 

@@ -29,23 +29,43 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      const { profile, org, role } = await fetchUserContext(session.user.id);
+      let { profile, org, role } = await fetchUserContext(session.user.id);
 
+      // First-time user: profile row doesn't exist yet — create it from auth metadata
       if (!profile) {
-        setStatus('error');
-        return;
+        const meta = session.user.user_metadata as Record<string, string> | undefined;
+        const fullName =
+          meta?.full_name || meta?.name || session.user.email?.split('@')[0] || 'User';
+
+        await supabase.from('user_profiles').upsert(
+          {
+            id:                   session.user.id,
+            full_name:            fullName,
+            organization_id:      null,
+            must_change_password: false,
+          },
+          { onConflict: 'id' }
+        );
+
+        profile = {
+          id:                   session.user.id,
+          organization_id:      null,
+          full_name:            fullName,
+          avatar_url:           null,
+          must_change_password: false,
+        };
+        org = null;
       }
 
       const user: User = {
-        id:              session.user.id,
-        email:           session.user.email!,
-        name:            profile.full_name,
-        role:            (role ?? 'hr_staff') as User['role'],
-        avatar:          profile.avatar_url ?? undefined,
-        tenantIds:       org ? [org.id] : [],
+        id:        session.user.id,
+        email:     session.user.email!,
+        name:      profile.full_name,
+        role:      (role ?? 'hr_staff') as User['role'],
+        avatar:    profile.avatar_url ?? undefined,
+        tenantIds: org ? [org.id] : [],
       };
 
-      // Log in with 2FA skipped (Supabase handles MFA separately in Phase 14)
       login(user, true);
 
       if (org) {
@@ -62,7 +82,7 @@ export default function AuthCallbackPage() {
         setTenant(tenant);
         navigate('/', { replace: true });
       } else {
-        // New signup — no org yet (shouldn't happen but safety fallback)
+        // New user — no org yet, go straight to company setup
         navigate('/setup-company', { replace: true });
       }
     }

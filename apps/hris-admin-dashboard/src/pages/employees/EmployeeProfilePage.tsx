@@ -11,8 +11,7 @@ import { format, differenceInYears } from 'date-fns';
 import { Chip } from '@mui/material';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import employeesData from '@/data/mock/employees.json';
-import employeeDetailsData from '@/data/mock/employee-details.json';
+import { useEmployee } from '@/hooks/useEmployees';
 import payrollRecordsData from '@/data/mock/payroll-records.json';
 import payrollRunsData from '@/data/mock/payroll-runs.json';
 import attendanceLogsData from '@/data/mock/attendance-logs.json';
@@ -22,8 +21,11 @@ import documentsLibraryData from '@/data/mock/documents-library.json';
 import performanceReviewsData from '@/data/mock/performance-reviews.json';
 import overtimeRequestsData from '@/data/mock/overtime-requests.json';
 
-type Employee = typeof employeesData[number];
-type EmployeeDetail = typeof employeeDetailsData[number];
+import mockEmployeesData from '@/data/mock/employees.json';
+import mockEmployeeDetailsData from '@/data/mock/employee-details.json';
+
+type MockEmployee = typeof mockEmployeesData[number];
+type MockDetail   = typeof mockEmployeeDetailsData[number];
 
 const statusConfig = {
   active:     { label: 'Active',     color: 'success' as const },
@@ -584,8 +586,8 @@ function PerformanceTab({ employeeId }: { employeeId: string }) {
 // ─── TAB: 201 FILE ─────────────────────────────────────────────────────────────
 function File201Tab({ employeeId, employee: _employee, details }: {
   employeeId: string;
-  employee: Employee;
-  details: EmployeeDetail | undefined;
+  employee: MockEmployee;
+  details: MockDetail | undefined;
 }) {
   const docs = useMemo(
     () => documentsLibraryData.filter((d) => d.employeeId === employeeId),
@@ -852,20 +854,81 @@ export default function EmployeeProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const employee = useMemo(
-    () => employeesData.find((e) => e.id === id) as Employee | undefined,
-    [id]
-  );
+  const { data: dbEmployee, isLoading } = useEmployee(id);
 
-  const details = useMemo(
-    () => employeeDetailsData.find((d) => d.id === id) as EmployeeDetail | undefined,
-    [id]
-  );
+  // Build an adapter that matches the shape the JSX expects
+  const employee = useMemo((): MockEmployee | undefined => {
+    if (dbEmployee) {
+      return {
+        id:         dbEmployee.id,
+        name:       dbEmployee.name,
+        position:   dbEmployee.position ?? '',
+        department: dbEmployee.department ?? '',
+        status:     dbEmployee.status,
+        hireDate:   dbEmployee.dateHired ?? '',
+        birthday:   dbEmployee.birthday ?? '',
+        salary:     dbEmployee.salary,
+        type:       dbEmployee.employmentType ?? '',
+        avatar:     dbEmployee.avatarUrl ?? null,
+      } as MockEmployee;
+    }
+    return mockEmployeesData.find((e) => e.id === id) as MockEmployee | undefined;
+  }, [dbEmployee, id]);
+
+  const details = useMemo((): MockDetail | undefined => {
+    if (dbEmployee) {
+      return {
+        id:                 dbEmployee.id,
+        companyEmail:       dbEmployee.workEmail ?? '',
+        personalEmail:      dbEmployee.personalEmail ?? '',
+        mobile:             dbEmployee.mobile ?? '',
+        landline:           dbEmployee.landline ?? '',
+        address: {
+          street:   dbEmployee.addressLine1 ?? '',
+          city:     dbEmployee.city ?? '',
+          province: dbEmployee.province ?? '',
+          zip:      dbEmployee.zipCode ?? '',
+        },
+        emergencyContact: dbEmployee.emergencyName ? {
+          name:         dbEmployee.emergencyName,
+          relationship: dbEmployee.emergencyRelationship ?? '',
+          phone:        dbEmployee.emergencyPhone ?? '',
+        } : undefined,
+        regularizationDate: dbEmployee.dateRegularized ?? '',
+        gender:       dbEmployee.gender ?? '',
+        civilStatus:  dbEmployee.civilStatus ?? '',
+        nationality:  dbEmployee.nationality ?? '',
+        sss:          dbEmployee.sss ?? '',
+        philhealth:   dbEmployee.philhealth ?? '',
+        pagibig:      dbEmployee.pagibig ?? '',
+        tin:          dbEmployee.tin ?? '',
+        bank: dbEmployee.bankName ? {
+          name:          dbEmployee.bankName,
+          accountNumber: dbEmployee.accountNumber ?? '',
+          accountName:   dbEmployee.accountName ?? '',
+          type:          dbEmployee.accountType ?? '',
+        } : undefined,
+        supervisor: dbEmployee.managerId ?? '',
+        notes: '',
+      } as unknown as MockDetail;
+    }
+    return mockEmployeeDetailsData.find((d) => d.id === id) as MockDetail | undefined;
+  }, [dbEmployee, id]);
 
   const supervisor = useMemo(
-    () => details?.supervisor ? employeesData.find((e) => e.id === details.supervisor) : null,
+    () => (details as any)?.supervisor
+      ? mockEmployeesData.find((e) => e.id === (details as any).supervisor)
+      : null,
     [details]
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="w-8 h-8 rounded-full border-2 border-[#0038a8] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   if (!employee) {
     return (

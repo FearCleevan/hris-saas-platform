@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Upload, FileSpreadsheet, X, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { addEmployee } from '@/services/addEmployee';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 const TEMPLATE_HEADERS = [
   'first_name', 'last_name', 'middle_name', 'birthday', 'gender', 'civil_status',
@@ -33,22 +35,33 @@ interface ParsedRow {
   department: string;
   valid: boolean;
   errors: string[];
+  payload: Parameters<typeof addEmployee>[0];
 }
 
 function parseCSV(text: string): ParsedRow[] {
   const lines = text.trim().split('\n');
   const dataLines = lines.slice(1).filter((l) => l.trim());
   return dataLines.map((line, i) => {
+    // TEMPLATE_HEADERS order:
+    // 0:first_name 1:last_name 2:middle_name 3:birthday 4:gender 5:civil_status
+    // 6:personal_email 7:company_email 8:mobile 9:street 10:city 11:province 12:zip
+    // 13:position 14:department 15:type 16:hire_date 17:salary
+    // 18:sss 19:philhealth 20:pagibig 21:tin
+    // 22:bank_name 23:account_number 24:account_name 25:account_type
     const cols = line.split(',');
-    const firstName = cols[0]?.trim();
-    const lastName = cols[1]?.trim();
-    const position = cols[13]?.trim();
+    const firstName  = cols[0]?.trim();
+    const lastName   = cols[1]?.trim();
+    const position   = cols[13]?.trim();
     const department = cols[14]?.trim();
+    const hireDate   = cols[16]?.trim();
+    const salary     = cols[17]?.trim();
     const errors: string[] = [];
-    if (!firstName) errors.push('Missing first name');
-    if (!lastName) errors.push('Missing last name');
-    if (!position) errors.push('Missing position');
+    if (!firstName)  errors.push('Missing first name');
+    if (!lastName)   errors.push('Missing last name');
+    if (!position)   errors.push('Missing position');
     if (!department) errors.push('Missing department');
+    if (!hireDate)   errors.push('Missing hire date');
+    if (!salary)     errors.push('Missing salary');
     return {
       row: i + 2,
       name: `${firstName} ${lastName}`.trim() || '(unknown)',
@@ -56,6 +69,36 @@ function parseCSV(text: string): ParsedRow[] {
       department: department || '—',
       valid: errors.length === 0,
       errors,
+      payload: {
+        firstName:   firstName  ?? '',
+        lastName:    lastName   ?? '',
+        middleName:  cols[2]?.trim() || undefined,
+        birthday:    cols[3]?.trim() ?? '',
+        gender:      (cols[4]?.trim() as 'Male' | 'Female') ?? 'Male',
+        civilStatus: cols[5]?.trim() ?? '',
+        nationality: 'Filipino',
+        personalEmail: cols[6]?.trim() ?? '',
+        companyEmail:  cols[7]?.trim() ?? '',
+        mobile:        cols[8]?.trim() ?? '',
+        street:        cols[9]?.trim() ?? '',
+        city:          cols[10]?.trim() ?? '',
+        province:      cols[11]?.trim() ?? '',
+        zip:           cols[12]?.trim() ?? '',
+        position:      position  ?? '',
+        department:    department ?? '',
+        type:          cols[15]?.trim() ?? 'regular',
+        hireDate:      hireDate  ?? '',
+        salary:        salary    ?? '0',
+        sss:        cols[18]?.trim() || undefined,
+        philhealth: cols[19]?.trim() || undefined,
+        pagibig:    cols[20]?.trim() || undefined,
+        tin:        cols[21]?.trim() || undefined,
+        bankName:      cols[22]?.trim() || undefined,
+        accountNumber: cols[23]?.trim() || undefined,
+        accountName:   cols[24]?.trim() || undefined,
+        accountType:   cols[25]?.trim() || undefined,
+        beneficiaries: [],
+      },
     };
   });
 }
@@ -98,9 +141,28 @@ export default function BulkUploadPage() {
       return;
     }
     setStatus('uploading');
-    await new Promise((r) => setTimeout(r, 1500));
-    setStatus('done');
-    toast.success(`${validRows.length} employees added successfully!`);
+    if (isSupabaseConfigured) {
+      let succeeded = 0;
+      let failed = 0;
+      for (const row of validRows) {
+        try {
+          await addEmployee(row.payload);
+          succeeded++;
+        } catch {
+          failed++;
+        }
+      }
+      setStatus('done');
+      if (failed > 0) {
+        toast.warning(`${succeeded} added, ${failed} failed. Check console for details.`);
+      } else {
+        toast.success(`${succeeded} employee${succeeded !== 1 ? 's' : ''} added successfully!`);
+      }
+    } else {
+      await new Promise((r) => setTimeout(r, 1000));
+      setStatus('done');
+      toast.success(`${validRows.length} employees added successfully! (mock mode)`);
+    }
   };
 
   const reset = () => {

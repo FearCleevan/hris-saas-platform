@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ChevronDown, ChevronRight, Users } from 'lucide-react';
-import employeesData from '@/data/mock/employees.json';
-import employeeDetailsData from '@/data/mock/employee-details.json';
+import { useEmployees } from '@/hooks/useEmployees';
+import type { EmployeeRow } from '@/services/employees';
+import mockEmployeesData from '@/data/mock/employees.json';
+import mockEmployeeDetailsData from '@/data/mock/employee-details.json';
 
-type Employee = typeof employeesData[number];
+type Employee = EmployeeRow;
 
 interface OrgNode {
   employee: Employee;
@@ -102,19 +104,36 @@ function EmployeeNode({ node, depth = 0 }: { node: OrgNode; depth?: number }) {
 }
 
 export default function OrgChartPage() {
+  const { data: liveEmployees } = useEmployees();
+
+  const employees: Employee[] = useMemo(() => {
+    if (liveEmployees && liveEmployees.length > 0) return liveEmployees;
+    return mockEmployeesData.map((e) => ({
+      id: e.id,
+      name: e.name,
+      position: e.position,
+      department: e.department,
+      status: e.status,
+      hireDate: e.hireDate,
+      birthday: e.birthday ?? '',
+      salary: e.salary,
+      type: e.type,
+      avatar: e.avatar ?? null,
+      employeeNo: e.id,
+      email: null,
+      managerId: mockEmployeeDetailsData.find((d) => d.id === e.id)?.supervisor ?? null,
+    }));
+  }, [liveEmployees]);
+
   const supervisorMap = useMemo(() => {
     const map = new Map<string, string | null>();
-    for (const d of employeeDetailsData) {
-      map.set(d.id, d.supervisor);
-    }
-    // Employees without detail records have no supervisor
-    for (const e of employeesData) {
-      if (!map.has(e.id)) map.set(e.id, null);
+    for (const e of employees) {
+      map.set(e.id, e.managerId ?? null);
     }
     return map;
-  }, []);
+  }, [employees]);
 
-  const tree = useMemo(() => buildTree(employeesData, supervisorMap), [supervisorMap]);
+  const tree = useMemo(() => buildTree(employees, supervisorMap), [employees, supervisorMap]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
@@ -133,7 +152,7 @@ export default function OrgChartPage() {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <Users className="w-4 h-4" />
-          {employeesData.length} employees
+          {employees.length} employees
         </div>
       </div>
 

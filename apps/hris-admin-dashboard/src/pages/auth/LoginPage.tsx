@@ -336,12 +336,12 @@ export default function LoginPage() {
 
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
             Don&apos;t have an account?{' '}
-            <a
-              href="https://hrisph.vercel.app/signup"
+            <Link
+              to="/signup"
               className="text-brand-blue font-medium hover:underline dark:text-blue-400"
             >
               Start free trial
-            </a>
+            </Link>
           </p>
         </motion.div>
       </div>

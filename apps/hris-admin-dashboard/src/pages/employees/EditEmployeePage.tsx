@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import employeesData from '@/data/mock/employees.json';
-import employeeDetailsData from '@/data/mock/employee-details.json';
+import { useEmployee, useUpdateEmployee } from '@/hooks/useEmployees';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import mockEmployeesData from '@/data/mock/employees.json';
+import mockEmployeeDetailsData from '@/data/mock/employee-details.json';
 
 // ─── Schemas (same as NewEmployeePage) ────────────────────────────────────────
 const personalSchema = z.object({
@@ -329,65 +331,105 @@ export default function EditEmployeePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Load existing employee data synchronously from JSON
-  const employee = employeesData.find((e) => e.id === id);
-  const details  = employeeDetailsData.find((d) => d.id === id);
+  const { data: dbEmployee, isLoading } = useEmployee(id);
+  const updateEmployee = useUpdateEmployee();
 
-  // Build pre-populated initial form data
+  // Build pre-populated form data from DB or mock fallback
   const buildInitialData = (): AllFormData => {
-    if (!employee) return {};
-    const { firstName, middleName, lastName } = splitName(employee.name);
+    if (dbEmployee) {
+      return {
+        firstName:             dbEmployee.firstName,
+        middleName:            dbEmployee.middleName ?? '',
+        lastName:              dbEmployee.lastName,
+        birthday:              dbEmployee.birthday ?? '',
+        gender:                (dbEmployee.gender as 'Male' | 'Female') ?? 'Male',
+        civilStatus:           dbEmployee.civilStatus ?? '',
+        nationality:           dbEmployee.nationality ?? '',
+        personalEmail:         dbEmployee.personalEmail ?? '',
+        companyEmail:          dbEmployee.workEmail ?? '',
+        mobile:                dbEmployee.mobile ?? '',
+        landline:              dbEmployee.landline ?? '',
+        street:                dbEmployee.addressLine1 ?? '',
+        city:                  dbEmployee.city ?? '',
+        province:              dbEmployee.province ?? '',
+        zip:                   dbEmployee.zipCode ?? '',
+        emergencyName:         dbEmployee.emergencyName ?? '',
+        emergencyRelationship: dbEmployee.emergencyRelationship ?? '',
+        emergencyPhone:        dbEmployee.emergencyPhone ?? '',
+        position:              dbEmployee.position ?? '',
+        department:            dbEmployee.department ?? '',
+        type:                  dbEmployee.employmentType ?? '',
+        hireDate:              dbEmployee.dateHired ?? '',
+        salary:                String(dbEmployee.salary ?? ''),
+        sss:                   dbEmployee.sss ?? '',
+        philhealth:            dbEmployee.philhealth ?? '',
+        pagibig:               dbEmployee.pagibig ?? '',
+        tin:                   dbEmployee.tin ?? '',
+        bankName:              dbEmployee.bankName ?? '',
+        accountNumber:         dbEmployee.accountNumber ?? '',
+        accountName:           dbEmployee.accountName ?? '',
+        accountType:           dbEmployee.accountType ?? '',
+      };
+    }
+    // Mock fallback
+    const mockEmp     = mockEmployeesData.find((e) => e.id === id);
+    const mockDetails = mockEmployeeDetailsData.find((d) => d.id === id);
+    if (!mockEmp) return {};
+    const { firstName, middleName, lastName } = splitName(mockEmp.name);
     return {
-      firstName,
-      middleName,
-      lastName,
-      birthday:    employee.birthday ?? '',
-      gender:      (details?.gender as 'Male' | 'Female') ?? 'Male',
-      civilStatus: details?.civilStatus ?? '',
-      nationality: details?.nationality ?? '',
-      // Contact
-      personalEmail:         details?.personalEmail ?? '',
-      companyEmail:          details?.companyEmail ?? '',
-      mobile:                details?.mobile ?? '',
-      landline:              details?.landline ?? '',
-      street:                details?.address?.street ?? '',
-      city:                  details?.address?.city ?? '',
-      province:              details?.address?.province ?? '',
-      zip:                   details?.address?.zip ?? '',
-      emergencyName:         details?.emergencyContact?.name ?? '',
-      emergencyRelationship: details?.emergencyContact?.relationship ?? '',
-      emergencyPhone:        details?.emergencyContact?.phone ?? '',
-      // Employment
-      position:   employee.position ?? '',
-      department: employee.department ?? '',
-      type:       employee.type ?? '',
-      hireDate:   employee.hireDate ?? '',
-      salary:     String(employee.salary ?? ''),
-      // Gov't IDs
-      sss:        details?.sss ?? '',
-      philhealth: details?.philhealth ?? '',
-      pagibig:    details?.pagibig ?? '',
-      tin:        details?.tin ?? '',
-      // Bank
-      bankName:      details?.bank?.name ?? '',
-      accountNumber: details?.bank?.accountNumber ?? '',
-      accountName:   details?.bank?.accountName ?? '',
-      accountType:   details?.bank?.type ?? '',
+      firstName, middleName, lastName,
+      birthday:    mockEmp.birthday ?? '',
+      gender:      ((mockDetails as any)?.gender as 'Male' | 'Female') ?? 'Male',
+      civilStatus: (mockDetails as any)?.civilStatus ?? '',
+      nationality: (mockDetails as any)?.nationality ?? '',
+      personalEmail:         (mockDetails as any)?.personalEmail ?? '',
+      companyEmail:          (mockDetails as any)?.companyEmail ?? '',
+      mobile:                (mockDetails as any)?.mobile ?? '',
+      landline:              (mockDetails as any)?.landline ?? '',
+      street:                (mockDetails as any)?.address?.street ?? '',
+      city:                  (mockDetails as any)?.address?.city ?? '',
+      province:              (mockDetails as any)?.address?.province ?? '',
+      zip:                   (mockDetails as any)?.address?.zip ?? '',
+      emergencyName:         (mockDetails as any)?.emergencyContact?.name ?? '',
+      emergencyRelationship: (mockDetails as any)?.emergencyContact?.relationship ?? '',
+      emergencyPhone:        (mockDetails as any)?.emergencyContact?.phone ?? '',
+      position:   mockEmp.position ?? '',
+      department: mockEmp.department ?? '',
+      type:       mockEmp.type ?? '',
+      hireDate:   mockEmp.hireDate ?? '',
+      salary:     String(mockEmp.salary ?? ''),
+      sss:        (mockDetails as any)?.sss ?? '',
+      philhealth: (mockDetails as any)?.philhealth ?? '',
+      pagibig:    (mockDetails as any)?.pagibig ?? '',
+      tin:        (mockDetails as any)?.tin ?? '',
+      bankName:      (mockDetails as any)?.bank?.name ?? '',
+      accountNumber: (mockDetails as any)?.bank?.accountNumber ?? '',
+      accountName:   (mockDetails as any)?.bank?.accountName ?? '',
+      accountType:   (mockDetails as any)?.bank?.type ?? '',
     };
   };
 
   const [step, setStep] = useState(0);
-  const [allData, setAllData] = useState<AllFormData>(buildInitialData);
+  const [allData, setAllData] = useState<AllFormData>({});
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [uploads, setUploads] = useState<Record<string, File | null>>({});
   const [finalSubmitting, setFinalSubmitting] = useState(false);
 
   const schemas = [personalSchema, contactSchema, employmentSchema, govidsSchema, bankSchema];
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: step < 5 ? zodResolver(schemas[step]) : undefined,
     defaultValues: allData,
   });
+
+  // Pre-fill form once DB data (or mock fallback) is available
+  useEffect(() => {
+    if (isLoading) return;
+    const initial = buildInitialData();
+    setAllData(initial);
+    reset(initial);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
 
   const handleStepSubmit = async (data: object) => {
     setAllData((prev) => ({ ...prev, ...data }));
@@ -400,12 +442,34 @@ export default function EditEmployeePage() {
   };
 
   const handleFinalSubmit = async () => {
+    if (!id) return;
     setFinalSubmitting(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setFinalSubmitting(false);
-    toast.success('Employee profile updated successfully!');
-    navigate(`/employees/${id}`);
+    try {
+      if (isSupabaseConfigured) {
+        await updateEmployee.mutateAsync({
+          id,
+          payload: allData as Parameters<typeof updateEmployee.mutateAsync>[0]['payload'],
+        });
+      }
+      toast.success('Employee profile updated successfully!');
+      navigate(`/employees/${id}`);
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to update employee');
+    } finally {
+      setFinalSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="w-8 h-8 rounded-full border-2 border-[#0038a8] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  // Determine if employee exists (DB or mock)
+  const employeeExists = dbEmployee || mockEmployeesData.some((e) => e.id === id);
 
   // ── Field definitions (same structure as NewEmployeePage) ──
   const personalFields: FormField[] = [
@@ -452,7 +516,7 @@ export default function EditEmployeePage() {
   const stepFields = [personalFields, contactFields, employmentFields, govidsFields, bankFields];
 
   // ── Not found ──
-  if (!employee) {
+  if (!employeeExists) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-center">
         <AlertCircle className="w-10 h-10 text-gray-300 mb-4" />
@@ -463,6 +527,10 @@ export default function EditEmployeePage() {
       </div>
     );
   }
+
+  const employeeName = dbEmployee?.name
+    ?? mockEmployeesData.find((e) => e.id === id)?.name
+    ?? 'Employee';
 
   const isCustomStep = step >= 5;
 
@@ -479,7 +547,7 @@ export default function EditEmployeePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Edit Employee</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-          Editing profile for <span className="font-semibold text-gray-700 dark:text-gray-300">{employee.name}</span>
+          Editing profile for <span className="font-semibold text-gray-700 dark:text-gray-300">{employeeName}</span>
         </p>
       </div>
 

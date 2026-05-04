@@ -11,9 +11,11 @@ import { ProtectedRoute } from '@/components/router/ProtectedRoute';
 import { useAuthStore } from '@/store/authStore';
 import { lightTheme, darkTheme } from '@/lib/theme';
 import { supabase, isSupabaseConfigured, fetchUserContext } from '@/lib/supabase';
+import type { SupabaseProfile } from '@/lib/supabase';
 import type { User, Tenant } from '@/types';
 
 import LoginPage from '@/pages/auth/LoginPage';
+import SignUpPage from '@/pages/auth/SignUpPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import TwoFactorPage from '@/pages/auth/TwoFactorPage';
 import TenantSelectorPage from '@/pages/auth/TenantSelectorPage';
@@ -60,6 +62,7 @@ const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: '/login', element: <LoginPage /> },
+      { path: '/signup', element: <SignUpPage /> },
       { path: '/forgot-password', element: <ForgotPasswordPage /> },
       { path: '/verify-2fa', element: <TwoFactorPage /> },
       {
@@ -147,15 +150,41 @@ function SupabaseSessionSync() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session && !isAuthenticated) {
-        const { profile, org, role } = await fetchUserContext(session.user.id);
+        let { profile, org, role } = await fetchUserContext(session.user.id);
 
-        if (profile) {
+        // First-time user: no profile row yet — create one from auth metadata
+        let resolvedProfile: SupabaseProfile | null = profile;
+        if (!resolvedProfile && supabase) {
+          const meta = session.user.user_metadata as Record<string, string> | undefined;
+          const fullName =
+            meta?.full_name || meta?.name || session.user.email?.split('@')[0] || 'User';
+
+          await supabase.from('user_profiles').upsert(
+            {
+              id:                   session.user.id,
+              full_name:            fullName,
+              organization_id:      null,
+              must_change_password: false,
+            },
+            { onConflict: 'id' }
+          );
+
+          resolvedProfile = {
+            id:                   session.user.id,
+            organization_id:      null,
+            full_name:            fullName,
+            avatar_url:           null,
+            must_change_password: false,
+          };
+        }
+
+        if (resolvedProfile) {
           const user: User = {
             id:        session.user.id,
             email:     session.user.email!,
-            name:      profile.full_name,
+            name:      resolvedProfile.full_name,
             role:      (role ?? 'hr_staff') as User['role'],
-            avatar:    profile.avatar_url ?? undefined,
+            avatar:    resolvedProfile.avatar_url ?? undefined,
             tenantIds: org ? [org.id] : [],
           };
           login(user, true);
@@ -173,6 +202,7 @@ function SupabaseSessionSync() {
             };
             setTenant(tenant);
           }
+          // No org → ProtectedRoute redirects to /select-tenant → auto-redirects to /setup-company
         }
       }
 

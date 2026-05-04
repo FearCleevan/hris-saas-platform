@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -26,11 +26,18 @@ export default function TenantSelectorPage() {
   const [selecting, setSelecting] = useState<string | null>(null);
 
   // Fetch real organisations from the database
-  const { data: accessibleTenants = [], isLoading } = useQuery({
+  const { data: accessibleTenants = [], isLoading, isError } = useQuery({
     queryKey: ['user-organizations'],
     queryFn: getUserOrganizations,
     staleTime: 1000 * 60 * 5,
   });
+
+  // New user with no organisations — go straight to company setup
+  useEffect(() => {
+    if (!isLoading && !isError && accessibleTenants.length === 0) {
+      navigate('/setup-company', { replace: true });
+    }
+  }, [isLoading, isError, accessibleTenants.length, navigate]);
 
   const filtered = accessibleTenants.filter((t) =>
     t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -41,7 +48,7 @@ export default function TenantSelectorPage() {
     setSelecting(tenant.id);
     try {
       // Update the active organisation in the database so the JWT picks it up
-      if (user?.id) {
+      if (user?.id && supabase) {
         await supabase
           .from('user_profiles')
           .upsert(
@@ -73,7 +80,7 @@ export default function TenantSelectorPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-9 h-9 bg-[#0038a8] rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-brand-blue rounded-xl flex items-center justify-center">
               <span className="text-white font-extrabold text-base">H</span>
             </div>
             <span className="text-xl font-extrabold text-gray-900 dark:text-white">HRISPH</span>
@@ -123,11 +130,11 @@ export default function TenantSelectorPage() {
                   transition={{ delay: i * 0.06 }}
                   onClick={() => handleSelect(tenant)}
                   disabled={!!selecting}
-                  className="group w-full flex items-center gap-4 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl hover:border-[#0038a8] hover:shadow-md transition-all duration-200 text-left cursor-pointer disabled:opacity-70"
+                  className="group w-full flex items-center gap-4 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl hover:border-brand-blue hover:shadow-md transition-all duration-200 text-left cursor-pointer disabled:opacity-70"
                 >
                   {/* Logo placeholder */}
-                  <div className="w-11 h-11 rounded-xl bg-[#0038a8]/10 flex items-center justify-center shrink-0">
-                    <Building2 className="w-5 h-5 text-[#0038a8]" />
+                  <div className="w-11 h-11 rounded-xl bg-brand-blue/10 flex items-center justify-center shrink-0">
+                    <Building2 className="w-5 h-5 text-brand-blue" />
                   </div>
 
                   {/* Info */}
@@ -160,9 +167,9 @@ export default function TenantSelectorPage() {
                   {/* Arrow */}
                   <div className="shrink-0">
                     {selecting === tenant.id ? (
-                      <span className="w-5 h-5 border-2 border-[#0038a8]/30 border-t-[#0038a8] rounded-full animate-spin block" />
+                      <span className="w-5 h-5 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin block" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#0038a8] group-hover:translate-x-0.5 transition-all" />
+                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-brand-blue group-hover:translate-x-0.5 transition-all" />
                     )}
                   </div>
                 </motion.button>
