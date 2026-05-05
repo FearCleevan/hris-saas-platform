@@ -1,0 +1,38 @@
+[
+  {
+    "id": "inv001",
+    "email": "newhr@hris-demo.ph",
+    "role": "hr_manager",
+    "roleName": "HR Manager",
+    "roleColor": "#0038a8",
+    "organizationId": "t001",
+    "organizationName": "Maharlika Manufacturing Corp.",
+    "sentAt": "2026-05-03T10:00:00Z",
+    "expiresAt": "2026-05-10T10:00:00Z",
+    "status": "pending"
+  },
+  {
+    "id": "inv002",
+    "email": "carlo.reyes@hris-demo.ph",
+    "role": "accountant",
+    "roleName": "Accountant",
+    "roleColor": "#059669",
+    "organizationId": "t001",
+    "organizationName": "Maharlika Manufacturing Corp.",
+    "sentAt": "2026-05-01T14:30:00Z",
+    "expiresAt": "2026-05-08T14:30:00Z",
+    "status": "pending"
+  },
+  {
+    "id": "inv003",
+    "email": "grace.santos@hris-demo.ph",
+    "role": "hr_staff",
+    "roleName": "HR Staff",
+    "roleColor": "#7c3aed",
+    "organizationId": "t002",
+    "organizationName": "Bayani BPO Solutions Inc.",
+    "sentAt": "2026-05-04T09:15:00Z",
+    "expiresAt": "2026-05-11T09:15:00Z",
+    "status": "pending"
+  }
+]

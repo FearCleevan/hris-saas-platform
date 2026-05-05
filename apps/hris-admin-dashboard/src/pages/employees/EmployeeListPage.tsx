@@ -418,6 +418,7 @@ export default function EmployeeListPage() {
               {filtered.length.toLocaleString()} of {employees.length.toLocaleString()} employee{employees.length !== 1 ? 's' : ''}
             </span>
           </div>
+          
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 // src/services/addEmployee.ts
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { uploadEmployeeDocuments } from '@/services/documents';
 
 // ─── Types ────────────────────────────────────────────────────────
 export interface Beneficiary {
@@ -43,6 +44,7 @@ type AddEmployeePayload = {
   accountName?: string;
   accountType?: string;
   beneficiaries: Beneficiary[];
+  uploads?: Record<string, File | null>;
 };
 
 // ─── Helper: get current user's organisation ID ─────────────────
@@ -112,7 +114,7 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
   if (empErr) throw empErr;
   const employeeId = employee.id;
 
-  // 2. Department lookup or create (same pattern) -------------------
+  // 2. Department — look up, auto-create if missing (code is NOT NULL in schema)
   const { data: dept } = await supabase
     .from('departments')
     .select('id')
@@ -121,7 +123,21 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     .maybeSingle();
 
   let departmentId = dept?.id ?? null;
+  if (!departmentId && payload.department) {
+    const deptCode = payload.department
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '')
+      .slice(0, 20) || 'dept';
+    const { data: newDept } = await supabase
+      .from('departments')
+      .insert({ organization_id: orgId, name: payload.department, code: deptCode, is_active: true })
+      .select('id')
+      .single();
+    if (newDept) departmentId = newDept.id;
+  }
 
+  // 3. Position — look up, auto-create if missing
   const { data: pos } = await supabase
     .from('positions')
     .select('id')
@@ -130,20 +146,21 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     .maybeSingle();
 
   let positionId = pos?.id ?? null;
-  if (!positionId) {
-    const { data: newPos, error: posErr } = await supabase
+  if (!positionId && payload.position) {
+    const { data: newPos } = await supabase
       .from('positions')
       .insert({
         organization_id: orgId,
-        department_id: departmentId,
-        title: payload.position,
+        department_id:   departmentId,
+        title:           payload.position,
+        is_active:       true,
       })
       .select('id')
       .single();
-    if (!posErr) positionId = newPos.id;
+    if (newPos) positionId = newPos.id;
   }
 
-  // 3. Employment type lookup ----------------------------------------
+  // 4. Employment type — look up, auto-create standard types if missing
   const { data: empType } = await supabase
     .from('employment_types')
     .select('id')
@@ -151,7 +168,26 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
     .eq('code', payload.type)
     .maybeSingle();
 
-  const employmentTypeId = empType?.id ?? null;
+  let employmentTypeId = empType?.id ?? null;
+  if (!employmentTypeId && payload.type) {
+    const typeLabels: Record<string, string> = {
+      regular:       'Regular',
+      probationary:  'Probationary',
+      contractual:   'Contractual',
+      part_time:     'Part Time',
+    };
+    const { data: newEmpType } = await supabase
+      .from('employment_types')
+      .insert({
+        organization_id: orgId,
+        code:            payload.type,
+        name:            typeLabels[payload.type] ?? payload.type,
+        is_active:       true,
+      })
+      .select('id')
+      .single();
+    if (newEmpType) employmentTypeId = newEmpType.id;
+  }
 
   // 4. Insert employee_employment -----------------------------------
   const { error: empRelErr } = await supabase
@@ -241,6 +277,11 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
       .from('employee_beneficiaries')
       .insert(benRows);
     if (benErr) throw benErr;
+  }
+
+  // 10. Documents ------------------------------------------------
+  if (payload.uploads && Object.values(payload.uploads).some(Boolean)) {
+    await uploadEmployeeDocuments(employeeId, payload.uploads);
   }
 
   return employeeId;

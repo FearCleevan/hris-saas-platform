@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useEmployee, useUpdateEmployee } from '@/hooks/useEmployees';
+import { useEmployee, useUpdateEmployee, useSyncBeneficiaries } from '@/hooks/useEmployees';
+import { uploadEmployeeDocuments } from '@/services/documents';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { PH_PROVINCES, PH_CITIES } from '@/data/ph-locations';
 import mockEmployeesData from '@/data/mock/employees.json';
@@ -473,7 +474,8 @@ export default function EditEmployeePage() {
   const navigate = useNavigate();
 
   const { data: dbEmployee, isLoading } = useEmployee(id);
-  const updateEmployee = useUpdateEmployee();
+  const updateEmployee    = useUpdateEmployee();
+  const syncBeneficiaries = useSyncBeneficiaries();
 
   const buildInitialData = (): AllFormData => {
     if (dbEmployee) {
@@ -482,8 +484,12 @@ export default function EditEmployeePage() {
         middleName:            dbEmployee.middleName ?? '',
         lastName:              dbEmployee.lastName,
         birthday:              dbEmployee.birthday ?? '',
-        gender:                (dbEmployee.gender as 'Male' | 'Female') ?? 'Male',
-        civilStatus:           dbEmployee.civilStatus ?? '',
+        gender:      (dbEmployee.gender
+          ? (dbEmployee.gender.charAt(0).toUpperCase() + dbEmployee.gender.slice(1)) as 'Male' | 'Female'
+          : 'Male'),
+        civilStatus: dbEmployee.civilStatus
+          ? (dbEmployee.civilStatus.charAt(0).toUpperCase() + dbEmployee.civilStatus.slice(1))
+          : '',
         nationality:           dbEmployee.nationality ?? '',
         personalEmail:         dbEmployee.personalEmail ?? '',
         companyEmail:          dbEmployee.workEmail ?? '',
@@ -568,6 +574,8 @@ export default function EditEmployeePage() {
   } = useForm({
     resolver: step < 5 ? zodResolver(schemas[step]) : undefined,
     defaultValues: allData,
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   });
 
   // Fetch org positions and departments from DB
@@ -592,12 +600,23 @@ export default function EditEmployeePage() {
     ? (PH_CITIES[watchedProvince] ?? [])
     : Object.values(PH_CITIES).flat().sort();
 
-  // Pre-fill form once DB data (or mock fallback) is available
+  // Pre-fill form and beneficiaries once DB data is available
   useEffect(() => {
     if (isLoading) return;
     const initial = buildInitialData();
     setAllData(initial);
     reset(initial);
+    if (dbEmployee?.beneficiaries?.length) {
+      setBeneficiaries(
+        dbEmployee.beneficiaries.map((b) => ({
+          id:           b.id,
+          name:         b.name,
+          relationship: b.relationship,
+          birthday:     b.birthday ?? '',
+          type:         b.type,
+        })),
+      );
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
@@ -616,13 +635,15 @@ export default function EditEmployeePage() {
     setFinalSubmitting(true);
     try {
       if (isSupabaseConfigured) {
-        // Merge accumulated step data with the live form values — getValues() includes
-        // all fields registered across steps (shouldUnregister defaults to false).
         const merged = { ...allData, ...getValues() };
         await updateEmployee.mutateAsync({
           id,
           payload: merged as Parameters<typeof updateEmployee.mutateAsync>[0]['payload'],
         });
+        await syncBeneficiaries.mutateAsync({ employeeId: id, beneficiaries });
+        if (Object.values(uploads).some(Boolean)) {
+          await uploadEmployeeDocuments(id, uploads);
+        }
       }
       toast.success('Employee profile updated successfully!');
       navigate(`/employees/${id}`);

@@ -6,10 +6,12 @@ import {
   getEmployeeStats,
   updateEmployee,
   deleteEmployee,
+  syncBeneficiaries,
   type EmployeeRow,
   type EmployeeDetail,
   type EmployeeStats,
   type UpdateEmployeePayload,
+  type EmployeeBeneficiary,
 } from '@/services/employees';
 import { addEmployee } from '@/services/addEmployee';
 import mockEmployees from '@/data/mock/employees.json';
@@ -94,6 +96,16 @@ export function useDeleteEmployee() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['employees'] });
       qc.invalidateQueries({ queryKey: ['employee-stats'] });
+    },
+  });
+}
+
+export function useSyncBeneficiaries() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { employeeId: string; beneficiaries: EmployeeBeneficiary[] }>({
+    mutationFn: ({ employeeId, beneficiaries }) => syncBeneficiaries(employeeId, beneficiaries),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['employee', variables.employeeId] });
     },
   });
 }

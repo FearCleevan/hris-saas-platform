@@ -29,11 +29,25 @@ export default function AuthCallbackPage() {
         return;
       }
 
+      // Check if this is an invited user (metadata injected by invite-member Edge Function)
+      const meta = session.user.user_metadata as Record<string, string> | undefined;
+      const inviteRoleSlug = meta?.role_slug;
+      const inviteOrgId    = meta?.organization_id;
+
+      // If the user arrived via an invitation link, set them up before fetching context
+      if (inviteRoleSlug && inviteOrgId) {
+        const { error: setupErr } = await supabase.rpc('setup_invited_user', {
+          p_role_slug:       inviteRoleSlug,
+          p_organization_id: inviteOrgId,
+        });
+        // Non-fatal: if the RPC fails (e.g. already set up), continue anyway
+        if (setupErr) console.warn('setup_invited_user:', setupErr.message);
+      }
+
       let { profile, org, role } = await fetchUserContext(session.user.id);
 
       // First-time user: profile row doesn't exist yet — create it from auth metadata
       if (!profile) {
-        const meta = session.user.user_metadata as Record<string, string> | undefined;
         const fullName =
           meta?.full_name || meta?.name || session.user.email?.split('@')[0] || 'User';
 
@@ -41,7 +55,7 @@ export default function AuthCallbackPage() {
           {
             id:                   session.user.id,
             full_name:            fullName,
-            organization_id:      null,
+            organization_id:      inviteOrgId ?? null,
             must_change_password: false,
           },
           { onConflict: 'id' }
@@ -49,12 +63,20 @@ export default function AuthCallbackPage() {
 
         profile = {
           id:                   session.user.id,
-          organization_id:      null,
+          organization_id:      inviteOrgId ?? null,
           full_name:            fullName,
           avatar_url:           null,
           must_change_password: false,
         };
         org = null;
+
+        // Re-fetch if we just ran setup_invited_user
+        if (inviteOrgId) {
+          const ctx = await fetchUserContext(session.user.id);
+          profile = ctx.profile ?? profile;
+          org     = ctx.org;
+          role    = ctx.role;
+        }
       }
 
       const user: User = {

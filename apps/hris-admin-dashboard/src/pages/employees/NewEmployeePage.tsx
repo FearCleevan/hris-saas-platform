@@ -494,6 +494,8 @@ export default function NewEmployeePage() {
   } = useForm({
     resolver: step < 5 ? zodResolver(schemas[step]) : undefined,
     defaultValues: allData,
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   });
 
   // Fetch org positions and departments from DB
@@ -565,6 +567,7 @@ export default function NewEmployeePage() {
         accountName:          allData.accountName,
         accountType:          allData.accountType,
         beneficiaries,
+        uploads,
       });
 
       queryClient.invalidateQueries({ queryKey: ['employees'] });

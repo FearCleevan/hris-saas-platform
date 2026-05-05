@@ -18,6 +18,8 @@ import attendanceLogsData from '@/data/mock/attendance-logs.json';
 import leaveRequestsData from '@/data/mock/leave-requests.json';
 import leaveBalancesData from '@/data/mock/leave-balances.json';
 import documentsLibraryData from '@/data/mock/documents-library.json';
+import { getEmployeeDocuments, getDocumentDownloadUrl, type DocumentMeta } from '@/services/documents';
+import { useQuery } from '@tanstack/react-query';
 import performanceReviewsData from '@/data/mock/performance-reviews.json';
 import overtimeRequestsData from '@/data/mock/overtime-requests.json';
 
@@ -389,24 +391,44 @@ function LeavesTab({ employeeId }: { employeeId: string }) {
 
 // ─── TAB: DOCUMENTS ────────────────────────────────────────────────────────────
 function DocumentsTab({ employeeId, employeeName }: { employeeId: string; employeeName: string }) {
-  const docs = useMemo(
-    () => documentsLibraryData.filter((d) => d.employeeId === employeeId),
-    [employeeId]
-  );
+  const { data: docs = [], isLoading } = useQuery<DocumentMeta[]>({
+    queryKey: ['employee-documents', employeeId],
+    queryFn: () => getEmployeeDocuments(employeeId),
+    staleTime: 1000 * 60 * 5,
+  });
 
   const docStatusCls: Record<string, string> = {
     active:   'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     expired:  'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
     archived: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+    draft:    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   };
+
+  const handleDownload = async (doc: DocumentMeta) => {
+    const url = await getDocumentDownloadUrl(doc.filePath);
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.fileName;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.click();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 rounded-full border-2 border-brand-blue border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500 dark:text-gray-400">{docs.length} document{docs.length !== 1 ? 's' : ''} on file for {employeeName}</p>
-        <Button size="sm" variant="outline" className="flex items-center gap-1.5 text-xs">
-          <Download className="w-3.5 h-3.5" /> Export All
-        </Button>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {docs.length} document{docs.length !== 1 ? 's' : ''} on file for {employeeName}
+        </p>
       </div>
 
       {docs.length === 0 ? (
@@ -418,30 +440,35 @@ function DocumentsTab({ employeeId, employeeName }: { employeeId: string; employ
       ) : (
         <div className="flex flex-col gap-2">
           {docs.map((doc) => (
-            <div key={doc.id} className="flex items-center justify-between gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:border-[#0038a8]/30 transition-colors">
+            <div key={doc.id} className="flex items-center justify-between gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:border-brand-blue/30 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[#0038a8]/10 flex items-center justify-center shrink-0">
-                  <FileText className="w-4 h-4 text-[#0038a8]" />
+                <div className="w-9 h-9 rounded-xl bg-brand-blue/10 flex items-center justify-center shrink-0">
+                  <FileText className="w-4 h-4 text-brand-blue" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{doc.name}</p>
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{doc.title}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full capitalize ${docStatusCls[doc.status] ?? docStatusCls['active']}`}>
                       {doc.status}
                     </span>
-                    <span className="text-[10px] text-gray-400">{doc.fileType.toUpperCase()} · {doc.fileSize}</span>
-                    {doc.expiryDate && (
-                      <span className="text-[10px] text-gray-400">Expires {format(new Date(doc.expiryDate), 'MMM d, yyyy')}</span>
-                    )}
+                    <span className="text-[10px] text-gray-400">
+                      {doc.mimeType.split('/')[1]?.toUpperCase() ?? 'FILE'}
+                      {doc.fileSize > 0 && ` · ${(doc.fileSize / 1024).toFixed(0)} KB`}
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                      {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+                    </span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] text-gray-400">{doc.version}</span>
-                <Button size="sm" variant="outline" className="text-xs h-7 px-2.5 flex items-center gap-1">
-                  <Download className="w-3 h-3" /> Download
-                </Button>
-              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleDownload(doc)}
+                className="text-xs h-7 px-2.5 flex items-center gap-1 shrink-0"
+              >
+                <Download className="w-3 h-3" /> Download
+              </Button>
             </div>
           ))}
         </div>
@@ -1052,6 +1079,27 @@ export default function EmployeeProfilePage() {
                 </SectionCard>
               )}
 
+              {dbEmployee?.beneficiaries && dbEmployee.beneficiaries.length > 0 && (
+                <SectionCard title={`Beneficiaries (${dbEmployee.beneficiaries.length})`}>
+                  <div className="flex flex-col gap-2 pt-1">
+                    {dbEmployee.beneficiaries.map((b) => (
+                      <div key={b.id} className="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                        <div className="w-7 h-7 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-xs font-bold shrink-0">
+                          {b.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{b.name}</p>
+                          <p className="text-xs text-gray-400">
+                            {b.relationship}
+                            {b.birthday && ` · Born ${format(new Date(b.birthday), 'MMM d, yyyy')}`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
+              )}
+
               {details?.notes && (
                 <SectionCard title="Notes">
                   <p className="text-sm text-gray-700 dark:text-gray-300">{details.notes}</p>
@@ -1171,6 +1219,27 @@ export default function EmployeeProfilePage() {
                     <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{supervisor.name}</p>
                     <p className="text-xs text-gray-400">{supervisor.position} · {supervisor.department}</p>
                   </div>
+                </div>
+              </SectionCard>
+            )}
+
+            {dbEmployee?.beneficiaries && dbEmployee.beneficiaries.length > 0 && (
+              <SectionCard title={`Beneficiaries (${dbEmployee.beneficiaries.length})`}>
+                <div className="flex flex-col gap-1 pt-1">
+                  {dbEmployee.beneficiaries.map((b) => (
+                    <div key={b.id} className="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                      <div className="w-7 h-7 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-xs font-bold shrink-0">
+                        {b.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{b.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {b.relationship}
+                          {b.birthday && ` · Born ${format(new Date(b.birthday), 'MMM d, yyyy')}`}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </SectionCard>
             )}
