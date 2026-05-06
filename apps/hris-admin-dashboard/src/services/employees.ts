@@ -584,12 +584,17 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
   }
 }
 
-// ── SOFT DELETE ───────────────────────────────────────────────────
+// ── DELETE (hard — cascades all child tables via RPC) ─────────────
 export async function deleteEmployee(id: string): Promise<void> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
-  const { error } = await supabase
-    .from('employees')
-    .update({ is_active: false, status: 'terminated' })
-    .eq('id', id);
+  const { error } = await supabase.rpc('delete_employees_hard', { p_ids: [id] });
+  if (error) throw error;
+}
+
+// ── BULK DELETE ───────────────────────────────────────────────────
+export async function deleteEmployees(ids: string[]): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+  if (ids.length === 0) return;
+  const { error } = await supabase.rpc('delete_employees_hard', { p_ids: ids });
   if (error) throw error;
 }

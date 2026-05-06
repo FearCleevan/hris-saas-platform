@@ -12,12 +12,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   UserPlus, Download, Upload, Filter, Users,
   TrendingUp, UserCheck, Clock, ChevronDown, X, Check, Search,
-  ArrowUpDown,
+  ArrowUpDown, Trash2, AlertTriangle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useEmployees } from '@/hooks/useEmployees';
+import { useEmployees, useDeleteManyEmployees } from '@/hooks/useEmployees';
 import type { EmployeeRow } from '@/services/employees';
 
 type Employee = EmployeeRow;
@@ -111,6 +111,7 @@ function FilterSelect({
 export default function EmployeeListPage() {
   const navigate = useNavigate();
   const { data: employees = [], isLoading, error } = useEmployees();
+  const deleteManyMutation = useDeleteManyEmployees();
 
   useEffect(() => {
     if (error) toast.error(`Failed to load employees: ${(error as Error).message}`);
@@ -124,10 +125,11 @@ export default function EmployeeListPage() {
   const [type,           setType]           = useState('All');
 
   // Bulk action state
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [bulkDept,    setBulkDept]    = useState('');
-  const [bulkStatus,  setBulkStatus]  = useState('');
-  const [bulkType,    setBulkType]    = useState('');
+  const [selectedIds,    setSelectedIds]    = useState<string[]>([]);
+  const [bulkDept,       setBulkDept]       = useState('');
+  const [bulkStatus,     setBulkStatus]     = useState('');
+  const [bulkType,       setBulkType]       = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Sort state (controlled externally so we can show the current sort)
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
@@ -163,6 +165,17 @@ export default function EmployeeListPage() {
     setBulkStatus('');
     setBulkType('');
   }, [selectedIds, bulkDept, bulkStatus, bulkType]);
+
+  const confirmBulkDelete = useCallback(async () => {
+    try {
+      await deleteManyMutation.mutateAsync(selectedIds);
+      toast.success(`Deleted ${selectedIds.length} employee${selectedIds.length !== 1 ? 's' : ''}`);
+      setSelectedIds([]);
+      setShowDeleteModal(false);
+    } catch (err) {
+      toast.error(`Delete failed: ${(err as Error).message}`);
+    }
+  }, [selectedIds, deleteManyMutation]);
 
   const clearAllFilters = useCallback(() => {
     setSearch('');
@@ -462,11 +475,84 @@ export default function EmployeeListPage() {
               <Check className="w-3.5 h-3.5" /> Apply
             </button>
 
+            <div className="w-px h-5 bg-gray-600 shrink-0" />
+
+            <button type="button" onClick={() => setShowDeleteModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-semibold transition-colors shrink-0">
+              <Trash2 className="w-3.5 h-3.5" /> Delete
+            </button>
+
             <button type="button" onClick={() => setSelectedIds([])} title="Clear selection"
               className="p-1.5 rounded-lg hover:bg-gray-700 text-gray-400 hover:text-white transition-colors shrink-0">
               <X className="w-4 h-4" />
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => !deleteManyMutation.isPending && setShowDeleteModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ duration: 0.18 }}
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                    Delete {selectedIds.length} employee{selectedIds.length !== 1 ? 's' : ''}?
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    This will permanently remove the selected employee{selectedIds.length !== 1 ? 's' : ''} and all associated records from the database.
+                    <strong className="text-red-600 dark:text-red-400"> This cannot be undone.</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  disabled={deleteManyMutation.isPending}
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={deleteManyMutation.isPending}
+                  onClick={confirmBulkDelete}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-60"
+                >
+                  {deleteManyMutation.isPending ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Deleting…
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Delete {selectedIds.length} employee{selectedIds.length !== 1 ? 's' : ''}
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

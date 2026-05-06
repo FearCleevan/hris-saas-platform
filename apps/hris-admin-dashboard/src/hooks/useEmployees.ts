@@ -6,6 +6,7 @@ import {
   getEmployeeStats,
   updateEmployee,
   deleteEmployee,
+  deleteEmployees,
   syncBeneficiaries,
   type EmployeeRow,
   type EmployeeDetail,
@@ -93,6 +94,17 @@ export function useDeleteEmployee() {
   const qc = useQueryClient();
   return useMutation<void, Error, string>({
     mutationFn: deleteEmployee,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['employees'] });
+      qc.invalidateQueries({ queryKey: ['employee-stats'] });
+    },
+  });
+}
+
+export function useDeleteManyEmployees() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, string[]>({
+    mutationFn: deleteEmployees,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['employees'] });
       qc.invalidateQueries({ queryKey: ['employee-stats'] });
