@@ -52,7 +52,7 @@ type TabId = 'weekly' | 'roster' | 'shifts';
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 const SHIFT_COLORS: Record<string, string> = {
-  shift001: 'bg-[#0038a8]/10 text-[#0038a8] dark:bg-[#0038a8]/20 dark:text-blue-300',
+  shift001: 'bg-brand-blue/10 text-[#0038a8] dark:bg-brand-blue/20 dark:text-blue-300',
   shift002: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
   shift003: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400',
   shift004: 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400',
@@ -1019,7 +1019,7 @@ function ShiftsSettingsTab({
           onClick={onAdd}
           className="bg-gray-50 dark:bg-gray-900/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-gray-400 min-h-[180px] hover:border-[#0038a8]/50 hover:text-[#0038a8] hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-colors group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 group-hover:bg-[#0038a8]/10 flex items-center justify-center transition-colors">
+          <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 group-hover:bg-brand-blue/10 flex items-center justify-center transition-colors">
             <Plus className="w-5 h-5" />
           </div>
           <span className="text-xs font-semibold">Add New Shift</span>
@@ -1094,10 +1094,10 @@ export default function SchedulePage() {
     <>
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Shifts & Schedule</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Shifts & Schedule</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               {stats.totalAssigned} employees across {shifts.length} shift type{shifts.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -1122,7 +1122,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -1130,14 +1130,14 @@ export default function SchedulePage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-[#0038a8] text-white shadow-sm'
+                    ? 'bg-brand-blue text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             );
           })}

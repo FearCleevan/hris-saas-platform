@@ -172,7 +172,7 @@ function RequestsTab() {
             onClick={() => setDatePreset(id)}
             className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${
               datePreset === id
-                ? 'bg-[#0038a8] text-white shadow-sm'
+                ? 'bg-brand-blue text-white shadow-sm'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
@@ -349,7 +349,7 @@ function RequestsTab() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.18 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 bg-gray-900 dark:bg-white rounded-2xl shadow-2xl max-w-[calc(100vw-2rem)] overflow-x-auto"
           >
             <span className="text-sm font-semibold text-white dark:text-gray-900">
               {selected.size} selected
@@ -757,7 +757,7 @@ function LeaveTypesTab() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5"
         >
           <div className="flex items-center gap-3 mb-3">
             <div
@@ -844,26 +844,26 @@ function ReportsTab() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Leave Days Taken</p>
-          <p className="text-2xl font-extrabold text-gray-900 dark:text-white">{totalLeavedays}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">{totalLeavedays}</p>
           <p className="text-[10px] text-gray-400 mt-0.5">Approved requests only</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
           <p className="text-xs text-gray-400 mb-1">Approved</p>
-          <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">{totalByStatus.approved}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-green-600 dark:text-green-400">{totalByStatus.approved}</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
           <p className="text-xs text-gray-400 mb-1">Pending</p>
-          <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{totalByStatus.pending}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-amber-600 dark:text-amber-400">{totalByStatus.pending}</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
           <p className="text-xs text-gray-400 mb-1">Rejected</p>
-          <p className="text-2xl font-extrabold text-[#ce1126] dark:text-red-400">{totalByStatus.rejected}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-brand-red dark:text-red-400">{totalByStatus.rejected}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* By Leave Type */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Days Taken by Leave Type</h3>
           <div className="flex flex-col gap-3">
             {byType.map(([code, days]) => {
@@ -895,7 +895,7 @@ function ReportsTab() {
         </div>
 
         {/* By Department */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Days Taken by Department</h3>
           <div className="flex flex-col gap-3">
             {byDept.map(([dept, days]) => (
@@ -919,7 +919,7 @@ function ReportsTab() {
       </div>
 
       {/* Company-wide balance summary */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
         <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Company-Wide Balance Summary (2023)</h3>
         <div className="grid grid-cols-3 gap-4">
           {(['vl', 'sl', 'sil'] as const).map((type) => {
@@ -967,10 +967,10 @@ export default function LeavesPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Leave Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Leave Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             VL · SL · SIL · ML · PL · SPL · BL · EL — Philippine Labor Code compliant
           </p>
         </div>
@@ -998,14 +998,14 @@ export default function LeavesPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? 'bg-brand-blue text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
               {tab.id === 'requests' && pendingCount > 0 && activeTab !== 'requests' && (
                 <span className="bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                   {pendingCount}

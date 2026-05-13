@@ -27,15 +27,15 @@ export default function DashboardPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-5 max-w-full"
+      className="flex flex-col gap-4 sm:gap-5 max-w-full"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white leading-tight">
             {greetingByHour()}, {user?.name?.split(' ')[0]}! 👋
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Here&apos;s what&apos;s happening at{' '}
             <span className="font-medium text-gray-700 dark:text-gray-300">{tenant?.name}</span> today.
           </p>
@@ -46,7 +46,7 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-        <div className="hidden sm:block text-right">
+        <div className="hidden sm:block text-right shrink-0">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Today</p>
           <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
             {new Date().toLocaleDateString('en-PH', {
@@ -59,9 +59,10 @@ export default function DashboardPage() {
       {/* KPI Cards */}
       <KPICards />
 
-      {/* Row 2: Heatmap + Department Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
+      {/* Row 2: Heatmap + Department Chart
+          Mobile: stack. Tablet (md): side-by-side 2+1. Desktop (lg): same but wider. */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        <div className="md:col-span-2">
           <AttendanceHeatmap />
         </div>
         <div>
@@ -70,8 +71,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 3: Activity Feed + Pending Approvals */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        <div className="md:col-span-2">
           <ActivityFeed />
         </div>
         <div>
@@ -80,7 +81,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 4: Quick Stats + Upcoming Events + Announcements */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         <div>
           <QuickStats />
         </div>

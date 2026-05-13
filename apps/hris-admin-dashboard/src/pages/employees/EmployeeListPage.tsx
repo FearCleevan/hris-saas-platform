@@ -322,10 +322,10 @@ export default function EmployeeListPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Employees</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Employees</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {isLoading ? 'Loading…' : `${employees.length.toLocaleString()} total employees`}
           </p>
         </div>
@@ -346,7 +346,7 @@ export default function EmployeeListPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 animate-pulse">
@@ -456,7 +456,7 @@ export default function EmployeeListPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-3 bg-gray-900 dark:bg-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-3 bg-gray-900 dark:bg-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700 max-w-[calc(100vw-2rem)] overflow-x-auto"
           >
             <span className="text-sm font-semibold shrink-0">{selectedIds.length} selected</span>
             <div className="w-px h-5 bg-gray-600 shrink-0" />
@@ -572,7 +572,58 @@ export default function EmployeeListPage() {
         )}
       </AnimatePresence>
 
-      {/* DataGrid */}
+      {/* Mobile card list (xs only) */}
+      <div className="sm:hidden flex flex-col gap-2 mb-4">
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl animate-pulse">
+              <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-3 w-48 rounded bg-gray-100 dark:bg-gray-800" />
+              </div>
+            </div>
+          ))
+        ) : filtered.length === 0 ? (
+          <p className="text-center text-sm text-gray-400 py-8">No employees match your filters.</p>
+        ) : (
+          filtered.map((emp) => {
+            const scfg = statusConfig[emp.status as keyof typeof statusConfig];
+            const tcfg = typeConfig[emp.type as keyof typeof typeConfig];
+            return (
+              <button
+                key={emp.id}
+                type="button"
+                onClick={() => navigate(`/employees/${emp.id}`)}
+                className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-left hover:border-brand-blue/40 hover:bg-brand-blue/3 transition-colors w-full"
+              >
+                <div className="w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {getInitials(emp.name)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{emp.name}</p>
+                  <p className="text-xs text-gray-400 truncate">{emp.position} · {emp.department}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <Chip
+                    label={scfg?.label ?? emp.status}
+                    color={scfg?.color ?? 'default'}
+                    size="small"
+                    sx={{ fontSize: 10, height: 20 }}
+                  />
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                    style={{ background: `${tcfg?.color}18`, color: tcfg?.color }}>
+                    {tcfg?.label ?? emp.type}
+                  </span>
+                </div>
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {/* DataGrid (sm+) */}
+      <div className="hidden sm:block">
       <Box
         sx={{
           height: 580,
@@ -621,6 +672,7 @@ export default function EmployeeListPage() {
           }}
         />
       </Box>
+      </div>
 
       {/* Footer note */}
       {!isLoading && filtered.length === 0 && employees.length > 0 && (

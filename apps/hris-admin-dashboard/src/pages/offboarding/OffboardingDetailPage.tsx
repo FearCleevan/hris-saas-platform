@@ -31,7 +31,7 @@ function getInitials(name: string) {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{title}</h3>
       {children}
     </div>
@@ -85,14 +85,14 @@ export default function OffboardingDetailPage() {
       </Link>
 
       {/* Header card */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
           <div className="w-16 h-16 rounded-2xl bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-white text-xl font-bold shrink-0">
             {getInitials(employee.name)}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-xl font-extrabold text-gray-900 dark:text-white">{employee.name}</h1>
+              <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white">{employee.name}</h1>
               <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${cfg.bg} ${cfg.color}`}>
                 {cfg.label}
               </span>
@@ -141,12 +141,14 @@ export default function OffboardingDetailPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="clearance">
-        <TabsList>
-          <TabsTrigger value="clearance">Clearance</TabsTrigger>
-          <TabsTrigger value="exit-interview">Exit Interview</TabsTrigger>
-          <TabsTrigger value="final-pay">Final Pay</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-1">
+          <TabsList className="w-max">
+            <TabsTrigger value="clearance">Clearance</TabsTrigger>
+            <TabsTrigger value="exit-interview">Exit Interview</TabsTrigger>
+            <TabsTrigger value="final-pay">Final Pay</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Clearance Tab */}
         <TabsContent value="clearance">
@@ -331,7 +333,7 @@ export default function OffboardingDetailPage() {
       </Tabs>
 
       {record.notes && (
-        <div className="mt-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="mt-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Notes</p>
           <p className="text-sm text-gray-700 dark:text-gray-300">{record.notes}</p>
         </div>

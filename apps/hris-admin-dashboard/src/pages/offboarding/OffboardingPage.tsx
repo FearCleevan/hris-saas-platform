@@ -38,7 +38,7 @@ function KpiCard({ label, value, icon: Icon, color }: { label: string; value: nu
       </div>
       <div>
         <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -57,16 +57,16 @@ export default function OffboardingPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Offboarding</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage clearance, exit interviews and final pay</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Offboarding</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage clearance, exit interviews and final pay</p>
         </div>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KpiCard label="Total Offboarding" value={kpis.total} icon={UserMinus} color="bg-[#0038a8]/10 text-[#0038a8]" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <KpiCard label="Total Offboarding" value={kpis.total} icon={UserMinus} color="bg-brand-blue/10 text-brand-blue" />
         <KpiCard label="In Progress" value={kpis.inProgress} icon={Clock} color="bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400" />
         <KpiCard label="Completed" value={kpis.completed} icon={CheckCircle2} color="bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400" />
         <KpiCard label="Exit Interview Pending" value={kpis.exitPending} icon={AlertCircle} color="bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400" />
@@ -88,7 +88,7 @@ export default function OffboardingPage() {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 hover:border-[#0038a8]/40 hover:shadow-sm transition-all cursor-pointer"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 hover:border-brand-blue/40 hover:shadow-sm transition-all cursor-pointer"
               onClick={() => navigate(`/offboarding/${record.id}`)}
             >
               <div className="flex items-start gap-4">

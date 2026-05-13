@@ -67,11 +67,14 @@ export function KPICards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 animate-pulse">
+          <div key={i} className={cn(
+            'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 animate-pulse',
+            i === 4 && 'col-span-2 sm:col-span-1',
+          )}>
             <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-700 mb-4" />
-            <div className="h-8 w-16 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+            <div className="h-7 w-16 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
             <div className="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800 mb-1.5" />
             <div className="h-3 w-20 rounded bg-gray-100 dark:bg-gray-800" />
           </div>
@@ -81,7 +84,7 @@ export function KPICards() {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
       {cards.map((card, i) => (
         <motion.button
           key={card.title}
@@ -90,25 +93,29 @@ export function KPICards() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.07 }}
           onClick={() => navigate(card.link)}
-          className="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 text-left hover:border-[#0038a8]/40 hover:shadow-md transition-all duration-200 cursor-pointer"
+          className={cn(
+            'group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 text-left hover:border-brand-blue/40 hover:shadow-md transition-all duration-200 cursor-pointer',
+            // Last card spans full width on mobile (2-col grid) so it isn't orphaned alone
+            i === cards.length - 1 && 'col-span-2 sm:col-span-1',
+          )}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center', card.iconBg)}>
-              <card.icon className={cn('w-4.5 h-4.5', card.iconColor)} />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className={cn('w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center', card.iconBg)}>
+              <card.icon className={cn('w-4 h-4', card.iconColor)} />
             </div>
             <span className={cn(
               'flex items-center gap-0.5 text-[10px] font-semibold',
               card.trend === 'up' ? 'text-green-600 dark:text-green-400' :
-              card.trend === 'down' ? 'text-[#ce1126]' : 'text-gray-400'
+              card.trend === 'down' ? 'text-brand-red' : 'text-gray-400'
             )}>
               {card.trend === 'up' && <TrendingUp className="w-3 h-3" />}
               {card.trend === 'down' && <TrendingDown className="w-3 h-3" />}
             </span>
           </div>
-          <p className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1 leading-none">
+          <p className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white mb-1 leading-none">
             {card.value}
           </p>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 leading-tight">
             {card.title}
           </p>
           <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">

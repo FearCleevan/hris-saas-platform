@@ -86,7 +86,7 @@ function getInitials(n: string) { return n.split(' ').slice(0, 2).map(x => x[0])
 function KpiCard({ label, value, icon: IconC, sub, color }: { label: string; value: string | number; icon: React.ElementType; sub?: string; color?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
         <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
       </div>
       <div><p className="text-xs text-gray-500 dark:text-gray-400">{label}</p><p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>{sub && <p className="text-xs text-gray-400">{sub}</p>}</div>
@@ -177,10 +177,10 @@ export default function DocumentsPage() {
   return (
     <>
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Document Management</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{libraryKPIs.total} documents · {libraryKPIs.categories} categories</p>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Document Management</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">{libraryKPIs.total} documents · {libraryKPIs.categories} categories</p>
           </div>
           <div className="flex items-center gap-2">
             {activeTab === 'library' && (
@@ -193,10 +193,10 @@ export default function DocumentsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
           {TABS.map(tab => { const Icon = tab.icon; return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-[#0038a8] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-              <Icon className="w-4 h-4" />{tab.label}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+              <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
             </button>
           );})}
         </div>
@@ -207,7 +207,7 @@ export default function DocumentsPage() {
             {/* ===== LIBRARY TAB ===== */}
             {activeTab === 'library' && (
               <div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                   <KpiCard label="Total Documents" value={libraryKPIs.total} icon={FolderOpen} />
                   <KpiCard label="Active" value={libraryKPIs.active} icon={CheckCircle2} color="bg-green-500" />
                   <KpiCard label="Categories" value={libraryKPIs.categories} icon={Grid3X3} />
@@ -306,9 +306,9 @@ export default function DocumentsPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-                  <div className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                  <div className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold">{getInitials(selectedEmp.name)}</div>
+                      <div className="w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold">{getInitials(selectedEmp.name)}</div>
                       <div>
                         <p className="text-sm font-bold text-gray-800 dark:text-white">{selectedEmp.name}</p>
                         <p className="text-xs text-gray-400">{selectedEmp.position} · {selectedEmp.department}</p>
@@ -319,7 +319,7 @@ export default function DocumentsPage() {
                       <div className="h-full bg-green-500 rounded-full" style={{ width: `${Math.round((empDocs.length / Math.max(required201Categories.length, 1)) * 100)}%` }} />
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                     <p className="text-xs font-semibold text-gray-500 mb-3">Missing Documents</p>
                     {missing201.length === 0 ? (
                       <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" />All required documents present</p>
@@ -374,7 +374,7 @@ export default function DocumentsPage() {
                   <Upload className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4 group-hover:text-[#0038a8] transition-colors" />
                   <p className="text-base font-bold text-gray-500 dark:text-gray-400 mb-1">Drag & drop files here</p>
                   <p className="text-xs text-gray-400 mb-4">or click to browse — PDF, DOCX, XLSX, JPG, PNG (max 10MB)</p>
-                  <button className="px-5 py-2.5 bg-[#0038a8] text-white text-sm font-semibold rounded-xl hover:bg-[#002d8a] transition-colors" onClick={() => toast.success('Upload simulated — 3 files queued')}>
+                  <button className="px-5 py-2.5 bg-brand-blue text-white text-sm font-semibold rounded-xl hover:bg-brand-blue-dark transition-colors" onClick={() => toast.success('Upload simulated — 3 files queued')}>
                     <Plus className="w-4 h-4 inline mr-1.5" />Select Files
                   </button>
                 </div>
@@ -398,7 +398,7 @@ export default function DocumentsPage() {
             {/* ===== SIGNATURES TAB ===== */}
             {activeTab === 'signatures' && (
               <div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                   <KpiCard label="Documents Requiring Signature" value={sigDocs.length} icon={PenTool} />
                   <KpiCard label="Pending Signatures" value={pendingSigs.length} icon={Clock} color="bg-amber-500" />
                   <KpiCard label="Signed" value={signedSigs.length} icon={CheckCircle2} color="bg-green-500" />
@@ -421,7 +421,7 @@ export default function DocumentsPage() {
                             </div>
                           </div>
                           {doc.esignedStatus === 'pending' && (
-                            <button onClick={() => toast.success(`Document "${doc.name}" signed successfully`)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] shrink-0">
+                            <button onClick={() => toast.success(`Document "${doc.name}" signed successfully`)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark shrink-0">
                               <PenTool className="w-3 h-3" />Sign
                             </button>
                           )}
@@ -436,7 +436,7 @@ export default function DocumentsPage() {
             {/* ===== EXPIRING TAB ===== */}
             {activeTab === 'expiring' && (
               <div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                   <KpiCard label="Expiring This Month" value={expiringKPIs.thisMonth} icon={Clock} color="bg-amber-500" />
                   <KpiCard label="Already Expired" value={expiringKPIs.expired} icon={AlertTriangle} color="bg-red-500" />
                   <KpiCard label="Within 30 Days" value={expiringKPIs.within30} icon={Clock} color="bg-red-500" />
@@ -445,7 +445,7 @@ export default function DocumentsPage() {
                   <label className="text-xs font-semibold text-gray-500">Show expiring within:</label>
                   <div className="flex gap-1">
                     {EXPIRING_OPTIONS.map(d => (
-                      <button key={d} onClick={() => setExpiringDays(d)} className={`px-3 py-1 rounded-lg text-xs font-semibold ${expiringDays === d ? 'bg-[#0038a8] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>{d}d</button>
+                      <button key={d} onClick={() => setExpiringDays(d)} className={`px-3 py-1 rounded-lg text-xs font-semibold ${expiringDays === d ? 'bg-brand-blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>{d}d</button>
                     ))}
                   </div>
                 </div>
@@ -466,7 +466,7 @@ export default function DocumentsPage() {
                               {doc.daysLeft <= 0 ? 'EXPIRED' : `${doc.daysLeft} days remaining`} · Expires {format(new Date(doc.expiryDate), 'MMM d, yyyy')}
                             </p>
                           </div>
-                          <button onClick={() => toast.success(`Renewal initiated for "${doc.name}"`)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] shrink-0">Renew</button>
+                          <button onClick={() => toast.success(`Renewal initiated for "${doc.name}"`)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark shrink-0">Renew</button>
                         </div>
                       </motion.div>
                     );
@@ -489,7 +489,7 @@ export default function DocumentsPage() {
                   </div>
                 </div>
                 {selectedVersionDocument && (
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-4">
+                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 mb-4">
                     <p className="text-sm font-bold text-gray-800 dark:text-white">{selectedVersionDocument.name}</p>
                     <p className="text-xs text-gray-400 mt-0.5">Current: {selectedVersionDocument.version} · {selectedVersionDocument.fileSize} · {versionHistory.length} versions total</p>
                   </div>
@@ -547,7 +547,7 @@ export default function DocumentsPage() {
                 <p className="text-xs text-gray-400 pt-1">{selectedDoc.description}</p>
               </div>
               <div className="flex gap-3 mt-4">
-                <button onClick={() => { toast.success(`Downloading ${selectedDoc.name}`); setSelectedDoc(null); }} className="flex-1 h-10 rounded-xl bg-[#0038a8] text-white text-sm font-bold hover:bg-[#002d8a]"><Download className="w-4 h-4 inline mr-1" />Download</button>
+                <button onClick={() => { toast.success(`Downloading ${selectedDoc.name}`); setSelectedDoc(null); }} className="flex-1 h-10 rounded-xl bg-brand-blue text-white text-sm font-bold hover:bg-brand-blue-dark"><Download className="w-4 h-4 inline mr-1" />Download</button>
               </div>
             </motion.div>
           </motion.div>

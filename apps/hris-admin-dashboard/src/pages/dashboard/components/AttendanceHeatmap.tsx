@@ -87,13 +87,13 @@ export function AttendanceHeatmap() {
   }, [cells]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
         <div>
           <h3 className="font-bold text-gray-900 dark:text-white text-sm">Attendance Heatmap</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">Last 13 weeks · avg {Math.round(avgRate * 100)}% attendance</p>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-gray-400">
+        <div className="flex items-center gap-2 text-[10px] text-gray-400 shrink-0">
           <span>Low</span>
           {(['low', 'medium', 'good', 'high'] as RateLevel[]).map((l) => (
             <div key={l} className={cn('w-3 h-3 rounded-sm', levelStyles[l])} />

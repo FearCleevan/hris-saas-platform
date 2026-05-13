@@ -197,7 +197,7 @@ function CategoryCard({
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <div className="w-24 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+          <div className="hidden sm:block w-24 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             {/* eslint-disable-next-line react/forbid-dom-props -- dynamic width requires inline style */}
             <div
               className={`h-full rounded-full transition-all ${allDone ? 'bg-green-500' : 'bg-brand-blue'}`}
@@ -284,15 +284,15 @@ export default function OnboardingDetailPage() {
       </Link>
 
       {/* Header card */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
           <div className="w-16 h-16 rounded-2xl bg-brand-blue flex items-center justify-center text-white text-xl font-bold shrink-0">
             {getInitials(detail.employeeName)}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-xl font-extrabold text-gray-900 dark:text-white">{detail.employeeName}</h1>
+              <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white">{detail.employeeName}</h1>
               <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${cfg.bg} ${cfg.color}`}>
                 {cfg.label}
               </span>

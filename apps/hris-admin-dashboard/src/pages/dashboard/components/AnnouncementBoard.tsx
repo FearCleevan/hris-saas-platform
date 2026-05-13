@@ -71,7 +71,7 @@ export function AnnouncementBoard() {
   const rest = announcementsData.filter((a) => !a.pinned);
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-bold text-gray-900 dark:text-white text-sm">Announcements</h3>

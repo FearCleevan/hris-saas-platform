@@ -50,7 +50,7 @@ function KpiCard({
       </div>
       <div>
         <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -86,7 +86,7 @@ function OnboardingCard({ record, index }: { record: OnboardingRecord; index: nu
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
-      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 hover:border-brand-blue/40 hover:shadow-sm transition-all cursor-pointer group"
+      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 hover:border-brand-blue/40 hover:shadow-sm transition-all cursor-pointer group"
       onClick={() => navigate(`/onboarding/${record.employeeId}`)}
     >
       <div className="flex items-start gap-4">
@@ -178,10 +178,10 @@ export default function OnboardingPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Onboarding</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Onboarding</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Track new hire checklists and pre-employment requirements
           </p>
         </div>
@@ -195,7 +195,7 @@ export default function OnboardingPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
         <KpiCard label="Total Onboarding" value={kpis.total}      icon={ClipboardList} color="bg-brand-blue/10 text-brand-blue" />
         <KpiCard label="In Progress"       value={kpis.inProgress} icon={Clock}         color="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" />
         <KpiCard label="Completed"         value={kpis.completed}  icon={CheckCircle2}  color="bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400" />

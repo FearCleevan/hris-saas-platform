@@ -14,6 +14,14 @@ export function DashboardLayout() {
   const { sidebarOpen } = useUIStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
+  // Track desktop breakpoint so framer-motion margin only applies on md+
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -26,19 +34,25 @@ export function DashboardLayout() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    if (isDesktop) setMobileMenuOpen(false);
+  }, [isDesktop]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
       <Sidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
 
-      {/* Main content shifts right on desktop to accommodate sidebar */}
+      {/* On mobile: no left margin (sidebar is an overlay).
+          On desktop: framer-motion animates margin to match sidebar width. */}
       <motion.div
-        animate={{ marginLeft: sidebarOpen ? 240 : 64 }}
+        animate={{ marginLeft: isDesktop ? (sidebarOpen ? 240 : 64) : 0 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="flex-1 flex flex-col min-w-0 md:ml-16"
+        className="flex-1 flex flex-col min-w-0"
       >
         <Navbar onMobileMenuClick={() => setMobileMenuOpen(true)} />
 
-        <main className="flex-1 overflow-auto p-5 sm:p-6">
+        <main className="flex-1 overflow-auto p-4 sm:p-5 lg:p-6">
           <Breadcrumbs />
           <Outlet />
         </main>

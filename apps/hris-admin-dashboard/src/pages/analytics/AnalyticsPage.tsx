@@ -191,10 +191,10 @@ export default function AnalyticsPage() {
   /* ─── Render ─── */
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Analytics & Insights</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Analytics & Insights</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Data-driven insights across all HR modules · Last updated: {format(new Date(), 'MMM d, yyyy h:mm a')}
           </p>
         </div>
@@ -208,17 +208,17 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
               isActive
                 ? tab.highlight ? 'bg-indigo-600 text-white shadow-sm' : 'bg-brand-blue text-white shadow-sm'
                 : tab.highlight ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}>
-              <Icon className="w-4 h-4" />{tab.label}
+              <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
               {tab.highlight && !isActive && (
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">AI</span>
               )}
@@ -243,7 +243,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-                <div className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Headcount Trend</h3>
                   <div className="flex items-end gap-4 h-32">
                     {workforce.headcountTrend.map((v, i) => {
@@ -258,7 +258,7 @@ export default function AnalyticsPage() {
                     })}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Department Distribution</h3>
                   <div className="flex flex-col gap-2">
                     {workforce.deptBreakdown.slice(0, 6).map(dept => (
@@ -298,7 +298,7 @@ export default function AnalyticsPage() {
           {/* ===== WORKFORCE TAB ===== */}
           {activeTab === 'workforce' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total Headcount" value={workforce.headcountTrend[5]} icon={Users} />
                 <KpiCard label="Active Employees" value={ACTIVE_EMP.length} icon={CheckCircle2} color="bg-green-500" sub={pct(ACTIVE_EMP.length, employeesData.length)} />
                 <KpiCard label="Avg Tenure" value={`${(differenceInMonths(new Date('2023-11-24'), new Date('2020-06-15')) / 12).toFixed(1)} yrs`} icon={Clock} />
@@ -306,14 +306,14 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Headcount by Department</h3>
                   <div className="flex flex-col gap-2">
                     {workforce.deptBreakdown.map(dept => (
                       <div key={dept.name} className="flex items-center gap-3">
                         <span className="text-xs text-gray-500 w-28">{dept.name}</span>
                         <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#0038a8] rounded-full flex items-center justify-end pr-2" style={{ width: `${(dept.count / workforce.maxDept) * 100}%` }}>
+                          <div className="h-full bg-brand-blue rounded-full flex items-center justify-end pr-2" style={{ width: `${(dept.count / workforce.maxDept) * 100}%` }}>
                             <span className="text-[9px] font-bold text-white">{dept.count}</span>
                           </div>
                         </div>
@@ -322,7 +322,7 @@ export default function AnalyticsPage() {
                     ))}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Age Distribution</h3>
                   <div className="flex items-end gap-3 h-28">
                     {Object.entries(workforce.ageGroups).map(([range, count]) => {
@@ -340,7 +340,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Tenure Distribution</h3>
                   {Object.entries(workforce.tenureGroups).map(([range, count]) => (
                     <div key={range} className="flex items-center gap-2 mb-2">
@@ -352,7 +352,7 @@ export default function AnalyticsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Employment Type</h3>
                   {Object.entries(workforce.typeDist).map(([type, count]) => (
                     <div key={type} className="flex items-center justify-between mb-2">
@@ -361,7 +361,7 @@ export default function AnalyticsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Gender Ratio</h3>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="flex-1 h-6 bg-blue-500 rounded-full flex items-center justify-center" style={{ width: `${(workforce.genderDist.male / 50) * 100}%` }}>
@@ -383,7 +383,7 @@ export default function AnalyticsPage() {
           {/* ===== PAYROLL TAB ===== */}
           {activeTab === 'payroll' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Monthly Payroll" value={pesoFull(payroll.totalPayroll)} icon={DollarSign} trend="up" />
                 <KpiCard label="Cost per Employee" value={pesoFull(payroll.avgSalary)} icon={Users} />
                 <KpiCard label="Overtime Cost" value={pesoFull(payroll.totalOvertime)} icon={Clock} trend="down" />
@@ -391,7 +391,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">6-Month Payroll Trend</h3>
                   <div className="flex items-end gap-4 h-36">
                     {payroll.trend.map((v, i) => {
@@ -406,7 +406,7 @@ export default function AnalyticsPage() {
                     })}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Cost by Department</h3>
                   <div className="flex flex-col gap-2">
                     {payroll.deptCosts.map(dept => (
@@ -428,7 +428,7 @@ export default function AnalyticsPage() {
           {/* ===== ATTENDANCE TAB ===== */}
           {activeTab === 'attendance' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Attendance Rate" value={`${attendance.rate}%`} icon={CheckCircle2} color={attendance.rate >= 90 ? 'bg-green-500' : 'bg-amber-500'} />
                 <KpiCard label="Absenteeism" value={`${Math.round((attendance.absent / Math.max(attendance.total, 1)) * 100)}%`} icon={XCircle} color="bg-red-500" />
                 <KpiCard label="Late Arrivals" value={attendance.late} icon={Clock} color="bg-amber-500" />
@@ -436,7 +436,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Late Arrivals Trend</h3>
                   <div className="flex items-end gap-4 h-28">
                     {attendance.lateTrend.map((v, i) => {
@@ -452,7 +452,7 @@ export default function AnalyticsPage() {
                     })}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Absences by Day of Week</h3>
                   <div className="flex items-end gap-3 h-28">
                     {Object.entries(attendance.dayOfWeekAbsence).map(([day, count]) => {
@@ -490,7 +490,7 @@ export default function AnalyticsPage() {
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                 </div>
-                <button onClick={() => { toast.success('Analyzing data...'); setTimeout(() => toast.success('New insights generated!'), 2000); }} className="ml-auto px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold">
+                <button onClick={() => { toast.success('Analyzing data...'); setTimeout(() => toast.success('New insights generated!'), 2000); }} className="ml-auto px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold">
                   <Sparkles className="w-3 h-3 inline mr-1" />Generate Insights
                 </button>
                 <span className="text-xs text-gray-400">{filteredInsights.length} insights</span>
@@ -519,7 +519,7 @@ export default function AnalyticsPage() {
                         {ins.status === 'active' && (
                           <button onClick={() => dismissInsight(ins.id)} className="text-[10px] font-semibold text-gray-500 hover:text-red-500"><EyeOff className="w-3 h-3 inline mr-0.5" />Dismiss</button>
                         )}
-                        <button onClick={() => toast.success('Action implemented')} className="text-[10px] font-semibold text-[#0038a8] hover:underline">✓ Implement</button>
+                        <button onClick={() => toast.success('Action implemented')} className="text-[10px] font-semibold text-brand-blue hover:underline">✓ Implement</button>
                       </div>
                     </motion.div>
                   );
@@ -533,16 +533,16 @@ export default function AnalyticsPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-500">{(dashboards as any[]).length} saved dashboards</p>
-                <button onClick={() => toast.success('New dashboard created')} className="px-4 py-2 bg-[#0038a8] text-white text-xs font-semibold rounded-xl">+ New Dashboard</button>
+                <button onClick={() => toast.success('New dashboard created')} className="px-4 py-2 bg-brand-blue text-white text-xs font-semibold rounded-xl">+ New Dashboard</button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {(dashboards as any[]).map((dash: any, i: number) => (
-                  <motion.div key={dash.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 ${dash.isDefault ? 'border-[#0038a8] ring-1 ring-[#0038a8]/20' : 'border-gray-200 dark:border-gray-800'}`}>
+                  <motion.div key={dash.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 sm:p-5 ${dash.isDefault ? 'border-brand-blue ring-1 ring-brand-blue/20' : 'border-gray-200 dark:border-gray-800'}`}>
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-gray-800 dark:text-white">{dash.name}</p>
-                          {dash.isDefault && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#0038a8]/10 text-[#0038a8] font-semibold">Default</span>}
+                          {dash.isDefault && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue font-semibold">Default</span>}
                         </div>
                         <p className="text-xs text-gray-400">{dash.description}</p>
                       </div>
@@ -557,7 +557,7 @@ export default function AnalyticsPage() {
                       <span>Modified: {format(new Date(dash.lastModified), 'MMM d')}</span>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <button onClick={() => toast.success(`Viewing: ${dash.name}`)} className="px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold"><Eye className="w-3 h-3 inline mr-1" />View</button>
+                      <button onClick={() => toast.success(`Viewing: ${dash.name}`)} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold"><Eye className="w-3 h-3 inline mr-1" />View</button>
                       <button onClick={() => toast.success('Dashboard exported')} className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600"><Download className="w-3 h-3 inline mr-1" />Export</button>
                     </div>
                   </motion.div>

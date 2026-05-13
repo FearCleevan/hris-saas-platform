@@ -1,6 +1,5 @@
 import { Menu, Search, Bell, Sun, Moon, LogOut, Building2, User, ChevronDown, Zap, UserPlus, DollarSign, BarChart2, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useUIStore } from '@/store/uiStore';
@@ -35,20 +34,20 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
   const unreadCount = notificationsData.filter((n) => !n.read).length;
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3 px-4 shrink-0 z-20 sticky top-0">
+    <header className="h-14 sm:h-16 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 shrink-0 z-20 sticky top-0">
       {/* Mobile menu toggle */}
       <button
         type="button"
         onClick={onMobileMenuClick}
-        className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 md:hidden transition-colors cursor-pointer"
+        className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 md:hidden transition-colors cursor-pointer shrink-0"
         aria-label="Toggle menu"
       >
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* Tenant name */}
+      {/* Tenant name — hidden on mobile to save space */}
       {tenant && (
-        <div className="hidden sm:flex items-center gap-2 text-sm">
+        <div className="hidden lg:flex items-center gap-2 text-sm shrink-0">
           <Building2 className="w-4 h-4 text-gray-400" />
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-48">
             {tenant.name}
@@ -56,32 +55,32 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
         </div>
       )}
 
-      {/* Search bar */}
+      {/* Search bar — flex-1 so it fills available space */}
       <button
         type="button"
         onClick={() => setSearchOpen(true)}
-        className="flex-1 max-w-sm flex items-center gap-2 px-3 h-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-400 text-sm hover:border-[#0038a8]/50 hover:bg-white dark:hover:bg-gray-800 transition-all cursor-pointer"
+        className="flex-1 flex items-center gap-2 px-3 h-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-400 text-sm hover:border-brand-blue/50 hover:bg-white dark:hover:bg-gray-800 transition-all cursor-pointer min-w-0"
         aria-label="Open global search"
       >
         <Search className="w-4 h-4 shrink-0" />
-        <span className="hidden sm:block">Search employees, payroll, reports…</span>
+        <span className="hidden sm:block truncate">Search employees, payroll, reports…</span>
         <span className="sm:hidden">Search…</span>
-        <kbd className="ml-auto hidden sm:inline-flex items-center gap-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-1.5 py-0.5 text-[10px] font-mono text-gray-400">
+        <kbd className="ml-auto hidden sm:inline-flex items-center gap-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-1.5 py-0.5 text-[10px] font-mono text-gray-400 shrink-0">
           ⌘K
         </kbd>
       </button>
 
-      <div className="flex items-center gap-1 ml-auto">
-        {/* Quick actions */}
+      <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+        {/* Quick actions — visible sm+ */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-lg bg-[#0038a8] hover:bg-[#002d8a] text-white text-xs font-semibold transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-lg bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-semibold transition-colors cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5" />
-              Quick Actions
-              <ChevronDown className="w-3 h-3 ml-0.5" />
+              <span className="hidden md:inline">Quick Actions</span>
+              <ChevronDown className="w-3 h-3 ml-0.5 hidden md:block" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
@@ -129,10 +128,7 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
               className="flex items-center gap-2 pl-2 pr-1 h-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
               aria-label="User menu"
             >
-              <div className={cn(
-                'w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0',
-                'bg-[#0038a8]'
-              )}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-brand-blue">
                 {getInitials(user?.name ?? 'U')}
               </div>
               <div className="hidden sm:flex flex-col items-start leading-none">
@@ -152,6 +148,16 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {/* Quick actions accessible on mobile via user menu */}
+            <div className="sm:hidden">
+              {quickActions.map((action) => (
+                <DropdownMenuItem key={action.label} onClick={() => navigate(action.path)}>
+                  <action.icon className="w-4 h-4 text-gray-400" />
+                  {action.label}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+            </div>
             <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
               <User className="w-4 h-4 text-gray-400" />
               My Profile
@@ -163,7 +169,7 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => { logout(); navigate('/login'); }}
-              className="text-[#ce1126] focus:text-[#ce1126] focus:bg-red-50 dark:focus:bg-red-950/20"
+              className="text-brand-red focus:text-brand-red focus:bg-red-50 dark:focus:bg-red-950/20"
             >
               <LogOut className="w-4 h-4" />
               Sign Out

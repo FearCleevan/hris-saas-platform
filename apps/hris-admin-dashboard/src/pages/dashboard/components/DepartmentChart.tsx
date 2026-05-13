@@ -27,7 +27,7 @@ export function DepartmentChart() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 h-full">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 h-full">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-bold text-gray-900 dark:text-white text-sm">By Department</h3>
@@ -36,7 +36,7 @@ export function DepartmentChart() {
         <button
           type="button"
           onClick={() => navigate('/employees')}
-          className="text-xs text-[#0038a8] dark:text-blue-400 hover:underline font-medium cursor-pointer"
+          className="text-xs text-brand-blue dark:text-blue-400 hover:underline font-medium cursor-pointer"
         >
           View all
         </button>

@@ -173,7 +173,7 @@ Note: For Philippine context — probationary period is 6 months; after that emp
     <div className="flex flex-col gap-5">
 
       {/* Controls */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center shrink-0">
             <Brain className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -278,7 +278,7 @@ Note: For Philippine context — probationary period is 6 months; after that emp
                   </div>
                   <div className="text-left">
                     <p className={`text-xs font-semibold ${cfg.color}`}>{level} Risk</p>
-                    <p className={`text-2xl font-extrabold ${cfg.color}`}>{count}</p>
+                    <p className={`text-xl sm:text-2xl font-extrabold ${cfg.color}`}>{count}</p>
                     <p className="text-[10px] text-gray-400">employees</p>
                   </div>
                 </button>
@@ -328,7 +328,7 @@ Note: For Philippine context — probationary period is 6 months; after that emp
                         >
                           <td className="px-4 py-2.5">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                              <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                                 {getInitials(emp.name)}
                               </div>
                               <div>

@@ -184,8 +184,8 @@ export default function BulkUploadPage() {
         Back to Employees
       </Link>
 
-      <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">Bulk Upload Employees</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Upload a CSV file to add multiple employees at once.</p>
+      <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white mb-1">Bulk Upload Employees</h1>
+      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6">Upload a CSV file to add multiple employees at once.</p>
 
       <div className="max-w-2xl space-y-5">
         {/* Step 1: Download template */}

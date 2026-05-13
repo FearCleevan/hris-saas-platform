@@ -94,8 +94,8 @@ function ratingBg(r: number): string { return r >= 4.5 ? 'bg-green-500' : r >= 3
 function KpiCard({ label, value, icon: IconC, sub, color }: { label: string; value: string | number; icon: React.ElementType; sub?: string; color?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
-        <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
+        <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-brand-blue'}`} />
       </div>
       <div><p className="text-xs text-gray-500 dark:text-gray-400">{label}</p><p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>{sub && <p className="text-xs text-gray-400">{sub}</p>}</div>
     </div>
@@ -187,10 +187,10 @@ export default function PerformancePage() {
   /* ─── Render ─── */
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Performance Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Performance Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {activeCycle.name} · {activeCycle.period} · {reviewKPIs.completed}/{reviewKPIs.total} reviews completed
           </p>
         </div>
@@ -204,16 +204,16 @@ export default function PerformancePage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
           <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors
               ${activeTab === tab.id
-                ? 'bg-[#0038a8] text-white shadow-sm'
+                ? 'bg-brand-blue text-white shadow-sm'
                 : tab.highlight
                   ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <Icon className="w-4 h-4" />{tab.label}
+            <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
             {tab.highlight && activeTab !== tab.id && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-600 text-white">AI</span>
             )}
@@ -227,7 +227,7 @@ export default function PerformancePage() {
           {/* ===== REVIEWS TAB ===== */}
           {activeTab === 'reviews' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total Reviews" value={reviewKPIs.total} icon={ClipboardList} />
                 <KpiCard label="Completed" value={reviewKPIs.completed} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="In Progress" value={reviewKPIs.inProgress} icon={Clock} color="bg-amber-500" />
@@ -260,7 +260,7 @@ export default function PerformancePage() {
                           <tr key={r.id} className={`${i < cycleReviews.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20`}>
                             <td className="px-4 py-2.5">
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
+                                <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
                                 <div><p className="text-xs font-semibold text-gray-800 dark:text-white">{r.emp?.name}</p><p className="text-[10px] text-gray-400">{r.emp?.department}</p></div>
                               </div>
                             </td>
@@ -297,7 +297,7 @@ export default function PerformancePage() {
                   <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Active Goals" value={goalKPIs.active} icon={Target} />
                 <KpiCard label="On Track" value={goalKPIs.onTrack} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="At Risk" value={goalKPIs.atRisk} icon={AlertTriangle} color="bg-red-500" />
@@ -308,7 +308,7 @@ export default function PerformancePage() {
                 {empGoals.map((goal, i) => {
                   const stColor = GOAL_STATUS_CFG[goal.status];
                   return (
-                    <motion.div key={goal.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                    <motion.div key={goal.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
@@ -358,12 +358,12 @@ export default function PerformancePage() {
                 <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 text-center">
                   <Edit3 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-sm font-semibold text-gray-500">Self-assessment not yet started</p>
-                  <button onClick={() => toast.success('Self-assessment started')} className="mt-3 px-4 py-2 bg-[#0038a8] text-white text-xs font-semibold rounded-xl">Start Self-Assessment</button>
+                  <button onClick={() => toast.success('Self-assessment started')} className="mt-3 px-4 py-2 bg-brand-blue text-white text-xs font-semibold rounded-xl">Start Self-Assessment</button>
                 </div>
               ) : (
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold">{getInitials(selfEmp.name)}</div>
+                    <div className="w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold">{getInitials(selfEmp.name)}</div>
                     <div><p className="text-sm font-bold text-gray-800 dark:text-white">{selfEmp.name}</p><p className="text-xs text-gray-400">{selfEmp.position}</p></div>
                   </div>
                   <p className="text-xs font-semibold text-gray-500 mb-3">Competency Ratings</p>
@@ -388,7 +388,7 @@ export default function PerformancePage() {
                     <p className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3">{selfReview.selfAssessment?.careerGoals || '—'}</p>
                   </div>
                   {selfReview.status === 'self_assessment' && (
-                    <button onClick={() => toast.success('Self-assessment submitted')} className="mt-4 px-4 py-2 bg-[#0038a8] text-white text-xs font-semibold rounded-xl">Submit Self-Assessment</button>
+                    <button onClick={() => toast.success('Self-assessment submitted')} className="mt-4 px-4 py-2 bg-brand-blue text-white text-xs font-semibold rounded-xl">Submit Self-Assessment</button>
                   )}
                 </div>
               )}
@@ -398,7 +398,7 @@ export default function PerformancePage() {
           {/* ===== EVALUATIONS TAB ===== */}
           {activeTab === 'evaluations' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Pending Reviews" value={pendingEvaluations.length} icon={Clock} color="bg-amber-500" />
                 <KpiCard label="Completed" value={completedEvaluations.length} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="Avg Rating" value={completedEvaluations.length > 0 ? (completedEvaluations.reduce((s, r) => s + (r.managerReview?.overallRating || 0), 0) / completedEvaluations.length).toFixed(1) : '—'} icon={StarIcon} color="bg-blue-500" />
@@ -410,10 +410,10 @@ export default function PerformancePage() {
                     {pendingEvaluations.map((r) => (
                       <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
+                          <div className="w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
                           <div><p className="text-sm font-semibold text-gray-800 dark:text-white">{r.emp?.name}</p><p className="text-xs text-gray-400">{r.emp?.department}</p></div>
                         </div>
-                        <button onClick={() => toast.success(`Evaluation submitted for ${r.emp?.name}`)} className="px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold">Complete Review</button>
+                        <button onClick={() => toast.success(`Evaluation submitted for ${r.emp?.name}`)} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold">Complete Review</button>
                       </div>
                     ))}
                   </div>
@@ -425,7 +425,7 @@ export default function PerformancePage() {
                   {completedEvaluations.map((r) => (
                     <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
+                        <div className="w-8 h-8 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold">{getInitials(r.emp?.name || '')}</div>
                         <div><p className="text-sm font-semibold text-gray-800 dark:text-white">{r.emp?.name}</p><p className="text-xs text-gray-400">{r.emp?.department}</p></div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -494,9 +494,9 @@ export default function PerformancePage() {
                   <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-4">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 mb-4">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold">{getInitials(historyEmp.name)}</div>
+                  <div className="w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold">{getInitials(historyEmp.name)}</div>
                   <div><p className="text-sm font-bold text-gray-800 dark:text-white">{historyEmp.name}</p><p className="text-xs text-gray-400">{historyEmp.position} · {historyEmp.department}</p></div>
                 </div>
                 {historyReviews.length > 0 && (
@@ -545,7 +545,7 @@ export default function PerformancePage() {
           {/* ===== PROMOTIONS TAB ===== */}
           {activeTab === 'promotions' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Candidates" value={promotionCandidates.length} icon={TrendingUp} />
                 <KpiCard label="Ready Now" value={promotionCandidates.filter(c => c.readiness === 'Ready Now').length} icon={Trophy} color="bg-green-500" />
                 <KpiCard label="6 Months" value={promotionCandidates.filter(c => c.readiness === '6 Months').length} icon={Clock} color="bg-amber-500" />
@@ -568,7 +568,7 @@ export default function PerformancePage() {
                         <tr key={c.id} className={`${i < promotionCandidates.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20`}>
                           <td className="px-4 py-2.5">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(c.emp?.name || '')}</div>
+                              <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold">{getInitials(c.emp?.name || '')}</div>
                               <span className="text-xs font-semibold text-gray-800 dark:text-white">{c.emp?.name}</span>
                             </div>
                           </td>
@@ -580,7 +580,7 @@ export default function PerformancePage() {
                             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${c.readiness === 'Ready Now' ? 'bg-green-50 text-green-600' : c.readiness === '6 Months' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>{c.readiness}</span>
                           </td>
                           <td className="px-4 py-2.5">
-                            <button onClick={() => toast.success(`Promotion recommended for ${c.emp?.name}`)} className="text-[10px] font-semibold text-[#0038a8] hover:underline">Recommend</button>
+                            <button onClick={() => toast.success(`Promotion recommended for ${c.emp?.name}`)} className="text-[10px] font-semibold text-brand-blue hover:underline">Recommend</button>
                           </td>
                         </tr>
                       ))}

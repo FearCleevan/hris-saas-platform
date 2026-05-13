@@ -142,8 +142,8 @@ function RunsTab({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 ${
-                isLatest ? 'border-[#0038a8]/30 shadow-sm' : 'border-gray-200 dark:border-gray-800'
+              className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 sm:p-5 ${
+                isLatest ? 'border-brand-blue/30 shadow-sm' : 'border-gray-200 dark:border-gray-800'
               }`}
             >
               <div className="flex items-start gap-4 flex-wrap">
@@ -151,7 +151,7 @@ function RunsTab({
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="text-sm font-bold text-gray-800 dark:text-white">{run.period}</p>
                     {isLatest && (
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#0038a8] text-white">CURRENT</span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand-blue text-white">CURRENT</span>
                     )}
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${cfg.bg} ${cfg.color}`}>
                       {cfg.label}
@@ -173,7 +173,7 @@ function RunsTab({
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] text-gray-400">Net Pay</p>
-                    <p className="text-base font-extrabold text-[#0038a8] dark:text-blue-400">{peso(run.totalNetPay)}</p>
+                    <p className="text-base font-extrabold text-brand-blue dark:text-blue-400">{peso(run.totalNetPay)}</p>
                   </div>
 
                   {nextStatus && (
@@ -184,7 +184,7 @@ function RunsTab({
                         nextStatus === 'review'
                           ? 'bg-amber-500 hover:bg-amber-600 text-white'
                           : nextStatus === 'approved'
-                          ? 'bg-[#0038a8] hover:bg-[#002d8a] text-white'
+                          ? 'bg-brand-blue hover:bg-brand-blue-dark text-white'
                           : 'bg-green-500 hover:bg-green-600 text-white'
                       }`}
                     >
@@ -213,7 +213,7 @@ function RunsTab({
                     <div
                       key={step}
                       className={`h-1 flex-1 rounded-full transition-colors ${
-                        done ? 'bg-[#0038a8]' : 'bg-gray-100 dark:bg-gray-800'
+                        done ? 'bg-brand-blue' : 'bg-gray-100 dark:bg-gray-800'
                       }`}
                     />
                   );
@@ -287,7 +287,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
             value={selectedRunId}
             onChange={(e) => setSelectedRunId(e.target.value)}
             title="Select payroll run"
-            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0038a8]/40 transition-colors"
+            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors"
           >
             {runRuns.map((r) => (
               <option key={r.id} value={r.id}>{r.period}</option>
@@ -301,7 +301,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
             value={deptFilter}
             onChange={(e) => setDeptFilter(e.target.value)}
             title="Filter by department"
-            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0038a8]/40 transition-colors"
+            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors"
           >
             {departments.map((d) => (
               <option key={d} value={d}>{d === 'all' ? 'All Departments' : d}</option>
@@ -315,7 +315,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
           placeholder="Search employee…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-9 px-3 w-44 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0038a8]/40 transition-colors"
+          className="h-9 px-3 w-44 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors"
         />
 
         <span className="text-xs text-gray-400">{filtered.length} employees</span>
@@ -331,7 +331,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
           <button
             type="button"
             onClick={() => exportRegisterCSV(filtered)}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors"
           >
             <Download className="w-3.5 h-3.5" />Export CSV
           </button>
@@ -345,16 +345,16 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
               <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 sticky left-0 bg-gray-50/80 dark:bg-gray-800/60 min-w-[180px]">Employee</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[70px]">Days</th>
-                <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[110px]">Basic Pay</th>
+                <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-27.5">Basic Pay</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[90px]">OT Pay</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[100px]">Allowances</th>
-                <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[110px]">Gross Pay</th>
+                <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-27.5">Gross Pay</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[80px]">SSS</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[90px]">PhilHealth</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[80px]">Pag-IBIG</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[90px]">Tax</th>
                 <th className="text-right px-3 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 min-w-[90px]">Loans</th>
-                <th className="text-right px-3 py-3 text-xs font-semibold text-[#0038a8] dark:text-blue-400 min-w-[110px]">Net Pay</th>
+                <th className="text-right px-3 py-3 text-xs font-semibold text-brand-blue dark:text-blue-400 min-w-27.5">Net Pay</th>
               </tr>
             </thead>
             <tbody>
@@ -368,7 +368,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
                   >
                     <td className="px-4 py-2.5 sticky left-0 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/20">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-brand-blue flex items-center justify-center text-white text-[9px] font-bold shrink-0">
                           {getInitials(r.emp.name)}
                         </div>
                         <div>
@@ -391,7 +391,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
                     <td className="px-3 py-2.5 text-right text-xs font-mono text-amber-600 dark:text-amber-400">
                       {loans > 0 ? peso(loans) : <span className="text-gray-300 dark:text-gray-700">—</span>}
                     </td>
-                    <td className="px-3 py-2.5 text-right text-sm font-bold text-[#0038a8] dark:text-blue-400">{peso(r.netPay)}</td>
+                    <td className="px-3 py-2.5 text-right text-sm font-bold text-brand-blue dark:text-blue-400">{peso(r.netPay)}</td>
                   </tr>
                 );
               })}
@@ -407,7 +407,7 @@ function RegisterTab({ records }: { records: PayrollRecord[] }) {
                 <td className="px-3 py-3 text-right text-xs font-bold text-red-500">{peso(totals.pi)}</td>
                 <td className="px-3 py-3 text-right text-xs font-bold text-red-500">{peso(totals.tax)}</td>
                 <td className="px-3 py-3 text-right text-xs font-bold text-red-500">—</td>
-                <td className="px-3 py-3 text-right text-sm font-extrabold text-[#0038a8] dark:text-blue-400">{peso(totals.net)}</td>
+                <td className="px-3 py-3 text-right text-sm font-extrabold text-brand-blue dark:text-blue-400">{peso(totals.net)}</td>
               </tr>
             </tfoot>
           </table>
@@ -438,7 +438,7 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
             value={selectedEmpId}
             onChange={(e) => setSelectedEmpId(e.target.value)}
             title="Select employee"
-            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0038a8]/40 transition-colors"
+            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors"
           >
             {sortedEmps.map((e) => (
               <option key={e.id} value={e.id}>{e.name}</option>
@@ -452,7 +452,7 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
             value={selectedRunId}
             onChange={(e) => setSelectedRunId(e.target.value)}
             title="Select pay period"
-            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0038a8]/40 transition-colors"
+            className="h-9 appearance-none pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors"
           >
             {runsList.map((r) => (
               <option key={r.id} value={r.id}>{r.period}</option>
@@ -472,7 +472,7 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
           <button
             type="button"
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors"
           >
             <Printer className="w-3.5 h-3.5" />Print / PDF
           </button>
@@ -489,7 +489,7 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
           className="max-w-2xl mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm"
         >
           {/* Payslip header */}
-          <div className="bg-[#0038a8] px-8 py-6 text-white">
+          <div className="bg-brand-blue px-8 py-6 text-white">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold opacity-70 uppercase tracking-widest">HRIS Solutions Inc.</p>
@@ -570,12 +570,12 @@ function PayslipTab({ records }: { records: PayrollRecord[] }) {
           </div>
 
           {/* Net pay */}
-          <div className="mx-8 mb-6 bg-[#0038a8]/5 dark:bg-[#0038a8]/10 border border-[#0038a8]/20 rounded-xl px-6 py-4 flex items-center justify-between">
+          <div className="mx-8 mb-6 bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20 rounded-xl px-6 py-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">NET PAY</p>
               <p className="text-[10px] text-gray-400">After all deductions · {run.type}</p>
             </div>
-            <p className="text-3xl font-extrabold text-[#0038a8] dark:text-blue-400 tabular-nums">{peso(rec.netPay)}</p>
+            <p className="text-3xl font-extrabold text-brand-blue dark:text-blue-400 tabular-nums">{peso(rec.netPay)}</p>
           </div>
 
           <div className="px-8 pb-6 text-center text-[10px] text-gray-400">
@@ -656,7 +656,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Summary KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Latest Gross Payroll', value: peso(latestRun.totalGross), sub: 'Nov 1–15, 2023' },
           { label: 'Total Deductions',     value: peso(latestRun.totalDeductions), sub: 'Statutory + loans' },
@@ -673,7 +673,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* 6-cutoff trend */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Gross Payroll Trend (Last 7 Runs)</h3>
           <div className="flex flex-col gap-2.5">
             {runs.map((run) => (
@@ -700,7 +700,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
         </div>
 
         {/* Deduction breakdown */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Deduction Breakdown — Nov 1–15</h3>
           <div className="flex flex-col gap-3">
             {[
@@ -728,7 +728,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Department payroll */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Net Pay by Department — Nov 1–15</h3>
           <div className="flex flex-col gap-2.5">
             {deptTotals.map(([dept, total]) => (
@@ -737,7 +737,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-[#0038a8]" style={{ width: `${(total / maxDept) * 100}%` }} />
+                      <div className="h-full rounded-full bg-brand-blue" style={{ width: `${(total / maxDept) * 100}%` }} />
                     </div>
                     <span className="text-xs font-bold font-mono text-gray-700 dark:text-gray-300 shrink-0 w-24 text-right tabular-nums">{peso(total)}</span>
                   </div>
@@ -748,20 +748,20 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
         </div>
 
         {/* Top earners */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Top 10 Earners — Net Pay</h3>
           <div className="flex flex-col gap-2">
             {topEarners.map(({ emp, netPay }, i) => (
               <div key={emp.id} className="flex items-center gap-3">
                 <span className="text-xs font-bold text-gray-300 dark:text-gray-600 w-4 shrink-0">{i + 1}</span>
-                <div className="w-6 h-6 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                <div className="w-6 h-6 rounded-full bg-brand-blue flex items-center justify-center text-white text-[9px] font-bold shrink-0">
                   {getInitials(emp.name)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{emp.name}</p>
                   <p className="text-[9px] text-gray-400">{emp.position}</p>
                 </div>
-                <span className="text-xs font-bold font-mono text-[#0038a8] dark:text-blue-400 shrink-0 tabular-nums">{peso(netPay)}</span>
+                <span className="text-xs font-bold font-mono text-brand-blue dark:text-blue-400 shrink-0 tabular-nums">{peso(netPay)}</span>
               </div>
             ))}
           </div>
@@ -788,7 +788,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
             <button
               type="button"
               onClick={() => toast.info('Generating 13th Month payroll run…')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />Generate Run
             </button>
@@ -802,7 +802,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Department</th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Monthly Salary</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500">Months (2023)</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[#0038a8] dark:text-blue-400">13th Month Pay</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-brand-blue dark:text-blue-400">13th Month Pay</th>
               </tr>
             </thead>
             <tbody>
@@ -810,7 +810,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                 <tr key={emp.id} className={`${i < arr.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors`}>
                   <td className="px-4 py-2.5 sticky left-0 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/20">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-brand-blue flex items-center justify-center text-white text-[9px] font-bold shrink-0">
                         {getInitials(emp.name)}
                       </div>
                       <div>
@@ -822,7 +822,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                   <td className="px-4 py-2.5 text-xs text-gray-500">{emp.department}</td>
                   <td className="px-4 py-2.5 text-right text-xs font-mono text-gray-600 dark:text-gray-400 tabular-nums">{peso(emp.salary)}</td>
                   <td className="px-4 py-2.5 text-center text-xs text-gray-500">{emp.months}</td>
-                  <td className="px-4 py-2.5 text-right text-sm font-bold text-[#0038a8] dark:text-blue-400 tabular-nums">{peso(emp.thirteenth)}</td>
+                  <td className="px-4 py-2.5 text-right text-sm font-bold text-brand-blue dark:text-blue-400 tabular-nums">{peso(emp.thirteenth)}</td>
                 </tr>
               ))}
             </tbody>
@@ -831,7 +831,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                 <td colSpan={4} className="px-4 py-3 text-xs font-bold text-gray-600 dark:text-gray-400">
                   TOTAL 13TH MONTH PAYOUT ({employeesData.length} employees)
                 </td>
-                <td className="px-4 py-3 text-right text-sm font-extrabold text-[#0038a8] dark:text-blue-400 tabular-nums">
+                <td className="px-4 py-3 text-right text-sm font-extrabold text-brand-blue dark:text-blue-400 tabular-nums">
                   {peso(totalThirteenth)}
                 </td>
               </tr>
@@ -844,7 +844,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Gift className="w-4 h-4 text-[#0038a8]" />
+            <Gift className="w-4 h-4 text-brand-blue" />
             <h3 className="text-sm font-bold text-gray-800 dark:text-white">Bonus Management — 2023</h3>
           </div>
           <button
@@ -859,7 +859,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
               }]);
               toast.success('Performance Bonus added');
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />Add Bonus
           </button>
@@ -882,7 +882,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                   <tr key={bonus.id} className={`${i < bonuses.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors`}>
                     <td className="px-4 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200">{bonus.type}</td>
                     <td className="px-4 py-2.5 text-xs text-gray-500">{bonus.month}</td>
-                    <td className="px-4 py-2.5 text-right text-xs font-bold font-mono text-[#0038a8] dark:text-blue-400 tabular-nums">
+                    <td className="px-4 py-2.5 text-right text-xs font-bold font-mono text-brand-blue dark:text-blue-400 tabular-nums">
                       {peso(amount)}
                     </td>
                     <td className="px-4 py-2.5 text-center">
@@ -902,7 +902,7 @@ function ReportsTab({ runs }: { runs: PayrollRun[] }) {
                             setBonuses(prev => prev.map(b => b.id === bonus.id ? { ...b, status: 'released' as const, totalAmount: amount } : b));
                             toast.success(`${bonus.type} marked as released`);
                           }}
-                          className="text-[10px] font-semibold text-[#0038a8] dark:text-blue-400 hover:underline"
+                          className="text-[10px] font-semibold text-brand-blue dark:text-blue-400 hover:underline"
                         >
                           Mark Released
                         </button>
@@ -959,7 +959,7 @@ function DisputesTab() {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
               filter === f
-                ? 'bg-[#0038a8] text-white'
+                ? 'bg-brand-blue text-white'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
@@ -990,7 +990,7 @@ function DisputesTab() {
               className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4"
             >
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold shrink-0">
                   {emp ? getInitials(emp.name) : '?'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1072,10 +1072,10 @@ export default function PayrollPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Payroll Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Payroll Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Semi-monthly · SSS · PhilHealth · Pag-IBIG · BIR TRAIN Law · {latestRun.period}
           </p>
         </div>
@@ -1099,7 +1099,7 @@ export default function PayrollPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1108,18 +1108,18 @@ export default function PayrollPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
                 isActive
                   ? tab.highlight
                     ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-[#0038a8] text-white shadow-sm'
+                    : 'bg-brand-blue text-white shadow-sm'
                   : tab.highlight
                     ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30'
                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
               {tab.highlight && !isActive && (
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
                   AI

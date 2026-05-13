@@ -89,7 +89,7 @@ const ROLE_BADGE_CLS: Record<InviteRole, string> = {
 
 const ROLE_AVATAR_CLS: Record<InviteRole, string> = {
   super_admin: 'bg-red-600',
-  hr_manager:  'bg-[#0038a8]',
+  hr_manager:  'bg-brand-blue',
   hr_staff:    'bg-violet-700',
   accountant:  'bg-emerald-600',
 };
@@ -117,8 +117,8 @@ const DEPARTMENTS_LIST = [...new Set(employeesData.map(e => e.department))].sort
 function KpiCard({ label, value, icon: IconC, color }: { label: string; value: string | number; icon: React.ElementType; color?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
-        <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
+        <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-brand-blue'}`} />
       </div>
       <div><p className="text-xs text-gray-500 dark:text-gray-400">{label}</p><p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p></div>
     </div>
@@ -299,19 +299,19 @@ export default function SettingsPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Settings & Administration</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Settings & Administration</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {company.name} · {company.activeEmployees} employees · {branches.length} locations
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
-          <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <Icon className="w-4 h-4" />{tab.label}
+          <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
           </button>
         );})}
       </div>
@@ -322,7 +322,7 @@ export default function SettingsPage() {
           {/* ===== COMPANY TAB ===== */}
           {activeTab === 'company' && (
             <div>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white">Company Profile</h3>
                   <button type="button" onClick={() => toast.success('Company profile saved')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold">
@@ -353,20 +353,20 @@ export default function SettingsPage() {
           {/* ===== BRANCHES TAB ===== */}
           {activeTab === 'branches' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Active Branches" value={branches.filter((b: any) => b.status === 'active').length} icon={MapPin} />
                 <KpiCard label="Total Locations" value={branches.length} icon={Building2} />
                 <KpiCard label="HQ Employees" value={branches.find((b: any) => b.isPrimary)?.employeeCount || 0} icon={Shield} />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {branches.map((branch: any, i: number) => (
-                  <motion.div key={branch.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 ${branch.isPrimary ? 'border-[#0038a8] ring-1 ring-[#0038a8]/10' : 'border-gray-200 dark:border-gray-800'}`}>
+                  <motion.div key={branch.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 sm:p-5 ${branch.isPrimary ? 'border-brand-blue ring-1 ring-brand-blue/10' : 'border-gray-200 dark:border-gray-800'}`}>
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-gray-800 dark:text-white">{branch.name}</p>
                           <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">{branch.code}</span>
-                          {branch.isPrimary && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#0038a8]/10 text-[#0038a8]">HQ</span>}
+                          {branch.isPrimary && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue">HQ</span>}
                         </div>
                         <p className="text-xs text-gray-400">{branch.address}, {branch.city}</p>
                       </div>
@@ -389,7 +389,7 @@ export default function SettingsPage() {
           {/* ===== DEPARTMENTS TAB ===== */}
           {activeTab === 'departments' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Departments" value={DEPARTMENTS_LIST.length} icon={Layers} />
                 <KpiCard label="Employees" value={employeesData.length} icon={Shield} />
                 <KpiCard label="Avg Team Size" value={Math.round(employeesData.length / DEPARTMENTS_LIST.length)} icon={Shield} />
@@ -437,7 +437,7 @@ export default function SettingsPage() {
                   <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-4">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 mb-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold" style={{ background: selectedRoleData.color }}>{selectedRoleData.name[0]}</div>
                   <div>
@@ -480,7 +480,7 @@ export default function SettingsPage() {
             <div>
               <div className="flex flex-col gap-3">
                 {workflows.map((wf, i) => (
-                  <motion.div key={wf.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                  <motion.div key={wf.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="text-sm font-bold text-gray-800 dark:text-white">{wf.name}</p>
@@ -511,7 +511,7 @@ export default function SettingsPage() {
           {activeTab === 'templates' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {templates.map((tpl: any, i: number) => (
-                <motion.div key={tpl.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <motion.div key={tpl.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="text-sm font-bold text-gray-800 dark:text-white">{tpl.name}</p>
@@ -582,7 +582,7 @@ export default function SettingsPage() {
               {/* Loading overlay */}
               {teamLoading && (
                 <div className="flex items-center justify-center py-16">
-                  <div className="w-6 h-6 border-2 border-[#0038a8]/30 border-t-[#0038a8] rounded-full animate-spin mr-3" />
+                  <div className="w-6 h-6 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin mr-3" />
                   <span className="text-sm text-gray-400">Loading team data…</span>
                 </div>
               )}
@@ -590,7 +590,7 @@ export default function SettingsPage() {
               {!teamLoading && (<>
 
               {/* KPI row */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <KpiCard label="Total Members" value={teamMembers.length} icon={Users} />
                 <KpiCard label="Active Members" value={teamMembers.filter(m => m.isActive).length} icon={UserCheck} />
                 <KpiCard label="Pending Invites" value={invitations.filter(i => i.status === 'pending').length} icon={Send} />
@@ -599,10 +599,10 @@ export default function SettingsPage() {
 
               {/* Invite panel — Super Admin only */}
               {isSuperAdmin && (
-                <div className="bg-white dark:bg-gray-900 border border-[#0038a8]/30 ring-1 ring-[#0038a8]/10 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-brand-blue/30 ring-1 ring-brand-blue/10 rounded-2xl p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg bg-[#0038a8]/10 flex items-center justify-center">
-                      <UserPlus className="w-4 h-4 text-[#0038a8]" />
+                    <div className="w-7 h-7 rounded-lg bg-brand-blue/10 flex items-center justify-center">
+                      <UserPlus className="w-4 h-4 text-brand-blue" />
                     </div>
                     <h3 className="text-sm font-bold text-gray-800 dark:text-white">Invite Team Member</h3>
                   </div>
@@ -741,7 +741,7 @@ export default function SettingsPage() {
                                 <div className="flex items-center gap-1">
                                   <p className="text-xs font-semibold text-gray-800 dark:text-white">{member.name}</p>
                                   {member.role === 'super_admin' && <Crown className="w-3 h-3 text-amber-500" />}
-                                  {member.userId === user?.id && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#0038a8]/10 text-[#0038a8] font-semibold">You</span>}
+                                  {member.userId === user?.id && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue font-semibold">You</span>}
                                 </div>
                                 <p className="text-[10px] text-gray-400">{member.email}</p>
                               </div>
@@ -756,7 +756,7 @@ export default function SettingsPage() {
                                   autoFocus
                                   onChange={e => handleChangeRole(member.userId, e.target.value as InviteRole)}
                                   onBlur={() => setChangingRoleFor(null)}
-                                  className="h-7 appearance-none pl-2 pr-6 rounded-lg border border-[#0038a8] bg-white dark:bg-gray-800 text-xs font-medium text-gray-800 dark:text-white focus:outline-none"
+                                  className="h-7 appearance-none pl-2 pr-6 rounded-lg border border-brand-blue bg-white dark:bg-gray-800 text-xs font-medium text-gray-800 dark:text-white focus:outline-none"
                                 >
                                   {INVITE_ROLES.map(r => (
                                     <option key={r.value} value={r.value}>{r.label}</option>
@@ -829,7 +829,7 @@ export default function SettingsPage() {
                 { name: 'SSO / SAML', desc: 'Single sign-on integration', status: 'coming_soon', icon: Shield },
                 { name: 'API Webhooks', desc: 'Custom webhook endpoints for events', status: 'available', icon: Plug },
               ].map((integration, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <integration.icon className="w-8 h-8 text-gray-400" />
@@ -855,13 +855,13 @@ export default function SettingsPage() {
           {/* ===== BACKUP & RESTORE TAB ===== */}
           {activeTab === 'backup' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Last Backup" value="Nov 24, 2023" icon={Clock} />
                 <KpiCard label="Backup Size" value="1.8 GB" icon={Database} />
                 <KpiCard label="Backup Type" value="Full System" icon={Shield} />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Backup Schedule</h3>
                   <div className="flex items-center justify-between text-xs mb-2">
                     <span className="text-gray-500">Full System Backup</span>
@@ -875,7 +875,7 @@ export default function SettingsPage() {
                     <Download className="w-3 h-3 inline mr-1" />Backup Now
                   </button>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Available Restore Points</h3>
                   {['Nov 24, 2023 02:00 AM', 'Nov 23, 2023 02:00 AM', 'Nov 22, 2023 02:00 AM'].map((rp, i) => (
                     <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 dark:border-gray-800/60 last:border-0">

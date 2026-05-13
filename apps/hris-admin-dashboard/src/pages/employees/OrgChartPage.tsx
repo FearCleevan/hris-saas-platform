@@ -53,19 +53,19 @@ function EmployeeNode({ node, depth = 0 }: { node: OrgNode; depth?: number }) {
         className="relative"
       >
         <div
-          className="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3 w-44 text-center hover:border-[#0038a8] hover:shadow-md transition-all cursor-pointer"
+          className="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3 w-44 text-center hover:border-brand-blue hover:shadow-md transition-all cursor-pointer"
           onClick={() => navigate(`/employees/${node.employee.id}`)}
         >
-          <div className="w-10 h-10 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-sm font-bold mx-auto mb-2">
+          <div className="w-10 h-10 rounded-full bg-brand-blue flex items-center justify-center text-white text-sm font-bold mx-auto mb-2">
             {getInitials(node.employee.name)}
           </div>
           <p className="text-xs font-semibold text-gray-900 dark:text-white leading-tight truncate">{node.employee.name}</p>
           <p className="text-[10px] text-gray-400 truncate mt-0.5">{node.employee.position}</p>
-          <p className="text-[10px] text-[#0038a8] dark:text-blue-400 mt-0.5">{node.employee.department}</p>
+          <p className="text-[10px] text-brand-blue dark:text-blue-400 mt-0.5">{node.employee.department}</p>
 
           {hasChildren && (
             <button
-              className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:border-[#0038a8] transition-colors z-10"
+              className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:border-brand-blue transition-colors z-10"
               onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
             >
               {expanded
@@ -147,8 +147,8 @@ export default function OrgChartPage() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Organization Chart</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Reporting structure across all departments</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Organization Chart</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Reporting structure across all departments</p>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <Users className="w-4 h-4" />

@@ -88,15 +88,15 @@ function calcPagIBIG(salary: number) {
   return { ee, er: ee };
 }
 
-const fieldCls = 'h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0038a8]/40 w-full';
+const fieldCls = 'h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 w-full';
 const selectCls = `${fieldCls} appearance-none`;
 
 /* ─── KPI Card ─── */
 function KpiCard({ label, value, icon: Icon, sub }: { label: string; value: string | number; icon: React.ElementType; sub?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className="w-10 h-10 rounded-xl bg-[#0038a8]/10 flex items-center justify-center shrink-0">
-        <Icon className="w-5 h-5 text-[#0038a8]" />
+      <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center shrink-0">
+        <Icon className="w-5 h-5 text-brand-blue" />
       </div>
       <div>
         <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
@@ -351,30 +351,30 @@ export default function BenefitsPage() {
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Benefits Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Benefits Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             HMO · Government Benefits · Loans · Dependents · Cost Analysis
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3 py-2 rounded-xl">
-          <Shield className="w-4 h-4 text-[#0038a8]" />
+          <Shield className="w-4 h-4 text-brand-blue" />
           {enrollKPIs.active} active enrollments · {loanKPIs.activeCount} active loans
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => {
           const Icon = tab.icon;
           return (
             <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
-                activeTab === tab.id ? 'bg-[#0038a8] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
-              <Icon className="w-4 h-4" />{tab.label}
+              <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
             </button>
           );
         })}
@@ -387,7 +387,7 @@ export default function BenefitsPage() {
           {/* ═════════════════════════════════════ ENROLLMENT TAB */}
           {activeTab === 'enrollment' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total Enrolled"   value={enrollKPIs.total}        icon={Users} />
                 <KpiCard label="Active"           value={enrollKPIs.active}       icon={CheckCircle2} sub={`${Math.round(enrollKPIs.active / enrollKPIs.total * 100)}% coverage`} />
                 <KpiCard label="Pending"          value={enrollKPIs.pending}      icon={Clock} />
@@ -424,7 +424,7 @@ export default function BenefitsPage() {
                     <Download className="w-3.5 h-3.5" />Export
                   </button>
                   <button type="button" onClick={() => setShowEnrollForm(v => !v)}
-                    className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${showEnrollForm ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-[#0038a8] text-white hover:bg-[#002d8a]'}`}>
+                    className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${showEnrollForm ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-brand-blue text-white hover:bg-brand-blue-dark'}`}>
                     {showEnrollForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                     {showEnrollForm ? 'Cancel' : 'Enroll Employee'}
                   </button>
@@ -474,7 +474,7 @@ export default function BenefitsPage() {
                           Cancel
                         </button>
                         <button type="button" onClick={handleEnrollEmployee}
-                          className="h-8 px-4 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors flex items-center gap-1.5">
+                          className="h-8 px-4 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors flex items-center gap-1.5">
                           <Check className="w-3.5 h-3.5" />Confirm Enrollment
                         </button>
                       </div>
@@ -506,7 +506,7 @@ export default function BenefitsPage() {
                           <tr key={enr.id} className={`${i < filteredEnrollments.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors`}>
                             <td className="px-4 py-2.5">
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                                <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                                   {getInitials(enr.emp.name)}
                                 </div>
                                 <div>
@@ -541,7 +541,7 @@ export default function BenefitsPage() {
                                     setEnrollments(prev => prev.map(e => e.id === enr.id ? { ...e, status: enr.status === 'active' ? 'pending' : 'active' } : e));
                                     toast.success('Enrollment status updated');
                                   }}
-                                  className="text-[10px] font-semibold text-[#0038a8] dark:text-blue-400 hover:underline whitespace-nowrap">
+                                  className="text-[10px] font-semibold text-brand-blue dark:text-blue-400 hover:underline whitespace-nowrap">
                                   {enr.status === 'active' ? 'Suspend' : 'Re-activate'}
                                 </button>
                                 <span className="text-gray-200 dark:text-gray-700">|</span>
@@ -568,7 +568,7 @@ export default function BenefitsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
                 {planStats.map(plan => (
                   <motion.div key={plan.id} whileHover={{ y: -2 }} transition={{ duration: 0.15 }}
-                    className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 cursor-pointer transition-all ${
+                    className={`bg-white dark:bg-gray-900 border rounded-2xl p-4 sm:p-5 cursor-pointer transition-all ${
                       hmoPlanFilter === plan.id ? 'border-2' : 'border-gray-200 dark:border-gray-800'
                     }`}
                     style={hmoPlanFilter === plan.id ? { borderColor: plan.color } : {}}
@@ -607,7 +607,7 @@ export default function BenefitsPage() {
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Filter by plan:</span>
                 <button type="button" onClick={() => setHmoPlanFilter(null)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${!hmoPlanFilter ? 'bg-[#0038a8] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${!hmoPlanFilter ? 'bg-brand-blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
                   All ({enrollKPIs.active})
                 </button>
                 {planStats.map(p => (
@@ -617,7 +617,7 @@ export default function BenefitsPage() {
                     {p.tier} ({p.count})
                   </button>
                 ))}
-                <span className="ml-auto text-xs font-semibold text-gray-500">Total ER Cost: <span className="text-[#0038a8]">{peso(totalHMOCost)}/mo</span></span>
+                <span className="ml-auto text-xs font-semibold text-gray-500">Total ER Cost: <span className="text-brand-blue">{peso(totalHMOCost)}/mo</span></span>
               </div>
 
               {/* HMO enrolled employees roster */}
@@ -660,9 +660,9 @@ export default function BenefitsPage() {
                           </td>
                           <td className="px-4 py-2.5 text-xs text-gray-500">{COVERAGE_CFG[enr.coverageType] ?? enr.coverageType}</td>
                           <td className="px-4 py-2.5 text-right text-xs font-mono text-gray-600 dark:text-gray-400">{peso(enr.plan.employeeShare)}</td>
-                          <td className="px-4 py-2.5 text-right text-xs font-mono font-semibold text-[#0038a8] dark:text-blue-400">{peso(enr.plan.employerShare)}</td>
+                          <td className="px-4 py-2.5 text-right text-xs font-mono font-semibold text-brand-blue dark:text-blue-400">{peso(enr.plan.employerShare)}</td>
                           <td className="px-4 py-2.5 text-center">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${enr.deps > 0 ? 'bg-[#0038a8]/10 text-[#0038a8]' : 'text-gray-300 dark:text-gray-700'}`}>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${enr.deps > 0 ? 'bg-brand-blue/10 text-brand-blue' : 'text-gray-300 dark:text-gray-700'}`}>
                               {enr.deps > 0 ? enr.deps : '—'}
                             </span>
                           </td>
@@ -679,7 +679,7 @@ export default function BenefitsPage() {
           {/* ═════════════════════════════════════ GOVERNMENT TAB */}
           {activeTab === 'government' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Monthly SSS (EE+ER)"     value={peso(govTotals.sssEE + govTotals.sssER)} icon={Building2}   sub="Combined contributions" />
                 <KpiCard label="Monthly PhilHealth"       value={peso(govTotals.phEE + govTotals.phER)}   icon={HeartPulse}  sub="Combined contributions" />
                 <KpiCard label="Monthly Pag-IBIG"         value={peso(govTotals.piEE + govTotals.piER)}   icon={PiggyBank}   sub="Combined contributions" />
@@ -703,7 +703,7 @@ export default function BenefitsPage() {
               </div>
 
               {/* Employee-level view */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-4">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 mb-4">
                 <div className="flex items-center gap-3 mb-4 flex-wrap">
                   <p className="text-sm font-bold text-gray-800 dark:text-white flex-1">Individual Contribution Breakdown</p>
                   <div className="relative">
@@ -729,7 +729,7 @@ export default function BenefitsPage() {
                       </div>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-gray-400">Employer</span>
-                        <span className="font-semibold text-[#0038a8] dark:text-blue-400">{peso(er)}</span>
+                        <span className="font-semibold text-brand-blue dark:text-blue-400">{peso(er)}</span>
                       </div>
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-1 flex justify-between text-xs">
                         <span className="text-gray-400">Total</span>
@@ -792,7 +792,7 @@ export default function BenefitsPage() {
           {/* ═════════════════════════════════════ LOANS TAB */}
           {activeTab === 'loans' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Active Loans"       value={loanKPIs.activeCount}        icon={CreditCard} />
                 <KpiCard label="Total Outstanding"  value={peso(loanKPIs.totalBalance)} icon={PiggyBank}  />
                 <KpiCard label="Monthly Collections" value={peso(loanKPIs.monthlyCollections)} icon={TrendingUp} sub="Total amortizations" />
@@ -802,20 +802,20 @@ export default function BenefitsPage() {
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 {(['all', 'active', 'closed'] as const).map(f => (
                   <button key={f} type="button" onClick={() => setLoanStatusFilter(f)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${loanStatusFilter === f ? 'bg-[#0038a8] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${loanStatusFilter === f ? 'bg-brand-blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
                     {f === 'all' ? 'All Status' : f}
                   </button>
                 ))}
                 <span className="text-gray-200 dark:text-gray-700 text-sm">|</span>
                 {(['all', 'sss', 'pagibig', 'company'] as const).map(t => (
                   <button key={t} type="button" onClick={() => setLoanTypeFilter(t)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${loanTypeFilter === t ? 'bg-[#0038a8] text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${loanTypeFilter === t ? 'bg-brand-blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
                     {t === 'all' ? 'All Types' : LOAN_TYPE_CFG[t]?.label ?? t}
                   </button>
                 ))}
                 <span className="text-xs text-gray-400 ml-auto">{filteredLoans.length} loans</span>
                 <button type="button" onClick={() => setShowLoanForm(!showLoanForm)}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors">
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors">
                   {showLoanForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                   {showLoanForm ? 'Cancel' : 'File New Loan'}
                 </button>
@@ -825,9 +825,9 @@ export default function BenefitsPage() {
               <AnimatePresence>
                 {showLoanForm && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                    className="bg-blue-50 dark:bg-[#0038a8]/10 border border-[#0038a8]/30 rounded-2xl p-5 mb-4 overflow-hidden">
-                    <p className="text-sm font-bold text-[#0038a8] dark:text-blue-400 mb-4">File New Loan</p>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    className="bg-blue-50 dark:bg-brand-blue/10 border border-brand-blue/30 rounded-2xl p-4 sm:p-5 mb-4 overflow-hidden">
+                    <p className="text-sm font-bold text-brand-blue dark:text-blue-400 mb-4">File New Loan</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       <div>
                         <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Employee *</label>
                         <div className="relative">
@@ -869,13 +869,13 @@ export default function BenefitsPage() {
                       </div>
                       <div className="flex items-end">
                         <button type="button" onClick={handleFileLoan}
-                          className="h-8 w-full rounded-lg bg-[#0038a8] text-white text-xs font-bold hover:bg-[#002d8a] transition-colors">
+                          className="h-8 w-full rounded-lg bg-brand-blue text-white text-xs font-bold hover:bg-brand-blue-dark transition-colors">
                           Submit Loan
                         </button>
                       </div>
                     </div>
                     {loanForm.principal && loanForm.amortization && (
-                      <p className="text-[10px] text-[#0038a8] mt-2">
+                      <p className="text-[10px] text-brand-blue mt-2">
                         Estimated term: ~{Math.ceil(Number(loanForm.principal) / Number(loanForm.amortization))} months
                       </p>
                     )}
@@ -897,7 +897,7 @@ export default function BenefitsPage() {
                     <motion.div key={loan.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                       className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
                       <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold shrink-0">
                           {loan.emp ? getInitials(loan.emp.name) : '??'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -917,7 +917,7 @@ export default function BenefitsPage() {
                           {loan.status === 'active' && (
                             <div>
                               <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#0038a8] rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+                                <div className="h-full bg-brand-blue rounded-full transition-all" style={{ width: `${progressPct}%` }} />
                               </div>
                               <p className="text-[10px] text-gray-400 mt-0.5">{progressPct}% paid off</p>
                             </div>
@@ -947,7 +947,7 @@ export default function BenefitsPage() {
           {/* ═════════════════════════════════════ COST ANALYSIS TAB */}
           {activeTab === 'costs' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total HMO Cost/mo"    value={peso(totalHMOCost)}   icon={HeartPulse} sub={`${enrollKPIs.active} enrolled`} />
                 <KpiCard label="Avg HMO/Employee"      value={peso(Math.round(totalHMOCost / Math.max(enrollKPIs.active, 1)))} icon={Users} sub="Per month" />
                 <KpiCard label="Active Loan Exposure"  value={peso(loanKPIs.totalBalance)}  icon={CreditCard}  sub={`${loanKPIs.activeCount} active loans`} />
@@ -955,7 +955,7 @@ export default function BenefitsPage() {
               </div>
 
               {/* Total monthly benefits cost summary */}
-              <div className="bg-[#0038a8] rounded-2xl p-5 mb-4 text-white">
+              <div className="bg-brand-blue rounded-2xl p-4 sm:p-5 mb-4 text-white">
                 <p className="text-xs font-semibold opacity-70 uppercase tracking-widest mb-1">Total Monthly Benefits Cost to Company</p>
                 <p className="text-3xl font-extrabold">
                   {peso(totalHMOCost + govTotals.sssER + govTotals.phER + govTotals.piER)}
@@ -970,14 +970,14 @@ export default function BenefitsPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* HMO by department */}
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">HMO Cost by Department (ER Share)</h3>
                   <div className="flex flex-col gap-2.5">
                     {costAnalysis.deptCosts.map(dept => (
                       <div key={dept.dept} className="flex items-center gap-3">
                         <span className="text-xs font-medium text-gray-600 dark:text-gray-400 w-24 shrink-0 truncate">{dept.dept}</span>
                         <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#0038a8] rounded-full flex items-center justify-end pr-2"
+                          <div className="h-full bg-brand-blue rounded-full flex items-center justify-end pr-2"
                             style={{ width: `${(dept.hmoCost / costAnalysis.maxHMO) * 100}%` }}>
                             <span className="text-[9px] font-bold text-white">{peso(dept.hmoCost)}</span>
                           </div>
@@ -990,19 +990,19 @@ export default function BenefitsPage() {
 
                 {/* Plan distribution + Gov't breakdown */}
                 <div className="flex flex-col gap-4">
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                     <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">HMO Plan Distribution</h3>
                     <div className="grid grid-cols-4 gap-2">
                       {planStats.map(plan => (
                         <div key={plan.id} className="text-center p-3 rounded-xl" style={{ backgroundColor: `${plan.color}15` }}>
-                          <p className="text-2xl font-extrabold" style={{ color: plan.color }}>{plan.count}</p>
+                          <p className="text-xl sm:text-2xl font-extrabold" style={{ color: plan.color }}>{plan.count}</p>
                           <p className="text-[10px] font-semibold text-gray-500">{plan.tier}</p>
                           <p className="text-[9px] text-gray-400">{peso(plan.totalCost)}/mo</p>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                     <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Gov't Employer Contributions Breakdown</h3>
                     {[
                       { label: 'SSS (ER)',       value: govTotals.sssER, color: '#0038a8', pct: govTotals.sssER / (govTotals.sssER + govTotals.phER + govTotals.piER) },
@@ -1026,7 +1026,7 @@ export default function BenefitsPage() {
           {/* ═════════════════════════════════════ DEPENDENTS TAB */}
           {activeTab === 'dependents' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total Dependents"        value={dependents.length}              icon={Users} />
                 <KpiCard label="HMO Enrolled"            value={dependents.filter(d => d.hmoEnrolled).length} icon={CheckCircle2} sub="Under employee's plan" />
                 <KpiCard label="Employees w/ Dependents" value={empsWithDeps.length}            icon={Building2} />
@@ -1045,7 +1045,7 @@ export default function BenefitsPage() {
                 </div>
                 <span className="text-xs text-gray-400">{filteredDeps.length} dependents</span>
                 <button type="button" onClick={() => setShowDepForm(!showDepForm)}
-                  className="ml-auto flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors">
+                  className="ml-auto flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors">
                   {showDepForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                   {showDepForm ? 'Cancel' : 'Add Dependent'}
                 </button>
@@ -1055,9 +1055,9 @@ export default function BenefitsPage() {
               <AnimatePresence>
                 {showDepForm && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                    className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-5 mb-4 overflow-hidden">
+                    className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-4 sm:p-5 mb-4 overflow-hidden">
                     <p className="text-sm font-bold text-green-700 dark:text-green-400 mb-4">Add Dependent</p>
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       <div>
                         <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Employee *</label>
                         <div className="relative">
@@ -1134,7 +1134,7 @@ export default function BenefitsPage() {
                           <td className="px-4 py-2.5">
                             <div className="flex items-center gap-2">
                               {dep.emp && (
-                                <div className="w-5 h-5 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[8px] font-bold shrink-0">
+                                <div className="w-5 h-5 rounded-full bg-brand-blue flex items-center justify-center text-white text-[8px] font-bold shrink-0">
                                   {getInitials(dep.emp.name)}
                                 </div>
                               )}

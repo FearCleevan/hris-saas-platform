@@ -22,7 +22,7 @@ export function ActivityFeed() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-bold text-gray-900 dark:text-white text-sm">Recent Activity</h3>
@@ -67,7 +67,7 @@ export function ActivityFeed() {
                   </div>
                 </div>
 
-                <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0038a8] transition-colors shrink-0 mt-1" />
+                <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-blue transition-colors shrink-0 mt-1" />
               </button>
             );
           })}

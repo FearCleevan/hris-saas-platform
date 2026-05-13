@@ -88,7 +88,7 @@ function getInitials(first: string, last: string) { return `${first[0]}${last[0]
 function KpiCard({ label, value, icon: IconC, sub, color }: { label: string; value: string | number; icon: React.ElementType; sub?: string; color?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
         <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
       </div>
       <div><p className="text-xs text-gray-500 dark:text-gray-400">{label}</p><p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>{sub && <p className="text-xs text-gray-400">{sub}</p>}</div>
@@ -207,28 +207,28 @@ export default function RecruitmentPage() {
   /* ─── Render ─── */
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Recruitment (ATS)</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Recruitment (ATS)</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {jobKPIs.active} active jobs · {jobKPIs.openPositions} open positions · {jobKPIs.totalApplicants} total applicants
           </p>
         </div>
-        <button onClick={() => toast.success('New job posting created')} className="px-4 py-2 bg-[#0038a8] text-white text-xs font-semibold rounded-xl hover:bg-[#002d8a]">
+        <button onClick={() => toast.success('New job posting created')} className="px-4 py-2 bg-brand-blue text-white text-xs font-semibold rounded-xl hover:bg-brand-blue-dark">
           <Plus className="w-3.5 h-3.5 inline mr-1" />Post New Job
         </button>
       </div>
 
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
           <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors
               ${activeTab === tab.id
-                ? 'bg-[#0038a8] text-white shadow-sm'
+                ? 'bg-brand-blue text-white shadow-sm'
                 : tab.highlight
                   ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <Icon className="w-4 h-4" />{tab.label}
+            <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
             {tab.highlight && activeTab !== tab.id && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-600 text-white">AI</span>
             )}
@@ -242,7 +242,7 @@ export default function RecruitmentPage() {
           {/* ===== JOBS TAB ===== */}
           {activeTab === 'jobs' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Active Jobs" value={jobKPIs.active} icon={Briefcase} />
                 <KpiCard label="Total Applicants" value={jobKPIs.totalApplicants} icon={Users} />
                 <KpiCard label="Open Positions" value={jobKPIs.openPositions} icon={Building} />
@@ -262,7 +262,7 @@ export default function RecruitmentPage() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredJobs.map((job, i) => (
-                  <motion.div key={job.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                  <motion.div key={job.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <p className="text-sm font-bold text-gray-800 dark:text-white">{job.title}</p>
@@ -318,7 +318,7 @@ export default function RecruitmentPage() {
                           {stageApps.map(app => (
                             <div key={app.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-3 hover:border-[#0038a8]/40 transition-colors cursor-pointer">
                               <div className="flex items-center gap-2 mb-1">
-                                <div className="w-6 h-6 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[9px] font-bold">{getInitials(app.firstName, app.lastName)}</div>
+                                <div className="w-6 h-6 rounded-full bg-brand-blue flex items-center justify-center text-white text-[9px] font-bold">{getInitials(app.firstName, app.lastName)}</div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[11px] font-semibold text-gray-800 dark:text-white truncate">{app.firstName} {app.lastName}</p>
                                 </div>
@@ -339,7 +339,7 @@ export default function RecruitmentPage() {
           {/* ===== APPLICANTS TAB ===== */}
           {activeTab === 'applicants' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total" value={applicantKPIs.total} icon={Users} />
                 <KpiCard label="Shortlisted" value={applicantKPIs.shortlisted} icon={Star} color="bg-amber-500" />
                 <KpiCard label="Interviewed" value={applicantKPIs.interviewed} icon={CalendarClock} />
@@ -386,7 +386,7 @@ export default function RecruitmentPage() {
                           <tr key={a.id} className={`${i < filteredApplicants.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20`}>
                             <td className="px-4 py-2.5">
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{getInitials(a.firstName, a.lastName)}</div>
+                                <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold">{getInitials(a.firstName, a.lastName)}</div>
                                 <div><p className="text-xs font-semibold text-gray-800 dark:text-white">{a.firstName} {a.lastName}</p><p className="text-[9px] text-gray-400">{a.email}</p></div>
                               </div>
                             </td>
@@ -408,7 +408,7 @@ export default function RecruitmentPage() {
           {/* ===== INTERVIEWS TAB ===== */}
           {activeTab === 'interviews' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Upcoming" value={upcomingInterviews.length} icon={CalendarClock} color="bg-blue-500" />
                 <KpiCard label="Completed" value={completedInterviews.length} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="This Week" value={upcomingInterviews.filter(i => differenceInDays(new Date(i.date), new Date('2023-11-24')) <= 7).length} icon={Clock} />
@@ -419,7 +419,7 @@ export default function RecruitmentPage() {
                   <div key={intv.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold">{intv.app ? getInitials(intv.app.firstName, intv.app.lastName) : '?'}</div>
+                        <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold">{intv.app ? getInitials(intv.app.firstName, intv.app.lastName) : '?'}</div>
                         <div>
                           <p className="text-sm font-semibold text-gray-800 dark:text-white">{intv.app?.firstName} {intv.app?.lastName}</p>
                           <p className="text-xs text-gray-400">{intv.job?.title} · {intv.type}</p>
@@ -442,7 +442,7 @@ export default function RecruitmentPage() {
           {/* ===== OFFERS TAB ===== */}
           {activeTab === 'offers' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total Offers" value={offerKPIs.total} icon={FileCheck} />
                 <KpiCard label="Accepted" value={offerKPIs.accepted} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="Pending" value={offerKPIs.pending} icon={Clock} color="bg-amber-500" />
@@ -453,7 +453,7 @@ export default function RecruitmentPage() {
                   const stCfg = OFFER_STATUS_CFG[off.status] || OFFER_STATUS_CFG.draft;
                   const app = applicants.find(a => a.id === off.applicantId);
                   return (
-                    <motion.div key={off.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                    <motion.div key={off.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="text-sm font-bold text-gray-800 dark:text-white">{app?.firstName} {app?.lastName} — {off.position}</p>
@@ -479,14 +479,14 @@ export default function RecruitmentPage() {
           {/* ===== ANALYTICS TAB ===== */}
           {activeTab === 'analytics' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="Total Applicants" value={applicantKPIs.total} icon={Users} />
                 <KpiCard label="In Pipeline" value={analytics.totalInPipeline} icon={Columns3} />
                 <KpiCard label="Hired" value={applicantKPIs.hired} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="Offer Acceptance" value={`${offerKPIs.rate}%`} icon={TrendingUp} color="bg-blue-500" />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Pipeline Funnel</h3>
                   <div className="flex flex-col gap-2">
                     {PIPELINE_STAGES.map((stage, i) => {
@@ -496,7 +496,7 @@ export default function RecruitmentPage() {
                         <div key={stage} className="flex items-center gap-3">
                           <span className="text-xs text-gray-500 w-32">{STAGE_CFG[stage]?.label}</span>
                           <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-[#0038a8] rounded-full flex items-center justify-end pr-2" style={{ width: `${Math.max(pct, 3)}%` }}>
+                            <div className="h-full bg-brand-blue rounded-full flex items-center justify-end pr-2" style={{ width: `${Math.max(pct, 3)}%` }}>
                               <span className="text-[9px] font-bold text-white">{count}</span>
                             </div>
                           </div>
@@ -505,7 +505,7 @@ export default function RecruitmentPage() {
                     })}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Source Effectiveness</h3>
                   <div className="flex flex-col gap-2">
                     {analytics.sources.map(src => (
@@ -521,7 +521,7 @@ export default function RecruitmentPage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                 <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Applications Trend</h3>
                 <div className="flex items-end gap-3 h-24">
                   {analytics.monthlyApps.map((count, i) => {
@@ -529,7 +529,7 @@ export default function RecruitmentPage() {
                     return (
                       <div key={i} className="flex-1 flex flex-col items-center gap-1">
                         <span className="text-xs font-bold text-gray-600">{count}</span>
-                        <div className="w-full bg-[#0038a8] rounded-t-md" style={{ height: `${pct}%`, minHeight: '4px' }} />
+                        <div className="w-full bg-brand-blue rounded-t-md" style={{ height: `${pct}%`, minHeight: '4px' }} />
                         <span className="text-[10px] text-gray-400">{analytics.months[i]}</span>
                       </div>
                     );

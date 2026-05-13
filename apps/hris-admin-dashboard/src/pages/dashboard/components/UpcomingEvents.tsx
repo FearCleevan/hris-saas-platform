@@ -50,7 +50,7 @@ const events: Event[] = [
 
 export function UpcomingEvents() {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 h-full">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 h-full">
       <div className="mb-4">
         <h3 className="font-bold text-gray-900 dark:text-white text-sm">Upcoming Celebrations</h3>
         <p className="text-xs text-gray-500 dark:text-gray-400">Birthdays & work anniversaries (next 30 days)</p>

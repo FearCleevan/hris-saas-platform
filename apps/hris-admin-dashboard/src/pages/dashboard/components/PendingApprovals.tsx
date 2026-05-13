@@ -22,7 +22,7 @@ export function PendingApprovals() {
   const highCount = approvalsData.filter((a) => a.urgency === 'high').length;
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 h-full">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 h-full">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-bold text-gray-900 dark:text-white text-sm">Pending Approvals</h3>
@@ -31,7 +31,7 @@ export function PendingApprovals() {
           </p>
         </div>
         {highCount > 0 && (
-          <div className="flex items-center gap-1 text-xs text-[#ce1126] font-semibold">
+          <div className="flex items-center gap-1 text-xs text-brand-red font-semibold shrink-0">
             <AlertCircle className="w-3.5 h-3.5" />
             {highCount} urgent
           </div>
@@ -65,7 +65,7 @@ export function PendingApprovals() {
                   {formatDistanceToNow(new Date(item.submittedAt), { addSuffix: true })}
                 </span>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#0038a8] transition-colors shrink-0" />
+              <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-brand-blue transition-colors shrink-0" />
             </button>
           );
         })}
@@ -74,7 +74,7 @@ export function PendingApprovals() {
       <button
         type="button"
         onClick={() => navigate('/leaves')}
-        className="w-full mt-3 text-center text-xs text-[#0038a8] dark:text-blue-400 hover:underline font-medium py-2 cursor-pointer"
+        className="w-full mt-3 text-center text-xs text-brand-blue dark:text-blue-400 hover:underline font-medium py-2 cursor-pointer"
       >
         View all approvals →
       </button>

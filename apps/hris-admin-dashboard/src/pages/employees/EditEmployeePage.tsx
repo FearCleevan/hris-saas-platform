@@ -883,14 +883,14 @@ export default function EditEmployeePage() {
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Edit Employee</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Edit Employee</h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
           Editing profile for <span className="font-semibold text-gray-700 dark:text-gray-300">{employeeName}</span>
         </p>
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
+      <div className="flex items-center gap-1 mb-6 sm:mb-8 overflow-x-auto pb-1">
         {STEPS.map((s, i) => {
           const Icon = s.icon;
           const done   = i < step;
@@ -915,8 +915,8 @@ export default function EditEmployeePage() {
       </div>
 
       {/* Form card */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 max-w-2xl">
-        <h2 className="text-base font-semibold text-gray-800 dark:text-white mb-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 max-w-2xl">
+        <h2 className="text-base font-semibold text-gray-800 dark:text-white mb-4 sm:mb-5">
           Step {step + 1} of {STEPS.length}: {STEPS[step].label}
         </h2>
 

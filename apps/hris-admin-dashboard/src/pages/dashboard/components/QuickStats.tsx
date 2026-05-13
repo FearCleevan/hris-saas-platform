@@ -17,7 +17,7 @@ const stats = [
 
 export function QuickStats() {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
       <div className="mb-4">
         <h3 className="font-bold text-gray-900 dark:text-white text-sm">Quick Stats</h3>
         <p className="text-xs text-gray-500 dark:text-gray-400">Workforce changes this month</p>

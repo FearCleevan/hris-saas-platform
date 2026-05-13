@@ -136,7 +136,7 @@ function KpiCard({
       </div>
       <div>
         <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -625,7 +625,7 @@ function DailyTab({
                   >
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                           {getInitials(emp.name)}
                         </div>
                         <div>
@@ -811,7 +811,7 @@ function ReportsTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Top 10 — Most Late (Total Minutes)</h3>
           <div className="flex flex-col gap-2.5">
             {topLate.map(({ emp, mins }, i) => (
@@ -834,7 +834,7 @@ function ReportsTab() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Top 10 — Most Absent (Days)</h3>
           <div className="flex flex-col gap-2.5">
             {topAbsent.map(({ emp, count }, i) => (
@@ -858,7 +858,7 @@ function ReportsTab() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
         <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Period Summary — Oct 2 to Nov 10, 2023</h3>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {(Object.entries(totals) as [keyof typeof totals, number][]).map(([s, count]) => {
@@ -866,7 +866,7 @@ function ReportsTab() {
             const pct = ((count / attendanceLogs.length) * 100).toFixed(1);
             return (
               <div key={s} className={`rounded-xl p-3 border ${cfg.bg}`}>
-                <p className={`text-2xl font-bold ${cfg.color}`}>{count}</p>
+                <p className={`text-xl sm:text-2xl font-bold ${cfg.color}`}>{count}</p>
                 <p className={`text-xs font-medium ${cfg.color} opacity-80`}>{cfg.label}</p>
                 <p className="text-[10px] text-gray-400 mt-0.5">{pct}% of records</p>
               </div>
@@ -911,7 +911,7 @@ function OvertimeTab() {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize ${
               filter === f
-                ? 'bg-[#0038a8] text-white'
+                ? 'bg-brand-blue text-white'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
@@ -942,7 +942,7 @@ function OvertimeTab() {
               className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4"
             >
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold shrink-0">
                   {getInitials(emp.name)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1014,7 +1014,7 @@ function ShiftsTab({
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.06 }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5"
         >
           <div className="flex items-center gap-3 mb-3">
             <div
@@ -1061,9 +1061,9 @@ function ShiftsTab({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: shifts.length * 0.06 }}
         onClick={onAdd}
-        className="bg-gray-50 dark:bg-gray-900/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-gray-400 min-h-[180px] hover:border-[#0038a8]/50 hover:text-[#0038a8] hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-colors group"
+        className="bg-gray-50 dark:bg-gray-900/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-gray-400 min-h-[180px] hover:border-brand-blue/50 hover:text-brand-blue hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-colors group"
       >
-        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 group-hover:bg-[#0038a8]/10 flex items-center justify-center transition-colors">
+        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 group-hover:bg-brand-blue/10 flex items-center justify-center transition-colors">
           <Plus className="w-5 h-5" />
         </div>
         <span className="text-xs font-semibold">Add New Shift</span>
@@ -1076,7 +1076,7 @@ function ShiftsTab({
 function HolidaysTab() {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+      <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-800">
         <h3 className="text-sm font-bold text-gray-800 dark:text-white">Philippine Holidays 2023</h3>
         <p className="text-xs text-gray-400 mt-0.5">
           {holidaysData.length} holidays · Per Proclamation No. 90 & RA 9849
@@ -1087,7 +1087,7 @@ function HolidaysTab() {
           const typeCfg = HOLIDAY_TYPE_CFG[h.type as keyof typeof HOLIDAY_TYPE_CFG] ?? HOLIDAY_TYPE_CFG.regular;
           const isPast = new Date(h.date) < new Date('2023-10-02');
           return (
-            <div key={h.id} className={`flex items-center gap-4 px-5 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30 ${isPast ? 'opacity-40' : ''}`}>
+            <div key={h.id} className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30 ${isPast ? 'opacity-40' : ''}`}>
               <div className="w-12 shrink-0 text-center">
                 <p className="text-[10px] font-semibold text-gray-400 uppercase">{format(parseISO(h.date), 'MMM')}</p>
                 <p className="text-xl font-extrabold text-[#0038a8] leading-tight">{format(parseISO(h.date), 'd')}</p>
@@ -1177,10 +1177,10 @@ export default function AttendancePage() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Attendance</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Attendance</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Track daily attendance, overtime, and shift schedules
           </p>
         </div>
@@ -1193,7 +1193,7 @@ export default function AttendancePage() {
           {pendingOT > 0 && (
             <button
               onClick={() => setActiveTab('overtime')}
-              className="ml-2 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 font-semibold border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition-colors"
+              className="hidden sm:inline-block ml-2 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 font-semibold border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition-colors"
             >
               {pendingOT} OT pending
             </button>
@@ -1222,7 +1222,7 @@ export default function AttendancePage() {
                 onClick={() => setSelectedDate(date)}
                 className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${
                   selectedDate === date
-                    ? 'bg-[#0038a8] text-white shadow-sm'
+                    ? 'bg-brand-blue text-white shadow-sm'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
@@ -1232,7 +1232,7 @@ export default function AttendancePage() {
                 )}
               </button>
             ))}
-            <span className="text-xs text-gray-400 ml-auto">
+            <span className="hidden sm:inline text-xs text-gray-400 ml-auto">
               Viewing: <span className="font-semibold text-gray-600 dark:text-gray-300">{format(parseISO(selectedDate), 'EEEE, MMMM d, yyyy')}</span>
             </span>
           </div>
@@ -1247,14 +1247,14 @@ export default function AttendancePage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-[#0038a8] text-white shadow-sm'
+                  ? 'bg-brand-blue text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           );
         })}

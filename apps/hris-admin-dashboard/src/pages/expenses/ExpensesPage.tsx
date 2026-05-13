@@ -83,7 +83,7 @@ const selectCls = `${fieldCls} appearance-none`;
 function KpiCard({ label, value, icon: IconC, sub, color }: { label: string; value: string | number; icon: React.ElementType; sub?: string; color?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
         <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
       </div>
       <div>
@@ -398,10 +398,10 @@ export default function ExpensesPage() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Expense Management</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Expense Management</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               Track employee claims, company expenses, and budget utilization
             </p>
           </div>
@@ -420,18 +420,18 @@ export default function ExpensesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
           {TABS.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
                   isActive
-                    ? tab.highlight ? 'bg-indigo-600 text-white shadow-sm' : 'bg-[#0038a8] text-white shadow-sm'
+                    ? tab.highlight ? 'bg-indigo-600 text-white shadow-sm' : 'bg-brand-blue text-white shadow-sm'
                     : tab.highlight ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}>
-                <Icon className="w-4 h-4" />{tab.label}
+                <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
                 {tab.highlight && !isActive && (
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">AI</span>
                 )}
@@ -446,7 +446,7 @@ export default function ExpensesPage() {
             {/* ═══════════ CLAIMS TAB ═══════════ */}
             {activeTab === 'claims' && (
               <div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                   <KpiCard label="Total Claims" value={claimsKPIs.total} icon={FileText} />
                   <KpiCard label="Pending" value={claimsKPIs.pending} icon={Clock} sub={peso(claimsKPIs.pendingAmount)} />
                   <KpiCard label="Approved" value={claims.filter(c => c.status === 'approved').length} icon={CheckCircle2} color="bg-blue-500" />
@@ -481,7 +481,7 @@ export default function ExpensesPage() {
                   <div className="ml-auto flex items-center gap-2">
                     <span className="text-xs text-gray-400">{filteredClaims.length} claims</span>
                     <button type="button" onClick={() => setShowClaimForm(v => !v)}
-                      className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${showClaimForm ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-[#0038a8] text-white hover:bg-[#002d8a]'}`}>
+                      className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${showClaimForm ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-brand-blue text-white hover:bg-brand-blue-dark'}`}>
                       {showClaimForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                       {showClaimForm ? 'Cancel' : 'Submit Claim'}
                     </button>
@@ -528,7 +528,7 @@ export default function ExpensesPage() {
                             Cancel
                           </button>
                           <button type="button" onClick={handleSubmitClaim}
-                            className="h-8 px-4 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors flex items-center gap-1.5">
+                            className="h-8 px-4 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors flex items-center gap-1.5">
                             <Check className="w-3.5 h-3.5" />Submit Claim
                           </button>
                         </div>
@@ -559,7 +559,7 @@ export default function ExpensesPage() {
                             <tr key={c.id} className={`${i < filteredClaims.length - 1 ? 'border-b border-gray-50 dark:border-gray-800/60' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/20`}>
                               <td className="px-4 py-2.5">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-7 h-7 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-[10px] font-bold shrink-0">{getInitials(c.emp.name)}</div>
+                                  <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0">{getInitials(c.emp.name)}</div>
                                   <div>
                                     <p className="text-xs font-semibold text-gray-800 dark:text-white">{c.emp.name}</p>
                                     <p className="text-[10px] text-gray-400">{c.emp.department}</p>
@@ -612,7 +612,7 @@ export default function ExpensesPage() {
             {/* ═══════════ APPROVALS TAB ═══════════ */}
             {activeTab === 'approvals' && (
               <div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                   <KpiCard label="Pending Approvals" value={pendingClaims.length} icon={Clock} color="bg-amber-500" />
                   <KpiCard label="Total Pending Amount" value={peso(pendingClaims.reduce((s, c) => s + c.amount, 0))} icon={FileText} />
                   <KpiCard label="Oldest Pending"
@@ -629,7 +629,7 @@ export default function ExpensesPage() {
                       <motion.div key={c.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                         className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#0038a8] flex items-center justify-center text-white text-xs font-bold shrink-0">{getInitials(c.emp.name)}</div>
+                          <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold shrink-0">{getInitials(c.emp.name)}</div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                               <p className="text-sm font-semibold text-gray-800 dark:text-white">{c.emp.name}</p>
@@ -681,7 +681,7 @@ export default function ExpensesPage() {
                   onDragEnter={handleDragEnter}
                   onDragLeave={handleDragLeave}
                   className={`border-2 border-dashed rounded-2xl p-10 mb-5 text-center cursor-default transition-all duration-200 select-none ${isDragOver
-                    ? 'border-[#0038a8] bg-[#0038a8]/5 scale-[1.01]'
+                    ? 'border-[#0038a8] bg-brand-blue/5 scale-[1.01]'
                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
                     }`}
                 >
@@ -697,7 +697,7 @@ export default function ExpensesPage() {
                   <button
                     type="button"
                     onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                    className="mt-4 px-4 py-2 bg-[#0038a8] text-white text-xs font-semibold rounded-xl hover:bg-[#002d8a] transition-colors flex items-center gap-1.5 mx-auto"
+                    className="mt-4 px-4 py-2 bg-brand-blue text-white text-xs font-semibold rounded-xl hover:bg-brand-blue-dark transition-colors flex items-center gap-1.5 mx-auto"
                   >
                     <Plus className="w-3.5 h-3.5" /> Choose Files
                   </button>
@@ -798,7 +798,7 @@ export default function ExpensesPage() {
                         return (
                           <button key={c.id} type="button" onClick={() => setSelectedReceipt(c)}
                             className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-left hover:border-[#0038a8]/50 hover:shadow-sm transition-all group">
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg h-20 flex items-center justify-center mb-2 group-hover:bg-[#0038a8]/5 transition-colors relative overflow-hidden">
+                            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg h-20 flex items-center justify-center mb-2 group-hover:bg-brand-blue/5 transition-colors relative overflow-hidden">
                               <FileText className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                               <span className="absolute bottom-1 right-1 text-[8px] font-bold bg-white dark:bg-gray-900 rounded px-1 text-gray-400">VIEW</span>
                             </div>
@@ -819,7 +819,7 @@ export default function ExpensesPage() {
             {/* ═══════════ COMPANY EXPENSES TAB ═══════════ */}
             {activeTab === 'company' && (
               <div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                   <KpiCard label="Total Ops Expenses" value={peso(companyKPIs.total)} icon={Building2} />
                   <KpiCard label="Expenses" value={companyKPIs.count} icon={FileText} />
                   <KpiCard label="Recurring" value={companyKPIs.recurring} icon={ArrowUpRight} sub="Monthly" />
@@ -828,7 +828,7 @@ export default function ExpensesPage() {
 
                 <div className="flex justify-end mb-3">
                   <button type="button" onClick={() => setShowCompanyForm(v => !v)}
-                    className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${showCompanyForm ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-[#0038a8] text-white hover:bg-[#002d8a]'}`}>
+                    className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors ${showCompanyForm ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' : 'bg-brand-blue text-white hover:bg-brand-blue-dark'}`}>
                     {showCompanyForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                     {showCompanyForm ? 'Cancel' : 'Log Expense'}
                   </button>
@@ -892,7 +892,7 @@ export default function ExpensesPage() {
                             Cancel
                           </button>
                           <button type="button" onClick={handleAddCompanyExpense}
-                            className="h-8 px-4 rounded-lg bg-[#0038a8] text-white text-xs font-semibold hover:bg-[#002d8a] transition-colors flex items-center gap-1.5">
+                            className="h-8 px-4 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors flex items-center gap-1.5">
                             <Check className="w-3.5 h-3.5" />Log Expense
                           </button>
                         </div>
@@ -958,12 +958,12 @@ export default function ExpensesPage() {
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                   <KpiCard label="Total Claims" value={peso(reportData.totalClaims)} icon={FileText} />
                   <KpiCard label="Total Company" value={peso(reportData.totalCompany)} icon={Building2} />
                   <KpiCard label="Combined Spend" value={peso(reportData.totalClaims + reportData.totalCompany)} icon={TrendingUp} />
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Expenses by Category</h3>
                   <div className="flex flex-col gap-2.5">
                     {reportData.catBreakdown.map(cat => (
@@ -1001,7 +1001,7 @@ export default function ExpensesPage() {
                     <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                   <KpiCard label="Budget" value={peso(budgetKPIs.totalBudget)} icon={Target} />
                   <KpiCard label="Actual" value={peso(budgetKPIs.totalActual)} icon={TrendingUp} color={budgetKPIs.utilization > 100 ? 'bg-red-500' : 'bg-green-500'} />
                   <KpiCard label="Utilization" value={`${budgetKPIs.utilization}%`} icon={budgetKPIs.utilization > 100 ? ArrowUpRight : ArrowDownRight} color={budgetKPIs.utilization > 100 ? 'bg-red-500' : budgetKPIs.utilization > 85 ? 'bg-amber-500' : 'bg-green-500'} />

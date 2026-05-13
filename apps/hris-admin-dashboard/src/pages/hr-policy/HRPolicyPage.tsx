@@ -203,13 +203,13 @@ IMPORTANT RULES:
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-5 sm:mb-6 flex-wrap">
         <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center shrink-0">
           <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">HR Policy Q&A</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">HR Policy Q&A</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             Philippine labor law · Leave policies · DOLE compliance · Tax obligations — powered by Gemini
           </p>
         </div>
@@ -350,7 +350,7 @@ IMPORTANT RULES:
                 {/* Avatar */}
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                   msg.role === 'user'
-                    ? 'bg-[#0038a8] text-white'
+                    ? 'bg-brand-blue text-white'
                     : 'bg-indigo-100 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800'
                 }`}>
                   {msg.role === 'user' ? <User size={14} className="text-white" /> : <Bot size={14} className="text-indigo-600 dark:text-indigo-400" />}
@@ -360,7 +360,7 @@ IMPORTANT RULES:
                 <div className={`max-w-[80%] group ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                   <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-[#0038a8] text-white rounded-tr-md'
+                      ? 'bg-brand-blue text-white rounded-tr-md'
                       : 'bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md'
                   }`}>
                     {msg.role === 'assistant' ? (

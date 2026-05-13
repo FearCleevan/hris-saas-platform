@@ -70,7 +70,7 @@ const STATUS_CFG: Record<string, { label: string; color: string; bg: string }> =
 function KpiCard({ label, value, icon: IconC, sub, color }: { label: string; value: string | number; icon: React.ElementType; sub?: string; color?: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-4">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-[#0038a8]/10'}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color || 'bg-brand-blue/10'}`}>
         <IconC className={`w-5 h-5 ${color ? 'text-white' : 'text-[#0038a8]'}`} />
       </div>
       <div><p className="text-xs text-gray-500 dark:text-gray-400">{label}</p><p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>{sub && <p className="text-xs text-gray-400">{sub}</p>}</div>
@@ -154,10 +154,10 @@ export default function CompliancePage() {
   /* ─── Render ─── */
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Compliance & Reports</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Compliance & Reports</h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Overall Compliance Score: {dashboardKPIs.overallScore}% · {upcomingDeadlines.length} upcoming deadlines
           </p>
         </div>
@@ -166,10 +166,10 @@ export default function CompliancePage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1 mb-5 sm:mb-6 overflow-x-auto pb-1 scrollbar-none">
         {TABS.map(tab => { const Icon = tab.icon; return (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-[#0038a8] text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <Icon className="w-4 h-4" />{tab.label}
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <Icon className="w-4 h-4" /><span className="hidden sm:inline">{tab.label}</span>
           </button>
         );})}
       </div>
@@ -180,14 +180,14 @@ export default function CompliancePage() {
           {/* ===== DASHBOARD TAB ===== */}
           {activeTab === 'dashboard' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="DOLE Compliance" value={`${dashboardKPIs.doleCompliance}%`} icon={Building2} color={dashboardKPIs.doleCompliance >= 90 ? 'bg-green-500' : 'bg-amber-500'} />
                 <KpiCard label="Reports Filed" value={`${dashboardKPIs.govReportsFiled}/${reports.length}`} icon={FileSpreadsheet} />
                 <KpiCard label="DPA Compliance" value={`${dashboardKPIs.dpaCompliance}%`} icon={Lock} color={dashboardKPIs.dpaCompliance >= 95 ? 'bg-green-500' : 'bg-amber-500'} />
                 <KpiCard label="Upcoming Deadlines" value={upcomingDeadlines.length} icon={AlertTriangle} color={upcomingDeadlines.length > 2 ? 'bg-red-500' : 'bg-amber-500'} />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-                <div className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Upcoming Deadlines</h3>
                   <div className="flex flex-col gap-2">
                     {upcomingDeadlines.slice(0, 8).map((d, i) => (
@@ -202,17 +202,17 @@ export default function CompliancePage() {
                     {upcomingDeadlines.length === 0 && <p className="text-xs text-gray-400 text-center py-4">No upcoming deadlines</p>}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Quick Actions</h3>
                   <div className="flex flex-col gap-2">
-                    <button onClick={() => setActiveTab('govreports')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-[#0038a8]/10 text-gray-700 dark:text-gray-300 transition-colors">📄 File Government Reports</button>
-                    <button onClick={() => setActiveTab('audit')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-[#0038a8]/10 text-gray-700 dark:text-gray-300 transition-colors">🔍 View Audit Logs</button>
-                    <button onClick={() => setActiveTab('dataprivacy')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-[#0038a8]/10 text-gray-700 dark:text-gray-300 transition-colors">🔒 Check DPA Status</button>
-                    <button onClick={() => setActiveTab('customreports')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-[#0038a8]/10 text-gray-700 dark:text-gray-300 transition-colors">📊 Run Custom Report</button>
+                    <button onClick={() => setActiveTab('govreports')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-brand-blue/10 text-gray-700 dark:text-gray-300 transition-colors">📄 File Government Reports</button>
+                    <button onClick={() => setActiveTab('audit')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-brand-blue/10 text-gray-700 dark:text-gray-300 transition-colors">🔍 View Audit Logs</button>
+                    <button onClick={() => setActiveTab('dataprivacy')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-brand-blue/10 text-gray-700 dark:text-gray-300 transition-colors">🔒 Check DPA Status</button>
+                    <button onClick={() => setActiveTab('customreports')} className="text-xs text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-brand-blue/10 text-gray-700 dark:text-gray-300 transition-colors">📊 Run Custom Report</button>
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                 <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-3">Compliance by Category</h3>
                 {['DOLE', 'Government Reports', 'Data Privacy'].map(cat => {
                   const pct = cat === 'DOLE' ? dashboardKPIs.doleCompliance : cat === 'Data Privacy' ? dashboardKPIs.dpaCompliance : Math.round((reports.filter(r => r.status === 'filed').length / reports.length) * 100);
@@ -233,7 +233,7 @@ export default function CompliancePage() {
           {/* ===== DOLE TAB ===== */}
           {activeTab === 'dole' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Compliant" value={dole.filter(d => d.status === 'compliant').length} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="Pending" value={dole.filter(d => d.status === 'pending').length} icon={Clock} color="bg-amber-500" />
                 <KpiCard label="Overdue" value={dole.filter(d => d.status === 'overdue').length} icon={XCircle} color="bg-red-500" />
@@ -273,7 +273,7 @@ export default function CompliancePage() {
           {/* ===== GOVERNMENT REPORTS TAB ===== */}
           {activeTab === 'govreports' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Reports Filed" value={reports.filter(r => r.status === 'filed').length} icon={CheckCircle2} color="bg-green-500" />
                 <KpiCard label="Pending" value={reports.filter(r => r.status === 'pending').length} icon={Clock} color="bg-amber-500" />
                 <KpiCard label="Next Due" value={reports.filter(r => r.nextDueDate).sort((a, b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime())[0]?.name || '—'} icon={AlertTriangle} />
@@ -282,7 +282,7 @@ export default function CompliancePage() {
                 {reports.map((r, i) => {
                   const stCfg = STATUS_CFG[r.status] || STATUS_CFG.not_filed;
                   return (
-                    <motion.div key={r.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                    <motion.div key={r.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <p className="text-sm font-bold text-gray-800 dark:text-white">{r.fullName}</p>
@@ -298,7 +298,7 @@ export default function CompliancePage() {
                       </div>
                       <div className="flex gap-2">
                         {r.status === 'pending' && (
-                          <button onClick={() => toast.success(`${r.name} for ${r.period} generated`)} className="px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold">Generate & File</button>
+                          <button onClick={() => toast.success(`${r.name} for ${r.period} generated`)} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold">Generate & File</button>
                         )}
                         <button onClick={() => toast.success(`Previewing ${r.name}`)} className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 hover:bg-gray-50"><Eye className="w-3 h-3 inline mr-1" />Preview</button>
                         {r.status === 'filed' && (
@@ -315,7 +315,7 @@ export default function CompliancePage() {
           {/* ===== DATA PRIVACY TAB ===== */}
           {activeTab === 'dataprivacy' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 <KpiCard label="DPA Compliance" value={`${dashboardKPIs.dpaCompliance}%`} icon={Lock} color={dashboardKPIs.dpaCompliance >= 95 ? 'bg-green-500' : 'bg-amber-500'} />
                 <KpiCard label="Compliant Items" value={dpa.filter(d => d.status === 'compliant').length} icon={CheckCircle2} />
                 <KpiCard label="Consent Forms" value="48/50" icon={FileSpreadsheet} sub="2 pending from new hires" />
@@ -357,7 +357,7 @@ export default function CompliancePage() {
           {/* ===== AUDIT LOGS TAB ===== */}
           {activeTab === 'audit' && (
             <div>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
                 <KpiCard label="Total Logs" value={auditStats.total} icon={ScrollText} />
                 <KpiCard label="Unique Users" value={auditStats.uniqueUsers} icon={Shield} />
                 <KpiCard label="Today" value={auditStats.today} icon={Clock} />
@@ -418,13 +418,13 @@ export default function CompliancePage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-500">{customReports.length} saved reports</p>
-                <button onClick={() => toast.success('Report builder opened')} className="px-4 py-2 bg-[#0038a8] text-white text-xs font-semibold rounded-xl">+ New Report</button>
+                <button onClick={() => toast.success('Report builder opened')} className="px-4 py-2 bg-brand-blue text-white text-xs font-semibold rounded-xl">+ New Report</button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {customReports.map((cr, i) => {
                   const createdBy = employeesData.find(e => e.id === cr.createdBy);
                   return (
-                    <motion.div key={cr.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+                    <motion.div key={cr.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <p className="text-sm font-bold text-gray-800 dark:text-white">{cr.name}</p>
@@ -441,7 +441,7 @@ export default function CompliancePage() {
                         <span>Last run: {format(new Date(cr.lastRun), 'MMM d, yyyy')}</span>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => toast.success(`Running: ${cr.name}`)} className="px-3 py-1.5 rounded-lg bg-[#0038a8] text-white text-xs font-semibold">Run Report</button>
+                        <button onClick={() => toast.success(`Running: ${cr.name}`)} className="px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold">Run Report</button>
                         <button onClick={() => toast.success(`Downloading ${cr.name} as CSV`)} className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600"><Download className="w-3 h-3 inline mr-1" />Export</button>
                       </div>
                     </motion.div>

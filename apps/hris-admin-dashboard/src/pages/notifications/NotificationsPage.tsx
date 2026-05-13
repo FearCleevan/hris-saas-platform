@@ -70,7 +70,7 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
             Notifications
             {unreadCount > 0 && (
               <span className="text-sm font-bold px-2 py-0.5 rounded-full bg-red-500 text-white">{unreadCount}</span>
@@ -84,7 +84,7 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={markAllRead}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0038a8] text-white text-sm font-semibold hover:bg-[#002d8a] transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue text-white text-sm font-semibold hover:bg-brand-blue-dark transition-colors"
           >
             <CheckCheck size={15} />Mark All Read
           </button>
@@ -120,7 +120,7 @@ export default function NotificationsPage() {
               onClick={() => setTypeFilter(t)}
               className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors ${
                 typeFilter === t
-                  ? 'bg-[#0038a8] text-white'
+                  ? 'bg-brand-blue text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
@@ -172,7 +172,7 @@ export default function NotificationsPage() {
                             {notif.title}
                           </p>
                           {!notif.read && (
-                            <span className="w-2 h-2 rounded-full bg-[#0038a8] shrink-0" />
+                            <span className="w-2 h-2 rounded-full bg-brand-blue shrink-0" />
                           )}
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}>
                             {cfg.label}

@@ -64,7 +64,7 @@ function InfoRow({ label, value, icon: Icon }: { label: string; value?: string |
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{title}</h3>
       {children}
     </div>
@@ -987,14 +987,14 @@ export default function EmployeeProfilePage() {
       </Link>
 
       {/* Profile header */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          <div className="w-20 h-20 rounded-2xl bg-[#0038a8] flex items-center justify-center text-white text-2xl font-bold shrink-0">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#0038a8] flex items-center justify-center text-white text-xl sm:text-2xl font-bold shrink-0">
             {getInitials(employee.name)}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="text-xl font-extrabold text-gray-900 dark:text-white">{employee.name}</h1>
+              <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white">{employee.name}</h1>
               <Chip
                 label={statusCfg?.label ?? employee.status}
                 color={statusCfg?.color ?? 'default'}
