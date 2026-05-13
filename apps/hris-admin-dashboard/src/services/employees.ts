@@ -143,6 +143,8 @@ export type DepartmentOption = { id: string; name: string };
 export type PositionOption   = { id: string; title: string; departmentId: string | null };
 
 // ── Internal Supabase shape ───────────────────────────────────────
+// departments/positions/employment_types are FK-forward joins from employee_employment
+// so PostgREST returns them as plain objects (not arrays).
 type SupabaseEmployeeRow = {
   id: string;
   first_name: string;
@@ -157,9 +159,9 @@ type SupabaseEmployeeRow = {
     date_hired: string;
     is_current: boolean;
     direct_manager_id: string | null;
-    departments: { name: string }[];
-    positions: { title: string }[];
-    employment_types: { name: string; code: string }[];
+    departments: { name: string } | null;
+    positions: { title: string } | null;
+    employment_types: { name: string; code: string } | null;
   }[];
   employee_compensation: {
     basic_salary: number;
@@ -174,13 +176,13 @@ function mapRow(row: SupabaseEmployeeRow): EmployeeRow {
   return {
     id:          row.id,
     name:        [row.first_name, row.last_name].filter(Boolean).join(' '),
-    position:    emp?.positions?.[0]?.title ?? '—',
-    department:  emp?.departments?.[0]?.name ?? '—',
+    position:    emp?.positions?.title ?? '—',
+    department:  emp?.departments?.name ?? '—',
     status:      row.status,
     hireDate:    emp?.date_hired ?? '',
     birthday:    row.date_of_birth ?? '',
     salary:      comp?.basic_salary ?? 0,
-    type:        emp?.employment_types?.[0]?.code ?? 'regular',
+    type:        emp?.employment_types?.code ?? 'regular',
     avatar:      row.avatar_url,
     employeeNo:  row.employee_no,
     email:       row.work_email,
@@ -212,12 +214,16 @@ export async function getEmployees(): Promise<EmployeeRow[]> {
     .order('last_name');
 
   if (error) throw error;
-  return (data as SupabaseEmployeeRow[]).map(mapRow);
+  return (data as unknown as SupabaseEmployeeRow[]).map(mapRow);
 }
 
 // ── SINGLE DETAIL ────────────────────────────────────────────────
 export async function getEmployee(id: string): Promise<EmployeeDetail | null> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+
+  // Resolve org first so every sub-query gets an explicit org filter —
+  // this prevents RLS from silently returning empty rows on some policies.
+  const orgId = await getAuthOrgId();
 
   // Run all queries in parallel. Gov IDs and beneficiaries are fetched directly
   // (not via join) to avoid RLS policies that may block embedded-resource access.
@@ -241,18 +247,21 @@ export async function getEmployee(id: string): Promise<EmployeeDetail | null> {
         employee_emergency_contacts(name, relationship, mobile_number, is_primary)
       `)
       .eq('id', id)
+      .eq('organization_id', orgId)
       .single(),
 
     supabase
       .from('employee_government_ids')
       .select('sss_number, tin_number, pagibig_number, philhealth_number')
       .eq('employee_id', id)
+      .eq('organization_id', orgId)
       .maybeSingle(),
 
     supabase
       .from('employee_beneficiaries')
       .select('id, name, relationship, date_of_birth')
-      .eq('employee_id', id),
+      .eq('employee_id', id)
+      .eq('organization_id', orgId),
   ]);
 
   if (mainRes.error) {
@@ -260,6 +269,10 @@ export async function getEmployee(id: string): Promise<EmployeeDetail | null> {
     throw mainRes.error;
   }
   if (!mainRes.data) return null;
+
+  // Warn in dev so silent empty-data failures are visible in the console
+  if (govRes.error) console.warn('[getEmployee] gov IDs query failed:', govRes.error.message);
+  if (benRes.error) console.warn('[getEmployee] beneficiaries query failed:', benRes.error.message);
 
   const d    = mainRes.data as any;
   const gov  = govRes.data;
@@ -291,12 +304,12 @@ export async function getEmployee(id: string): Promise<EmployeeDetail | null> {
     avatarUrl:             d.avatar_url,
     status:                d.status,
     employeeNo:            d.employee_no,
-    position:              emp?.positions?.[0]?.title ?? null,
-    positionId:            emp?.positions?.[0]?.id ?? null,
-    department:            emp?.departments?.[0]?.name ?? null,
-    departmentId:          emp?.departments?.[0]?.id ?? null,
-    employmentType:        emp?.employment_types?.[0]?.code ?? null,
-    employmentTypeId:      emp?.employment_types?.[0]?.id ?? null,
+    position:              emp?.positions?.title ?? null,
+    positionId:            (emp?.positions as any)?.id ?? null,
+    department:            emp?.departments?.name ?? null,
+    departmentId:          (emp?.departments as any)?.id ?? null,
+    employmentType:        emp?.employment_types?.code ?? null,
+    employmentTypeId:      (emp?.employment_types as any)?.id ?? null,
     dateHired:             emp?.date_hired ?? null,
     dateRegularized:       emp?.date_regularized ?? null,
     managerId:             emp?.direct_manager_id ?? null,
@@ -380,16 +393,16 @@ export async function getEmployeeStats(): Promise<EmployeeStats> {
 
   if (allRes.error) throw allRes.error;
 
-  const rows = allRes.data as {
+  const rows = allRes.data as unknown as {
     status: string;
-    employee_employment: { date_hired: string; is_current: boolean; employment_types: { code: string }[] }[];
+    employee_employment: { date_hired: string; is_current: boolean; employment_types: { code: string } | null }[];
   }[];
 
   const total       = rows.length;
   const active      = rows.filter((r) => r.status === 'active').length;
   const onLeave     = rows.filter((r) => r.status === 'on_leave').length;
   const probationary = rows.filter((r) =>
-    r.employee_employment?.find((e) => e.is_current)?.employment_types?.[0]?.code === 'probationary'
+    r.employee_employment?.find((e) => e.is_current)?.employment_types?.code === 'probationary'
   ).length;
   const newThisMonth = rows.filter((r) => {
     const hired = r.employee_employment?.find((e) => e.is_current)?.date_hired ?? '';
@@ -471,7 +484,7 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
   const [deptRes, posRes, empTypeRes] = await Promise.all([
     supabase.from('departments').select('id').eq('name', payload.department).eq('organization_id', orgId).maybeSingle(),
     supabase.from('positions').select('id').eq('title', payload.position).eq('organization_id', orgId).maybeSingle(),
-    supabase.from('employment_types').select('id').eq('code', payload.type).maybeSingle(),
+    supabase.from('employment_types').select('id').eq('code', payload.type).eq('organization_id', orgId).maybeSingle(),
   ]);
 
   // 3. Build employment update — only overwrite an ID when the lookup actually found a row
@@ -582,6 +595,73 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
       if (ecInsErr) throw ecInsErr;
     }
   }
+}
+
+// ── BULK UPDATE (status / department / employment type) ───────────
+export async function bulkUpdateEmployees(
+  ids: string[],
+  patch: { status?: string; department?: string; type?: string },
+): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+  if (ids.length === 0) return;
+
+  const orgId = await getAuthOrgId();
+  const tasks: Promise<void>[] = [];
+
+  if (patch.status) {
+    tasks.push((async () => {
+      const { error } = await supabase
+        .from('employees')
+        .update({ status: patch.status })
+        .in('id', ids)
+        .eq('organization_id', orgId);
+      if (error) throw error;
+    })());
+  }
+
+  if (patch.department) {
+    const { data: dept } = await supabase
+      .from('departments')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('name', patch.department)
+      .maybeSingle();
+
+    if (dept?.id) {
+      tasks.push((async () => {
+        const { error } = await supabase
+          .from('employee_employment')
+          .update({ department_id: dept.id })
+          .in('employee_id', ids)
+          .eq('organization_id', orgId)
+          .eq('is_current', true);
+        if (error) throw error;
+      })());
+    }
+  }
+
+  if (patch.type) {
+    const { data: empType } = await supabase
+      .from('employment_types')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('code', patch.type)
+      .maybeSingle();
+
+    if (empType?.id) {
+      tasks.push((async () => {
+        const { error } = await supabase
+          .from('employee_employment')
+          .update({ employment_type_id: empType.id })
+          .in('employee_id', ids)
+          .eq('organization_id', orgId)
+          .eq('is_current', true);
+        if (error) throw error;
+      })());
+    }
+  }
+
+  await Promise.all(tasks);
 }
 
 // ── DELETE (hard — cascades all child tables via RPC) ─────────────

@@ -11,7 +11,7 @@ import { format, differenceInYears } from 'date-fns';
 import { Chip } from '@mui/material';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { useEmployee } from '@/hooks/useEmployees';
+import { useEmployee, useEmployees } from '@/hooks/useEmployees';
 import payrollRecordsData from '@/data/mock/payroll-records.json';
 import payrollRunsData from '@/data/mock/payroll-runs.json';
 import attendanceLogsData from '@/data/mock/attendance-logs.json';
@@ -882,6 +882,7 @@ export default function EmployeeProfilePage() {
   const navigate = useNavigate();
 
   const { data: dbEmployee, isLoading } = useEmployee(id);
+  const { data: allEmployees = [] } = useEmployees();
 
   // Build an adapter that matches the shape the JSX expects
   const employee = useMemo((): MockEmployee | undefined => {
@@ -942,12 +943,14 @@ export default function EmployeeProfilePage() {
     return mockEmployeeDetailsData.find((d) => d.id === id) as MockDetail | undefined;
   }, [dbEmployee, id]);
 
-  const supervisor = useMemo(
-    () => (details as any)?.supervisor
-      ? mockEmployeesData.find((e) => e.id === (details as any).supervisor)
-      : null,
-    [details]
-  );
+  const supervisor = useMemo(() => {
+    const supId = (details as any)?.supervisor as string | undefined;
+    if (!supId) return null;
+    // Prefer live DB employees (UUID IDs), fall back to mock (string IDs)
+    const live = allEmployees.find((e) => e.id === supId);
+    if (live) return live;
+    return mockEmployeesData.find((e) => e.id === supId) ?? null;
+  }, [details, allEmployees]);
 
   if (isLoading) {
     return (
@@ -1186,7 +1189,7 @@ export default function EmployeeProfilePage() {
         <TabsContent value="employment">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <SectionCard title="Job Details">
-              <InfoRow label="Employee ID"      value={employee.id} />
+              <InfoRow label="Employee ID"      value={dbEmployee?.employeeNo ?? employee.id} />
               <InfoRow label="Position"         value={employee.position} />
               <InfoRow label="Department"       value={employee.department}  icon={Building2} />
               <InfoRow label="Employment Type"  value={employee.type.charAt(0).toUpperCase() + employee.type.slice(1)} />

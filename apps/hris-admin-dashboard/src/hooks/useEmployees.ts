@@ -8,6 +8,7 @@ import {
   deleteEmployee,
   deleteEmployees,
   syncBeneficiaries,
+  bulkUpdateEmployees,
   type EmployeeRow,
   type EmployeeDetail,
   type EmployeeStats,
@@ -108,6 +109,16 @@ export function useDeleteManyEmployees() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['employees'] });
       qc.invalidateQueries({ queryKey: ['employee-stats'] });
+    },
+  });
+}
+
+export function useBulkUpdateEmployees() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { ids: string[]; patch: { status?: string; department?: string; type?: string } }>({
+    mutationFn: ({ ids, patch }) => bulkUpdateEmployees(ids, patch),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['employees'] });
     },
   });
 }

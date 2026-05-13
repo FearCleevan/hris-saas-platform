@@ -17,7 +17,7 @@ import {
 import { toast } from 'sonner';
 import { format, differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useEmployees, useDeleteManyEmployees } from '@/hooks/useEmployees';
+import { useEmployees, useDeleteManyEmployees, useBulkUpdateEmployees } from '@/hooks/useEmployees';
 import type { EmployeeRow } from '@/services/employees';
 
 type Employee = EmployeeRow;
@@ -112,6 +112,7 @@ export default function EmployeeListPage() {
   const navigate = useNavigate();
   const { data: employees = [], isLoading, error } = useEmployees();
   const deleteManyMutation = useDeleteManyEmployees();
+  const bulkUpdateMutation = useBulkUpdateEmployees();
 
   useEffect(() => {
     if (error) toast.error(`Failed to load employees: ${(error as Error).message}`);
@@ -150,21 +151,33 @@ export default function EmployeeListPage() {
     setSelectedIds(ids);
   }, []);
 
-  const applyBulkUpdate = useCallback(() => {
+  const applyBulkUpdate = useCallback(async () => {
     if (!bulkDept && !bulkStatus && !bulkType) {
       toast.error('Select at least one field to update');
       return;
     }
-    const changes: string[] = [];
-    if (bulkDept)   changes.push(`Department → ${bulkDept}`);
-    if (bulkStatus) changes.push(`Status → ${statusConfig[bulkStatus as keyof typeof statusConfig]?.label ?? bulkStatus}`);
-    if (bulkType)   changes.push(`Type → ${typeConfig[bulkType as keyof typeof typeConfig]?.label ?? bulkType}`);
-    toast.success(`Updated ${selectedIds.length} employee${selectedIds.length !== 1 ? 's' : ''}: ${changes.join(', ')}`);
+    try {
+      await bulkUpdateMutation.mutateAsync({
+        ids: selectedIds,
+        patch: {
+          ...(bulkStatus ? { status: bulkStatus } : {}),
+          ...(bulkDept   ? { department: bulkDept } : {}),
+          ...(bulkType   ? { type: bulkType } : {}),
+        },
+      });
+      const changes: string[] = [];
+      if (bulkDept)   changes.push(`Department → ${bulkDept}`);
+      if (bulkStatus) changes.push(`Status → ${statusConfig[bulkStatus as keyof typeof statusConfig]?.label ?? bulkStatus}`);
+      if (bulkType)   changes.push(`Type → ${typeConfig[bulkType as keyof typeof typeConfig]?.label ?? bulkType}`);
+      toast.success(`Updated ${selectedIds.length} employee${selectedIds.length !== 1 ? 's' : ''}: ${changes.join(', ')}`);
+    } catch (err) {
+      toast.error(`Bulk update failed: ${(err as Error).message}`);
+    }
     setSelectedIds([]);
     setBulkDept('');
     setBulkStatus('');
     setBulkType('');
-  }, [selectedIds, bulkDept, bulkStatus, bulkType]);
+  }, [selectedIds, bulkDept, bulkStatus, bulkType, bulkUpdateMutation]);
 
   const confirmBulkDelete = useCallback(async () => {
     try {
@@ -470,9 +483,12 @@ export default function EmployeeListPage() {
               ))}
             </select>
 
-            <button type="button" onClick={applyBulkUpdate}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-900 text-xs font-semibold hover:bg-gray-100 transition-colors shrink-0">
-              <Check className="w-3.5 h-3.5" /> Apply
+            <button type="button" onClick={applyBulkUpdate} disabled={bulkUpdateMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-gray-900 text-xs font-semibold hover:bg-gray-100 transition-colors shrink-0 disabled:opacity-50">
+              {bulkUpdateMutation.isPending
+                ? <span className="w-3.5 h-3.5 border-2 border-gray-400 border-t-gray-900 rounded-full animate-spin" />
+                : <Check className="w-3.5 h-3.5" />}
+              Apply
             </button>
 
             <div className="w-px h-5 bg-gray-600 shrink-0" />

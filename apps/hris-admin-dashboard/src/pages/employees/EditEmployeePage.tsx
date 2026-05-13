@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, Check, User, Phone, Briefcase, Shield,
-  Banknote, Users, Upload, X, Plus, FileText, Paperclip, AlertCircle, ChevronDown,
+  Banknote, Users, Upload, X, Plus, FileText, Paperclip, AlertCircle, ChevronDown, Eye,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ const PH_BANKS = [
 ];
 
 const STATIC_DEPARTMENTS = ['Engineering', 'HR', 'Finance', 'Operations', 'Sales', 'IT', 'Admin'];
-const CIVIL_STATUSES     = ['Single', 'Married', 'Widowed', 'Separated', 'Annulled'];
+const CIVIL_STATUSES     = ['Single', 'Married', 'Widowed', 'Separated', 'Divorced'];
 const EMPLOYMENT_TYPES   = ['regular', 'probationary', 'contractual'];
 const RELATIONSHIPS      = ['Spouse', 'Child', 'Parent', 'Sibling', 'In-law', 'Other'];
 
@@ -59,6 +59,7 @@ const STEPS = [
   { id: 'bank',          label: 'Bank',          icon: Banknote },
   { id: 'beneficiaries', label: 'Beneficiaries', icon: Users },
   { id: 'documents',     label: 'Documents',     icon: Upload },
+  { id: 'preview',       label: 'Preview',       icon: Eye },
 ];
 
 const SELECT_CLS = 'mt-1 w-full h-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white px-3 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-1';
@@ -467,6 +468,169 @@ function DocumentsStep({ uploads, onChange }: { uploads: Record<string, File | n
   );
 }
 
+// ─── PreviewStep ──────────────────────────────────────────────────────────────
+
+function PreviewSection({ title, icon: Icon, children }: {
+  title: string; icon: React.ElementType; children: React.ReactNode;
+}) {
+  return (
+    <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+        <Icon className="w-3.5 h-3.5 text-brand-blue shrink-0" />
+        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{title}</span>
+      </div>
+      <div className="px-4 py-1">{children}</div>
+    </div>
+  );
+}
+
+function PreviewRow({ label, value, changed }: {
+  label: string; value?: string | null; changed?: boolean;
+}) {
+  return (
+    <div className="flex items-start gap-3 py-2 border-b border-gray-50 dark:border-gray-800/50 last:border-0">
+      <span className="w-44 shrink-0 text-xs text-gray-400 mt-0.5">{label}</span>
+      <div className="flex-1 flex items-center gap-2 min-w-0 flex-wrap">
+        <span className={`text-sm font-medium break-all ${value ? 'text-gray-800 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600 font-normal'}`}>
+          {value || '—'}
+        </span>
+        {changed && (
+          <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+            Changed
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PreviewStep({
+  data,
+  beneficiaries,
+  uploads,
+  originalData,
+}: {
+  data: AllFormData;
+  beneficiaries: { id: string; name: string; relationship: string; birthday: string; type: 'primary' | 'contingent' }[];
+  uploads: Record<string, File | null>;
+  originalData?: AllFormData;
+}) {
+  const uploadedFiles = Object.entries(uploads).filter(([, f]) => f !== null);
+  const isDiff = (field: keyof AllFormData) =>
+    originalData !== undefined && originalData[field] !== data[field];
+
+  const fmtDate = (d?: string) => {
+    if (!d) return '';
+    try {
+      return new Date(d).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch {
+      return d;
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl text-xs text-blue-700 dark:text-blue-300">
+        <p>Please review all information carefully before saving. Use <strong>Back</strong> to make corrections.</p>
+        {originalData && (
+          <p className="mt-1">
+            Fields marked <span className="font-semibold text-amber-600 dark:text-amber-400">Changed</span> differ from the original saved values.
+          </p>
+        )}
+      </div>
+
+      <PreviewSection title="Personal Information" icon={User}>
+        <PreviewRow label="First Name"   value={data.firstName}          changed={isDiff('firstName')} />
+        <PreviewRow label="Middle Name"  value={data.middleName || '—'}  changed={isDiff('middleName')} />
+        <PreviewRow label="Last Name"    value={data.lastName}           changed={isDiff('lastName')} />
+        <PreviewRow label="Birthday"     value={fmtDate(data.birthday)}  changed={isDiff('birthday')} />
+        <PreviewRow label="Gender"       value={data.gender}             changed={isDiff('gender')} />
+        <PreviewRow label="Civil Status" value={data.civilStatus}        changed={isDiff('civilStatus')} />
+        <PreviewRow label="Nationality"  value={data.nationality}        changed={isDiff('nationality')} />
+      </PreviewSection>
+
+      <PreviewSection title="Contact Information" icon={Phone}>
+        <PreviewRow label="Company Email"    value={data.companyEmail}              changed={isDiff('companyEmail')} />
+        <PreviewRow label="Personal Email"   value={data.personalEmail}             changed={isDiff('personalEmail')} />
+        <PreviewRow label="Mobile"           value={data.mobile}                    changed={isDiff('mobile')} />
+        <PreviewRow label="Landline"         value={data.landline || '—'}           changed={isDiff('landline')} />
+        <PreviewRow label="Street"           value={data.street}                    changed={isDiff('street')} />
+        <PreviewRow label="City"             value={data.city}                      changed={isDiff('city')} />
+        <PreviewRow label="Province"         value={data.province}                  changed={isDiff('province')} />
+        <PreviewRow label="ZIP Code"         value={data.zip}                       changed={isDiff('zip')} />
+        <PreviewRow label="Emergency Name"   value={data.emergencyName}             changed={isDiff('emergencyName')} />
+        <PreviewRow label="Emergency Rel."   value={data.emergencyRelationship}     changed={isDiff('emergencyRelationship')} />
+        <PreviewRow label="Emergency Phone"  value={data.emergencyPhone}            changed={isDiff('emergencyPhone')} />
+      </PreviewSection>
+
+      <PreviewSection title="Employment Details" icon={Briefcase}>
+        <PreviewRow label="Position"        value={data.position}                                                       changed={isDiff('position')} />
+        <PreviewRow label="Department"      value={data.department}                                                     changed={isDiff('department')} />
+        <PreviewRow label="Employment Type" value={data.type ? data.type.charAt(0).toUpperCase() + data.type.slice(1) : ''} changed={isDiff('type')} />
+        <PreviewRow label="Hire Date"       value={fmtDate(data.hireDate)}                                              changed={isDiff('hireDate')} />
+        <PreviewRow label="Monthly Salary"  value={data.salary ? `₱${Number(data.salary).toLocaleString()}` : ''}      changed={isDiff('salary')} />
+      </PreviewSection>
+
+      <PreviewSection title="Government IDs" icon={Shield}>
+        <PreviewRow label="SSS Number"        value={data.sss || '—'}        changed={isDiff('sss')} />
+        <PreviewRow label="PhilHealth Number" value={data.philhealth || '—'} changed={isDiff('philhealth')} />
+        <PreviewRow label="Pag-IBIG Number"   value={data.pagibig || '—'}    changed={isDiff('pagibig')} />
+        <PreviewRow label="TIN"               value={data.tin || '—'}        changed={isDiff('tin')} />
+      </PreviewSection>
+
+      <PreviewSection title="Bank Account" icon={Banknote}>
+        <PreviewRow label="Bank Name"      value={data.bankName || '—'}                                                                          changed={isDiff('bankName')} />
+        <PreviewRow label="Account Number" value={data.accountNumber || '—'}                                                                     changed={isDiff('accountNumber')} />
+        <PreviewRow label="Account Name"   value={data.accountName || '—'}                                                                       changed={isDiff('accountName')} />
+        <PreviewRow label="Account Type"   value={data.accountType ? data.accountType.charAt(0).toUpperCase() + data.accountType.slice(1) : '—'} changed={isDiff('accountType')} />
+      </PreviewSection>
+
+      <PreviewSection title={`Beneficiaries (${beneficiaries.length})`} icon={Users}>
+        {beneficiaries.length === 0 ? (
+          <p className="py-3 text-sm text-gray-400">No beneficiaries added.</p>
+        ) : (
+          <div className="py-2 flex flex-col gap-2.5">
+            {beneficiaries.map((b) => (
+              <div key={b.id} className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-[10px] font-bold shrink-0 mt-0.5">
+                  {b.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{b.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {b.relationship}
+                    {b.birthday && ` · Born ${new Date(b.birthday).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                    {' · '}
+                    <span className={b.type === 'primary' ? 'text-brand-blue font-medium' : 'text-gray-500'}>
+                      {b.type.charAt(0).toUpperCase() + b.type.slice(1)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </PreviewSection>
+
+      <PreviewSection title={`Documents (${uploadedFiles.length} new uploads)`} icon={Upload}>
+        {uploadedFiles.length === 0 ? (
+          <p className="py-3 text-sm text-gray-400">No new documents uploaded. Existing files are preserved.</p>
+        ) : (
+          <div className="py-2 flex flex-col gap-1.5">
+            {uploadedFiles.map(([key, file]) => (
+              <div key={key} className="flex items-center gap-2">
+                <Paperclip className="w-3.5 h-3.5 text-brand-blue shrink-0" />
+                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{file!.name}</span>
+                <span className="text-xs text-gray-400 shrink-0">({(file!.size / 1024).toFixed(0)} KB)</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </PreviewSection>
+    </div>
+  );
+}
+
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 
 export default function EditEmployeePage() {
@@ -556,6 +720,7 @@ export default function EditEmployeePage() {
 
   const [step, setStep] = useState(0);
   const [allData, setAllData] = useState<AllFormData>({});
+  const [originalData, setOriginalData] = useState<AllFormData>({});
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [uploads, setUploads] = useState<Record<string, File | null>>({});
   const [finalSubmitting, setFinalSubmitting] = useState(false);
@@ -605,6 +770,7 @@ export default function EditEmployeePage() {
     if (isLoading) return;
     const initial = buildInitialData();
     setAllData(initial);
+    setOriginalData(initial);
     reset(initial);
     if (dbEmployee?.beneficiaries?.length) {
       setBeneficiaries(
@@ -621,13 +787,14 @@ export default function EditEmployeePage() {
   }, [isLoading]);
 
   const handleStepSubmit = async (data: object) => {
-    setAllData((prev) => ({ ...prev, ...data }));
+    const merged = { ...allData, ...data };
+    setAllData(merged);
+    reset(merged);
     setStep((s) => s + 1);
   };
 
   const handleCustomNext = () => {
-    if (step === 6) handleFinalSubmit();
-    else setStep((s) => s + 1);
+    setStep((s) => s + 1);
   };
 
   const handleFinalSubmit = async () => {
@@ -1025,14 +1192,25 @@ export default function EditEmployeePage() {
                   <Button
                     type="button"
                     onClick={handleCustomNext}
-                    disabled={finalSubmitting}
                     className="flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white"
                   >
+                    Review <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+            {/* Step 7: Preview */}
+            {step === 7 && (
+              <div>
+                <PreviewStep data={allData} beneficiaries={beneficiaries} uploads={uploads} originalData={originalData} />
+                <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
+                  <Button type="button" variant="outline" onClick={() => setStep((s) => s - 1)} className="flex items-center gap-1.5">
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </Button>
+                  <Button type="button" onClick={handleFinalSubmit} disabled={finalSubmitting}
+                    className="flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white">
                     {finalSubmitting ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Saving…
-                      </>
+                      <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving…</>
                     ) : (
                       <><Check className="w-4 h-4" /> Save Changes</>
                     )}
@@ -1040,6 +1218,7 @@ export default function EditEmployeePage() {
                 </div>
               </div>
             )}
+
           </motion.div>
         </AnimatePresence>
       </div>
