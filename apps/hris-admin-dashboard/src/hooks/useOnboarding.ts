@@ -4,6 +4,7 @@ import {
   getOnboardingRecords,
   getOnboardingDetail,
   updateOnboardingTaskStatus,
+  initiateOnboarding,
   type OnboardingRecord,
   type OnboardingDetail,
 } from '@/services/onboarding';
@@ -120,6 +121,20 @@ export function useOnboardingDetail(employeeId: string | undefined) {
     },
     enabled: !!employeeId,
     staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useInitiateOnboarding() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { employeeIds: string[]; startDate: string }>({
+    mutationFn: async ({ employeeIds, startDate }) => {
+      for (const employeeId of employeeIds) {
+        await initiateOnboarding(employeeId, startDate);
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['onboarding-records'] });
+    },
   });
 }
 

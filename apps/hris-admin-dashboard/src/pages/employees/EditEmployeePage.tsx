@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useEmployee, useUpdateEmployee, useSyncBeneficiaries } from '@/hooks/useEmployees';
 import { uploadEmployeeDocuments } from '@/services/documents';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -339,7 +340,7 @@ function BeneficiariesStep({ beneficiaries, onChange }: { beneficiaries: Benefic
           </div>
           <div>
             <Label className="text-xs">Birthday</Label>
-            <Input type="date" value={form.birthday} onChange={(e) => setForm({ ...form, birthday: e.target.value })} className="mt-1" />
+            <DatePicker value={form.birthday} onChange={(v) => setForm({ ...form, birthday: v })} placeholder="Select birthday" className="mt-1" />
           </div>
           <div>
             <Label className="text-xs">Type</Label>
@@ -1051,7 +1052,13 @@ export default function EditEmployeePage() {
                     </Field>
 
                     <Field name="hireDate" label="Hire Date" required error={errors.hireDate?.message as string}>
-                      <Input id="hireDate" type="date" {...register('hireDate')} className="mt-1" />
+                      <Controller
+                        name="hireDate"
+                        control={control}
+                        render={({ field }) => (
+                          <DatePicker value={field.value ?? ''} onChange={field.onChange} placeholder="Select hire date" className="mt-1" />
+                        )}
+                      />
                     </Field>
 
                     <Field name="salary" label="Monthly Basic Salary (₱)" required half={false} error={errors.salary?.message as string}>

@@ -233,6 +233,18 @@ export default function OnboardingDetailPage() {
   const { data: detail, isLoading } = useOnboardingDetail(id);
   const isMock = !!(id && id.startsWith('emp'));
 
+  // All hooks must be called before any early returns
+  const groupedCategories = useMemo(() => {
+    if (!detail) return [];
+    const map = new Map<string, OnboardingProgressItem[]>();
+    for (const item of detail.items) {
+      const cat = item.task.category;
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(item);
+    }
+    return Array.from(map.entries());
+  }, [detail]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-32">
@@ -256,19 +268,6 @@ export default function OnboardingDetailPage() {
   const cfg         = STATUS_CONFIG[detail.overallStatus];
   const pct         = detail.totalTasks > 0 ? Math.round((detail.completedTasks / detail.totalTasks) * 100) : 0;
   const daysElapsed = detail.dateHired ? differenceInDays(new Date(), new Date(detail.dateHired)) : 0;
-
-  // Group items by category preserving order of first appearance
-  const groupedCategories = useMemo(() => {
-    const map = new Map<string, OnboardingProgressItem[]>();
-    for (const item of detail.items) {
-      const cat = item.task.category;
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat)!.push(item);
-    }
-    return Array.from(map.entries());
-  }, [detail.items]);
-
-  // Compute regularization date estimate (hire date + 6 months) for display
   const regularizationEst = detail.dateHired
     ? format(addDays(parseISO(detail.dateHired), 180), 'MMM d, yyyy')
     : null;

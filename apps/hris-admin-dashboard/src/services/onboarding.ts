@@ -219,6 +219,62 @@ export async function getOnboardingDetail(employeeId: string): Promise<Onboardin
   };
 }
 
+// ── INITIATE ONBOARDING ───────────────────────────────────────────────────────
+
+export async function initiateOnboarding(
+  employeeId: string,
+  startDate: string,
+): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+  const orgId = await getAuthOrgId();
+
+  // Find the default active workflow
+  const { data: workflow, error: wfErr } = await supabase
+    .from('onboarding_workflows')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('is_default', true)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (wfErr) throw wfErr;
+  if (!workflow) throw new Error('No default onboarding workflow found. Set one up in Settings first.');
+
+  // Fetch tasks belonging to that workflow
+  const { data: tasks, error: tasksErr } = await supabase
+    .from('onboarding_tasks')
+    .select('id, due_days_after_hire')
+    .eq('workflow_id', workflow.id)
+    .eq('organization_id', orgId);
+
+  if (tasksErr) throw tasksErr;
+  if (!tasks || tasks.length === 0) throw new Error('The default workflow has no tasks. Add tasks in Settings first.');
+
+  // Delete any existing progress for this employee (re-initiate support)
+  await supabase
+    .from('onboarding_progress')
+    .delete()
+    .eq('employee_id', employeeId)
+    .eq('organization_id', orgId);
+
+  const start = new Date(startDate);
+  const rows = (tasks as any[]).map((t) => {
+    const dueDate = new Date(start);
+    dueDate.setDate(dueDate.getDate() + (t.due_days_after_hire ?? 7));
+    return {
+      employee_id:     employeeId,
+      organization_id: orgId,
+      workflow_id:     (workflow as any).id,
+      task_id:         t.id,
+      status:          'pending',
+      due_date:        dueDate.toISOString().split('T')[0],
+    };
+  });
+
+  const { error } = await supabase.from('onboarding_progress').insert(rows);
+  if (error) throw error;
+}
+
 // ── TOGGLE TASK ───────────────────────────────────────────────────────────────
 
 export async function updateOnboardingTaskStatus(

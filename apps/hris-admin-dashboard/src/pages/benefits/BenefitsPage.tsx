@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { DatePicker } from '@/components/ui/date-picker';
 import employeesData from '@/data/mock/employees.json';
 import rawPlans from '@/data/mock/benefits-hmo-plans.json';
 import rawEnrollments from '@/data/mock/benefits-enrollments.json';
@@ -1092,8 +1093,7 @@ export default function BenefitsPage() {
                       </div>
                       <div>
                         <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Birthday *</label>
-                        <input title='Date' type="date" value={depForm.birthday}
-                          onChange={e => setDepForm(p => ({ ...p, birthday: e.target.value }))} className={fieldCls} />
+                        <DatePicker value={depForm.birthday} onChange={v => setDepForm(p => ({ ...p, birthday: v }))} placeholder="Select birthday" />
                       </div>
                       <div className="flex items-end">
                         <button type="button" onClick={handleAddDependent}

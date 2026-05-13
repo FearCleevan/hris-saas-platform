@@ -8,6 +8,7 @@ import {
   Zap, Wrench, CalendarDays, MoreHorizontal, Eye, BotMessageSquare,
 } from 'lucide-react';
 import { SmartCategorizer } from './components/SmartCategorizer';
+import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import employeesData from '@/data/mock/employees.json';
@@ -515,7 +516,7 @@ export default function ExpensesPage() {
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[10px] font-semibold text-gray-500 uppercase">Date *</label>
-                            <input type="date" title="Date" value={claimForm.date} onChange={e => setClaimForm(f => ({ ...f, date: e.target.value }))} className={fieldCls} />
+                            <DatePicker value={claimForm.date} onChange={v => setClaimForm(f => ({ ...f, date: v }))} placeholder="Select date" />
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[10px] font-semibold text-gray-500 uppercase">Description</label>
@@ -858,7 +859,7 @@ export default function ExpensesPage() {
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[10px] font-semibold text-gray-500 uppercase">Date *</label>
-                            <input type="date" title="Date" value={companyForm.date} onChange={e => setCompanyForm(f => ({ ...f, date: e.target.value }))} className={fieldCls} />
+                            <DatePicker value={companyForm.date} onChange={v => setCompanyForm(f => ({ ...f, date: v }))} placeholder="Select date" />
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[10px] font-semibold text-gray-500 uppercase">Department</label>
