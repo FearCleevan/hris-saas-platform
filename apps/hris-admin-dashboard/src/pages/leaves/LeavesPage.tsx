@@ -4,14 +4,23 @@ import {
   Palmtree, Activity, CalendarDays, BookOpen, BarChart2,
   CheckCircle2, XCircle, AlertCircle,
   ChevronLeft, ChevronRight, ChevronDown,
-  Check, X, FileText, Shield, AlertTriangle, Users,
+  Check, X, FileText, Shield, AlertTriangle, Users, Loader2,
 } from 'lucide-react';
-import { format, parseISO, getDaysInMonth, startOfMonth, getDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
+import {
+  format, parseISO, getDaysInMonth, startOfMonth, getDay,
+  eachDayOfInterval, isWeekend, subDays,
+} from 'date-fns';
 import { toast } from 'sonner';
-import leaveRequests from '@/data/mock/leave-requests.json';
-import leaveBalances from '@/data/mock/leave-balances.json';
-import leaveTypes from '@/data/mock/leave-types.json';
-import employeesData from '@/data/mock/employees.json';
+import {
+  useLeaveRequests,
+  useLeaveBalances,
+  useLeaveTypes,
+  useApproveLeaveRequest,
+  useRejectLeaveRequest,
+  type LeaveRequestRow,
+  type LeaveBalanceRow,
+  type LeaveTypeRow,
+} from '@/hooks/useLeaves';
 
 type TabId = 'requests' | 'balances' | 'calendar' | 'types' | 'reports';
 type StatusFilter = 'all' | 'pending' | 'approved' | 'rejected';
@@ -20,6 +29,8 @@ const STATUS_CFG = {
   pending:  { label: 'Pending',  color: 'text-amber-600 dark:text-amber-400',  bg: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' },
   approved: { label: 'Approved', color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' },
   rejected: { label: 'Rejected', color: 'text-red-600 dark:text-red-400',      bg: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800' },
+  cancelled:{ label: 'Cancelled',color: 'text-gray-500 dark:text-gray-400',   bg: 'bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700' },
+  withdrawn:{ label: 'Withdrawn',color: 'text-gray-500 dark:text-gray-400',   bg: 'bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700' },
 };
 
 const LEAVE_CODE_COLORS: Record<string, string> = {
@@ -30,7 +41,7 @@ const LEAVE_CODE_COLORS: Record<string, string> = {
   PL:  'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400',
   SPL: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400',
   BL:  'bg-slate-50 dark:bg-slate-950/30 text-slate-700 dark:text-slate-400',
-  EL:  'bg-red-50 dark:bg-red-950/30 text-[#ce1126] dark:text-red-400',
+  EL:  'bg-red-50 dark:bg-red-950/30 text-brand-red dark:text-red-400',
 };
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
@@ -39,6 +50,15 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'calendar',  label: 'Calendar',    icon: CalendarDays },
   { id: 'types',     label: 'Leave Types', icon: BookOpen },
   { id: 'reports',   label: 'Reports',     icon: BarChart2 },
+];
+
+type DatePreset = 'all' | 'month' | '30d' | '90d';
+
+const DATE_PRESETS: { id: DatePreset; label: string }[] = [
+  { id: 'all',   label: 'All Time' },
+  { id: 'month', label: 'This Month' },
+  { id: '30d',   label: 'Last 30 Days' },
+  { id: '90d',   label: 'Last 90 Days' },
 ];
 
 function getInitials(name: string) {
@@ -53,47 +73,42 @@ function LeaveCodeBadge({ code }: { code: string }) {
   );
 }
 
-type DatePreset = 'all' | 'month' | '30d' | '90d';
+// ── Requests Tab ──────────────────────────────────────────────────────────────
 
-const DATE_PRESETS: { id: DatePreset; label: string }[] = [
-  { id: 'all',   label: 'All Time' },
-  { id: 'month', label: 'This Month' },
-  { id: '30d',   label: 'Last 30 Days' },
-  { id: '90d',   label: 'Last 90 Days' },
-];
-
-const LATEST_REQUEST_DATE = leaveRequests
-  .map((r) => new Date(r.submittedAt))
-  .reduce((max, d) => (d > max ? d : max), new Date('2000-01-01'));
-
-/* ─── Requests Tab ─── */
 function RequestsTab() {
-  const [filter, setFilter] = useState<StatusFilter>('all');
+  const { data: requests = [], isLoading } = useLeaveRequests();
+  const approve = useApproveLeaveRequest();
+  const reject  = useRejectLeaveRequest();
+
+  const [filter,     setFilter]     = useState<StatusFilter>('all');
   const [datePreset, setDatePreset] = useState<DatePreset>('all');
-  const [statuses, setStatuses] = useState<Record<string, string>>(
-    () => Object.fromEntries(leaveRequests.map((r) => [r.id, r.status])),
-  );
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [docModal, setDocModal] = useState<string | null>(null);
+  const [selected,   setSelected]   = useState<Set<string>>(new Set());
+  const [docModal,   setDocModal]   = useState<string | null>(null);
+  const [isBulk,     setIsBulk]     = useState(false);
+
+  const now = useMemo(() => new Date(), []);
 
   const filtered = useMemo(() => {
     const cutoff =
-      datePreset === 'month' ? startOfMonth(LATEST_REQUEST_DATE) :
-      datePreset === '30d'   ? subDays(LATEST_REQUEST_DATE, 30) :
-      datePreset === '90d'   ? subDays(LATEST_REQUEST_DATE, 90) :
+      datePreset === 'month' ? startOfMonth(now) :
+      datePreset === '30d'   ? subDays(now, 30) :
+      datePreset === '90d'   ? subDays(now, 90) :
       null;
 
-    return leaveRequests
-      .filter((r) => filter === 'all' || statuses[r.id] === filter)
+    return requests
+      .filter((r) => filter === 'all' || r.status === filter)
       .filter((r) => !cutoff || new Date(r.submittedAt) >= cutoff)
       .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-  }, [filter, datePreset, statuses]);
+  }, [requests, filter, datePreset, now]);
 
-  const pendingCount = Object.values(statuses).filter((s) => s === 'pending').length;
+  const pendingCount = useMemo(
+    () => requests.filter((r) => r.status === 'pending').length,
+    [requests],
+  );
 
   const visiblePendingIds = useMemo(
-    () => filtered.filter((r) => statuses[r.id] === 'pending').map((r) => r.id),
-    [filtered, statuses],
+    () => filtered.filter((r) => r.status === 'pending').map((r) => r.id),
+    [filtered],
   );
 
   const allPendingSelected =
@@ -102,8 +117,7 @@ function RequestsTab() {
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
@@ -124,41 +138,48 @@ function RequestsTab() {
     }
   };
 
-  const approve = (id: string) => {
-    setStatuses((p) => ({ ...p, [id]: 'approved' }));
+  const handleApprove = async (id: string) => {
+    await approve.mutateAsync({ id });
     setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
     toast.success('Leave request approved');
   };
 
-  const reject = (id: string) => {
-    setStatuses((p) => ({ ...p, [id]: 'rejected' }));
+  const handleReject = async (id: string) => {
+    await reject.mutateAsync({ id });
     setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
     toast.error('Leave request rejected');
   };
 
-  const bulkApprove = () => {
-    const count = [...selected].filter((id) => statuses[id] === 'pending').length;
-    setStatuses((prev) => {
-      const next = { ...prev };
-      selected.forEach((id) => { if (next[id] === 'pending') next[id] = 'approved'; });
-      return next;
-    });
-    toast.success(`${count} request(s) approved`);
-    setSelected(new Set());
+  const bulkApprove = async () => {
+    const pending = [...selected].filter((id) =>
+      requests.find((r) => r.id === id)?.status === 'pending',
+    );
+    setIsBulk(true);
+    try {
+      await Promise.all(pending.map((id) => approve.mutateAsync({ id })));
+      toast.success(`${pending.length} request(s) approved`);
+      setSelected(new Set());
+    } finally {
+      setIsBulk(false);
+    }
   };
 
-  const bulkReject = () => {
-    const count = [...selected].filter((id) => statuses[id] === 'pending').length;
-    setStatuses((prev) => {
-      const next = { ...prev };
-      selected.forEach((id) => { if (next[id] === 'pending') next[id] = 'rejected'; });
-      return next;
-    });
-    toast.error(`${count} request(s) rejected`);
-    setSelected(new Set());
+  const bulkReject = async () => {
+    const pending = [...selected].filter((id) =>
+      requests.find((r) => r.id === id)?.status === 'pending',
+    );
+    setIsBulk(true);
+    try {
+      await Promise.all(pending.map((id) => reject.mutateAsync({ id })));
+      toast.error(`${pending.length} request(s) rejected`);
+      setSelected(new Set());
+    } finally {
+      setIsBulk(false);
+    }
   };
 
-  const docReq = docModal ? leaveRequests.find((r) => r.id === docModal) : null;
+  const docReq = docModal ? requests.find((r) => r.id === docModal) : null;
+  const isMutating = approve.isPending || reject.isPending || isBulk;
 
   return (
     <div className="relative pb-20">
@@ -221,22 +242,23 @@ function RequestsTab() {
             Select All Pending
           </button>
         )}
+        {isLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
         <span className="ml-auto text-xs text-gray-400">{filtered.length} records</span>
       </div>
 
       {/* Request cards */}
       <div className="flex flex-col gap-3">
-        {filtered.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div className="text-center py-16 text-sm text-gray-400">No requests found</div>
         )}
+        {isLoading && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        )}
         {filtered.map((req, i) => {
-          const emp = employeesData.find((e) => e.id === req.employeeId);
-          if (!emp) return null;
-          const currentStatus = statuses[req.id];
-          const stCfg = STATUS_CFG[currentStatus as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending;
-          const lastApproval = req.approvals[req.approvals.length - 1];
-          const approver = lastApproval ? employeesData.find((e) => e.id === lastApproval.approverId) : null;
-          const isPending = currentStatus === 'pending';
+          const stCfg = STATUS_CFG[req.status as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending;
+          const isPending  = req.status === 'pending';
           const isSelected = selected.has(req.id);
 
           return (
@@ -266,18 +288,23 @@ function RequestsTab() {
                 )}
 
                 <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold shrink-0">
-                  {getInitials(emp.name)}
+                  {getInitials(req.employeeName)}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                    <p className="text-sm font-semibold text-gray-800 dark:text-white">{emp.name}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white">{req.employeeName}</p>
                     <LeaveCodeBadge code={req.leaveTypeCode} />
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${stCfg.bg} ${stCfg.color}`}>
                       {stCfg.label}
                     </span>
+                    {req.isHalfDay && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400">
+                        Half Day
+                      </span>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-400 mb-2">{emp.position} · {emp.department}</p>
+                  <p className="text-xs text-gray-400 mb-2">{req.position} · {req.department}</p>
 
                   <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400 mb-2">
                     <span className="font-medium text-gray-700 dark:text-gray-300">{req.leaveTypeName}</span>
@@ -305,11 +332,17 @@ function RequestsTab() {
                     </button>
                   )}
 
-                  {approver && lastApproval && (
+                  {req.approvedByName && req.approvedAt && (
                     <p className="text-[10px] text-gray-400">
-                      {currentStatus === 'approved' ? 'Approved' : currentStatus === 'rejected' ? 'Rejected' : 'Reviewed'} by {approver.name}
-                      {lastApproval.timestamp ? ` · ${format(new Date(lastApproval.timestamp), 'MMM d, yyyy h:mm a')}` : ''}
-                      {lastApproval.remarks ? ` — "${lastApproval.remarks}"` : ''}
+                      {req.status === 'approved' ? 'Approved' : 'Rejected'} by {req.approvedByName}
+                      {` · ${format(new Date(req.approvedAt), 'MMM d, yyyy h:mm a')}`}
+                      {req.notes ? ` — "${req.notes}"` : ''}
+                    </p>
+                  )}
+                  {!req.approvedByName && req.approvedAt && (
+                    <p className="text-[10px] text-gray-400">
+                      {req.status === 'approved' ? 'Approved' : 'Reviewed'}
+                      {` · ${format(new Date(req.approvedAt), 'MMM d, yyyy h:mm a')}`}
                     </p>
                   )}
                   <p className="text-[10px] text-gray-400 mt-0.5">
@@ -321,17 +354,21 @@ function RequestsTab() {
                   <div className="flex gap-2 shrink-0">
                     <button
                       type="button"
-                      onClick={() => approve(req.id)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors"
+                      onClick={() => handleApprove(req.id)}
+                      disabled={isMutating}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors disabled:opacity-50"
                     >
-                      <Check className="w-3 h-3" />Approve
+                      {approve.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                      Approve
                     </button>
                     <button
                       type="button"
-                      onClick={() => reject(req.id)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-500 hover:text-[#ce1126] border border-gray-200 dark:border-gray-700 text-xs font-semibold transition-colors"
+                      onClick={() => handleReject(req.id)}
+                      disabled={isMutating}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-500 hover:text-brand-red border border-gray-200 dark:border-gray-700 text-xs font-semibold transition-colors disabled:opacity-50"
                     >
-                      <X className="w-3 h-3" />Reject
+                      {reject.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+                      Reject
                     </button>
                   </div>
                 )}
@@ -354,11 +391,13 @@ function RequestsTab() {
             <span className="text-sm font-semibold text-white dark:text-gray-900">
               {selected.size} selected
             </span>
+            {isBulk && <Loader2 className="w-4 h-4 animate-spin text-gray-400 dark:text-gray-500" />}
             <div className="w-px h-4 bg-gray-700 dark:bg-gray-300" />
             <button
               type="button"
               onClick={bulkApprove}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-400 text-white text-xs font-bold transition-colors"
+              disabled={isBulk}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-400 text-white text-xs font-bold transition-colors disabled:opacity-50"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               Approve All
@@ -366,7 +405,8 @@ function RequestsTab() {
             <button
               type="button"
               onClick={bulkReject}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 hover:bg-red-400 text-white text-xs font-bold transition-colors"
+              disabled={isBulk}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 hover:bg-red-400 text-white text-xs font-bold transition-colors disabled:opacity-50"
             >
               <XCircle className="w-3.5 h-3.5" />
               Reject All
@@ -374,7 +414,8 @@ function RequestsTab() {
             <button
               type="button"
               onClick={() => setSelected(new Set())}
-              className="text-xs text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-800 transition-colors"
+              disabled={isBulk}
+              className="text-xs text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-800 transition-colors disabled:opacity-50"
             >
               Clear
             </button>
@@ -404,12 +445,12 @@ function RequestsTab() {
                 <div>
                   <h3 className="text-sm font-bold text-gray-800 dark:text-white">Attached Documents</h3>
                   <p className="text-[10px] text-gray-400 mt-0.5">
-                    {employeesData.find((e) => e.id === docReq.employeeId)?.name} · {docReq.leaveTypeName}
+                    {docReq.employeeName} · {docReq.leaveTypeName}
                   </p>
                 </div>
                 <button
-                  title="Attached Docs"
                   type="button"
+                  aria-label="Close"
                   onClick={() => setDocModal(null)}
                   className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
@@ -418,20 +459,24 @@ function RequestsTab() {
               </div>
               <div className="flex flex-col gap-2">
                 {docReq.documents.map((doc) => {
-                  const ext = doc.split('.').pop()?.toUpperCase() ?? 'FILE';
+                  const filename = doc.split('/').pop() ?? doc;
+                  const ext = filename.split('.').pop()?.toUpperCase() ?? 'FILE';
                   return (
-                    <div
+                    <a
                       key={doc}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
+                      href={doc}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center shrink-0">
                         <FileText className="w-4 h-4 text-brand-blue" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{doc}</p>
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{filename}</p>
                         <p className="text-[10px] text-gray-400">{ext} document</p>
                       </div>
-                    </div>
+                    </a>
                   );
                 })}
               </div>
@@ -443,23 +488,23 @@ function RequestsTab() {
   );
 }
 
-/* ─── Balances Tab ─── */
+// ── Balances Tab ──────────────────────────────────────────────────────────────
+
 function BalancesTab() {
+  const { data: balances = [], isLoading } = useLeaveBalances();
   const [deptFilter, setDeptFilter] = useState('all');
-  const departments = ['all', ...new Set(employeesData.map((e) => e.department))];
 
-  const rows = useMemo(() => {
-    return leaveBalances
-      .map((b) => {
-        const emp = employeesData.find((e) => e.id === b.employeeId);
-        return emp ? { ...b, emp } : null;
-      })
-      .filter((r): r is NonNullable<typeof r> => r !== null)
-      .filter((r) => deptFilter === 'all' || r.emp.department === deptFilter);
-  }, [deptFilter]);
+  const departments = useMemo(
+    () => ['all', ...new Set(balances.map((b) => b.department))].sort(),
+    [balances],
+  );
 
-  // SIL has maxCarryOver = 0 — any remaining SIL expires Dec 31
-  const expiringDays = rows.reduce((sum, r) => sum + r.sil.remaining, 0);
+  const rows = useMemo(
+    () => balances.filter((b) => deptFilter === 'all' || b.department === deptFilter),
+    [balances, deptFilter],
+  );
+
+  const expiringDays  = rows.reduce((sum, r) => sum + r.sil.remaining, 0);
   const expiringCount = rows.filter((r) => r.sil.remaining > 0).length;
 
   function Bar({ used, remaining, pending, color }: { used: number; remaining: number; pending: number; color: string }) {
@@ -506,7 +551,10 @@ function BalancesTab() {
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         </div>
-        <span className="text-xs text-gray-400">{rows.length} employees</span>
+        {isLoading
+          ? <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+          : <span className="text-xs text-gray-400">{rows.length} employees</span>
+        }
 
         {/* Legend */}
         <div className="ml-auto flex items-center gap-3 text-[10px] text-gray-400">
@@ -536,6 +584,20 @@ function BalancesTab() {
               </tr>
             </thead>
             <tbody>
+              {isLoading && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-gray-400" />
+                  </td>
+                </tr>
+              )}
+              {!isLoading && rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-gray-400">
+                    No balance data available
+                  </td>
+                </tr>
+              )}
               {rows.map((row, i) => (
                 <tr
                   key={row.employeeId}
@@ -544,16 +606,16 @@ function BalancesTab() {
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-full bg-brand-blue flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                        {getInitials(row.emp.name)}
+                        {getInitials(row.employeeName)}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 leading-tight">{row.emp.name}</p>
-                        <p className="text-[10px] text-gray-400">{row.emp.position}</p>
+                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 leading-tight">{row.employeeName}</p>
+                        <p className="text-[10px] text-gray-400">{row.position}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-2.5 hidden sm:table-cell">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{row.emp.department}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{row.department}</span>
                   </td>
                   <td className="px-4 py-2.5 w-40">
                     <div className="mb-0.5">
@@ -596,30 +658,32 @@ function BalancesTab() {
   );
 }
 
-/* ─── Calendar Tab ─── */
+// ── Calendar Tab ──────────────────────────────────────────────────────────────
+
 function CalendarTab() {
-  const [viewMonth, setViewMonth] = useState(new Date(2023, 10, 1)); // Nov 2023
+  const { data: requests = [], isLoading } = useLeaveRequests();
+
+  const [viewMonth, setViewMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [deptFilter, setDeptFilter] = useState('all');
 
   const departments = useMemo(
-    () => ['all', ...new Set(employeesData.map((e) => e.department))],
-    [],
+    () => ['all', ...new Set(requests.map((r) => r.department))].sort(),
+    [requests],
   );
 
   const approvedLeaves = useMemo(
     () =>
-      leaveRequests
+      requests
         .filter((r) => r.status === 'approved')
-        .filter((r) => {
-          if (deptFilter === 'all') return true;
-          const emp = employeesData.find((e) => e.id === r.employeeId);
-          return emp?.department === deptFilter;
-        }),
-    [deptFilter],
+        .filter((r) => deptFilter === 'all' || r.department === deptFilter),
+    [requests, deptFilter],
   );
 
   const leaveMap = useMemo(() => {
-    const map: Record<string, { empId: string; code: string }[]> = {};
+    const map: Record<string, { empId: string; empName: string; code: string }[]> = {};
     for (const req of approvedLeaves) {
       try {
         const days = eachDayOfInterval({ start: parseISO(req.startDate), end: parseISO(req.endDate) });
@@ -627,7 +691,7 @@ function CalendarTab() {
           if (!isWeekend(day)) {
             const key = format(day, 'yyyy-MM-dd');
             if (!map[key]) map[key] = [];
-            map[key].push({ empId: req.employeeId, code: req.leaveTypeCode });
+            map[key].push({ empId: req.employeeId, empName: req.employeeName, code: req.leaveTypeCode });
           }
         }
       } catch {
@@ -637,18 +701,15 @@ function CalendarTab() {
     return map;
   }, [approvedLeaves]);
 
-  const year = viewMonth.getFullYear();
+  const year  = viewMonth.getFullYear();
   const month = viewMonth.getMonth();
-  const daysInMonth = getDaysInMonth(viewMonth);
-  const firstDayOfWeek = getDay(startOfMonth(viewMonth));
+  const daysInMonth    = getDaysInMonth(viewMonth);
+  const firstDayOfWeek = getDay(viewMonth);
 
   const cells: (number | null)[] = [
     ...Array(firstDayOfWeek).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
-
-  const canGoPrev = viewMonth > new Date(2023, 6, 1);
-  const canGoNext = viewMonth < new Date(2023, 11, 1);
 
   return (
     <div>
@@ -657,14 +718,17 @@ function CalendarTab() {
         <button
           type="button"
           title="Previous month"
+          aria-label="Previous month"
           onClick={() => setViewMonth(new Date(year, month - 1, 1))}
-          disabled={!canGoPrev}
-          className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-500" />
         </button>
         <div className="flex items-center gap-3">
-          <h2 className="text-base font-bold text-gray-800 dark:text-white">{format(viewMonth, 'MMMM yyyy')}</h2>
+          <h2 className="text-base font-bold text-gray-800 dark:text-white">
+            {format(viewMonth, 'MMMM yyyy')}
+          </h2>
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
           {/* Department filter */}
           <div className="relative">
             <select
@@ -683,9 +747,9 @@ function CalendarTab() {
         <button
           type="button"
           title="Next month"
+          aria-label="Next month"
           onClick={() => setViewMonth(new Date(year, month + 1, 1))}
-          disabled={!canGoNext}
-          className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <ChevronRight className="w-4 h-4 text-gray-500" />
         </button>
@@ -725,17 +789,16 @@ function CalendarTab() {
                   </span>
                 )}
               </div>
-              {leaves.slice(0, 2).map((l, li) => {
-                const emp = employeesData.find((e) => e.id === l.empId);
-                return emp ? (
-                  <div key={`${l.empId}-${li}`} className="flex items-center gap-1 mb-0.5">
-                    <span className={`text-[8px] font-bold px-1 py-0.5 rounded ${LEAVE_CODE_COLORS[l.code] ?? 'bg-gray-100 text-gray-500'}`}>
-                      {l.code}
-                    </span>
-                    <span className="text-[9px] text-gray-500 dark:text-gray-400 truncate">{emp.name.split(' ')[0]}</span>
-                  </div>
-                ) : null;
-              })}
+              {leaves.slice(0, 2).map((l, li) => (
+                <div key={`${l.empId}-${li}`} className="flex items-center gap-1 mb-0.5">
+                  <span className={`text-[8px] font-bold px-1 py-0.5 rounded ${LEAVE_CODE_COLORS[l.code] ?? 'bg-gray-100 text-gray-500'}`}>
+                    {l.code}
+                  </span>
+                  <span className="text-[9px] text-gray-500 dark:text-gray-400 truncate">
+                    {l.empName.split(' ')[0]}
+                  </span>
+                </div>
+              ))}
               {leaves.length > 2 && (
                 <span className="text-[9px] text-gray-400">+{leaves.length - 2} more</span>
               )}
@@ -747,11 +810,22 @@ function CalendarTab() {
   );
 }
 
-/* ─── Leave Types Tab ─── */
+// ── Leave Types Tab ───────────────────────────────────────────────────────────
+
 function LeaveTypesTab() {
+  const { data: types = [], isLoading } = useLeaveTypes();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {leaveTypes.map((lt, i) => (
+      {types.map((lt, i) => (
         <motion.div
           key={lt.id}
           initial={{ opacity: 0, y: 6 }}
@@ -808,17 +882,24 @@ function LeaveTypesTab() {
   );
 }
 
-/* ─── Reports Tab ─── */
+// ── Reports Tab ───────────────────────────────────────────────────────────────
+
 function ReportsTab() {
+  const { data: requests = [], isLoading: loadingReqs } = useLeaveRequests();
+  const { data: types = [],    isLoading: loadingTypes } = useLeaveTypes();
+  const { data: balances = [], isLoading: loadingBals }  = useLeaveBalances();
+
+  const currentYear = new Date().getFullYear();
+  const isLoading   = loadingReqs || loadingTypes || loadingBals;
+
   const { byType, byDept, totalLeavedays } = useMemo(() => {
     const typeMap: Record<string, number> = {};
     const deptMap: Record<string, number> = {};
     let total = 0;
 
-    for (const req of leaveRequests.filter((r) => r.status === 'approved')) {
+    for (const req of requests.filter((r) => r.status === 'approved')) {
       typeMap[req.leaveTypeCode] = (typeMap[req.leaveTypeCode] ?? 0) + req.days;
-      const emp = employeesData.find((e) => e.id === req.employeeId);
-      if (emp) deptMap[emp.department] = (deptMap[emp.department] ?? 0) + req.days;
+      if (req.department) deptMap[req.department] = (deptMap[req.department] ?? 0) + req.days;
       total += req.days;
     }
 
@@ -827,16 +908,24 @@ function ReportsTab() {
       byDept: Object.entries(deptMap).sort((a, b) => b[1] - a[1]),
       totalLeavedays: total,
     };
-  }, []);
+  }, [requests]);
 
   const maxType = byType[0]?.[1] ?? 1;
   const maxDept = byDept[0]?.[1] ?? 1;
 
   const totalByStatus = useMemo(() => ({
-    approved: leaveRequests.filter((r) => r.status === 'approved').length,
-    pending:  leaveRequests.filter((r) => r.status === 'pending').length,
-    rejected: leaveRequests.filter((r) => r.status === 'rejected').length,
-  }), []);
+    approved: requests.filter((r) => r.status === 'approved').length,
+    pending:  requests.filter((r) => r.status === 'pending').length,
+    rejected: requests.filter((r) => r.status === 'rejected').length,
+  }), [requests]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -857,7 +946,7 @@ function ReportsTab() {
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
           <p className="text-xs text-gray-400 mb-1">Rejected</p>
-          <p className="text-xl sm:text-2xl font-extrabold text-brand-red dark:text-red-400">{totalByStatus.rejected}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-brand-red">{totalByStatus.rejected}</p>
         </div>
       </div>
 
@@ -865,103 +954,121 @@ function ReportsTab() {
         {/* By Leave Type */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Days Taken by Leave Type</h3>
-          <div className="flex flex-col gap-3">
-            {byType.map(([code, days]) => {
-              const lt = leaveTypes.find((t) => t.code === code);
-              return (
-                <div key={code} className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                    style={{ backgroundColor: lt?.color ?? '#9ca3af' }}
-                  >
-                    {code}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{lt?.name ?? code}</span>
-                      <span className="text-xs font-bold text-gray-800 dark:text-white ml-2 shrink-0">{days}d</span>
+          {byType.length === 0 ? (
+            <p className="text-xs text-gray-400 text-center py-8">No approved leave data</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {byType.map(([code, days]) => {
+                const lt = types.find((t) => t.code === code);
+                return (
+                  <div key={code} className="flex items-center gap-3">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                      style={{ backgroundColor: lt?.color ?? '#9ca3af' }}
+                    >
+                      {code}
                     </div>
-                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: `${(days / maxType) * 100}%`, backgroundColor: lt?.color ?? '#9ca3af' }}
-                      />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{lt?.name ?? code}</span>
+                        <span className="text-xs font-bold text-gray-800 dark:text-white ml-2 shrink-0">{days}d</span>
+                      </div>
+                      <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${(days / maxType) * 100}%`, backgroundColor: lt?.color ?? '#9ca3af' }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* By Department */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Days Taken by Department</h3>
-          <div className="flex flex-col gap-3">
-            {byDept.map(([dept, days]) => (
-              <div key={dept} className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 dark:text-gray-400 w-24 shrink-0 truncate">{dept}</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-brand-blue"
-                        style={{ width: `${(days / maxDept) * 100}%` }}
-                      />
+          {byDept.length === 0 ? (
+            <p className="text-xs text-gray-400 text-center py-8">No approved leave data</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {byDept.map(([dept, days]) => (
+                <div key={dept} className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 w-24 shrink-0 truncate">{dept}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-brand-blue"
+                          style={{ width: `${(days / maxDept) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300 w-8 text-right shrink-0">{days}d</span>
                     </div>
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 w-8 text-right shrink-0">{days}d</span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Company-wide balance summary */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5">
-        <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">Company-Wide Balance Summary (2023)</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {(['vl', 'sl', 'sil'] as const).map((type) => {
-            const totals = leaveBalances.reduce(
-              (acc, b) => ({
-                entitled: acc.entitled + b[type].entitled + b[type].carryOver,
-                used:     acc.used + b[type].used,
-                remaining: acc.remaining + b[type].remaining,
-              }),
-              { entitled: 0, used: 0, remaining: 0 },
-            );
-            const pct = totals.entitled > 0 ? Math.round((totals.used / totals.entitled) * 100) : 0;
-            const lt = leaveTypes.find((t) => t.code === type.toUpperCase());
-            return (
-              <div key={type} className="text-center">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold mx-auto mb-2"
-                  style={{ backgroundColor: lt?.color ?? '#9ca3af' }}
-                >
-                  {type.toUpperCase()}
+        <h3 className="text-sm font-bold text-gray-800 dark:text-white mb-4">
+          Company-Wide Balance Summary ({currentYear})
+        </h3>
+        {balances.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-8">No balance data for {currentYear}</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {(['vl', 'sl', 'sil'] as const).map((type) => {
+              const totals = balances.reduce(
+                (acc, b) => ({
+                  entitled:  acc.entitled + b[type].entitled + b[type].carryOver,
+                  used:      acc.used + b[type].used,
+                  remaining: acc.remaining + b[type].remaining,
+                }),
+                { entitled: 0, used: 0, remaining: 0 },
+              );
+              const pct = totals.entitled > 0 ? Math.round((totals.used / totals.entitled) * 100) : 0;
+              const lt  = types.find((t) => t.code === type.toUpperCase());
+              return (
+                <div key={type} className="text-center">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold mx-auto mb-2"
+                    style={{ backgroundColor: lt?.color ?? '#9ca3af' }}
+                  >
+                    {type.toUpperCase()}
+                  </div>
+                  <p className="text-xs font-semibold text-gray-500 mb-1">{lt?.name ?? type.toUpperCase()}</p>
+                  <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-1">
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: lt?.color ?? '#9ca3af' }} />
+                  </div>
+                  <p className="text-[10px] text-gray-400">
+                    {totals.used} used / {totals.entitled} entitled · {pct}% utilization
+                  </p>
                 </div>
-                <p className="text-xs font-semibold text-gray-500 mb-1">{lt?.name}</p>
-                <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-1">
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: lt?.color }} />
-                </div>
-                <p className="text-[10px] text-gray-400">{totals.used} used / {totals.entitled} entitled · {pct}% utilization</p>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-/* ─── Main Page ─── */
+// ── Main Page ─────────────────────────────────────────────────────────────────
+
 export default function LeavesPage() {
   const [activeTab, setActiveTab] = useState<TabId>('requests');
+  const { data: requests = [] }   = useLeaveRequests();
 
   const pendingCount = useMemo(
-    () => leaveRequests.filter((r) => r.status === 'pending').length,
-    [],
+    () => requests.filter((r) => r.status === 'pending').length,
+    [requests],
   );
 
   return (

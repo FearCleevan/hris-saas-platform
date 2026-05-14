@@ -1,5 +1,24 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
+async function getAuthOrgId(): Promise<string> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  const orgId =
+    (user.app_metadata?.org_id as string | undefined) ??
+    (user.user_metadata?.org_id as string | undefined);
+  if (orgId) return orgId;
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single();
+  if (!profile?.organization_id) throw new Error('Organization not found');
+  return profile.organization_id;
+}
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
 export type LeaveApproval = {
   level: number;
   approverId: string;
@@ -12,15 +31,22 @@ export type LeaveApproval = {
 export type LeaveRequestRow = {
   id: string;
   employeeId: string;
+  employeeName: string;
+  position: string;
+  department: string;
+  avatarUrl: string | null;
   leaveTypeId: string;
   leaveTypeCode: string;
   leaveTypeName: string;
   startDate: string;
   endDate: string;
   days: number;
+  isHalfDay: boolean;
   reason: string;
   status: string;
   approvals: LeaveApproval[];
+  approvedByName: string | null;
+  approvedAt: string | null;
   submittedAt: string;
   documents: string[];
   notes: string;
@@ -36,6 +62,9 @@ export type LeaveBalanceEntry = {
 
 export type LeaveBalanceRow = {
   employeeId: string;
+  employeeName: string;
+  position: string;
+  department: string;
   year: number;
   vl: LeaveBalanceEntry;
   sl: LeaveBalanceEntry;
@@ -56,6 +85,8 @@ export type LeaveTypeRow = {
   description: string;
 };
 
+// ── Internal Supabase shapes ───────────────────────────────────────────────────
+
 type SupabaseLeaveRequest = {
   id: string;
   employee_id: string;
@@ -67,15 +98,10 @@ type SupabaseLeaveRequest = {
   status: string;
   document_url: string | null;
   remarks: string | null;
+  approved_at: string | null;
   created_at: string;
   leave_types: { code: string; name: string } | null;
-  leave_approvals: {
-    level: number;
-    approver_id: string;
-    status: string;
-    acted_at: string | null;
-    remarks: string | null;
-  }[];
+  employees: { first_name: string; last_name: string; position: string | null; department: string | null; avatar_url: string | null } | null;
 };
 
 type SupabaseLeaveBalance = {
@@ -87,6 +113,7 @@ type SupabaseLeaveBalance = {
   carried_over: number;
   balance: number;
   leave_types: { code: string } | null;
+  employees: { first_name: string; last_name: string; position: string | null; department: string | null } | null;
 };
 
 type SupabaseLeaveType = {
@@ -100,6 +127,8 @@ type SupabaseLeaveType = {
   description: string | null;
 };
 
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
 function emptyBalance(): LeaveBalanceEntry {
   return { entitled: 0, carryOver: 0, used: 0, pending: 0, remaining: 0 };
 }
@@ -110,111 +139,167 @@ const LEAVE_COLOR_MAP: Record<string, string> = {
   BL: '#64748b', EL: '#ce1126',
 };
 
-export async function getLeaveRequests(): Promise<LeaveRequestRow[]> {
-  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+// ── Leave Requests ─────────────────────────────────────────────────────────────
 
-  const { data, error } = await supabase
+export async function getLeaveRequests(): Promise<LeaveRequestRow[]> {
+  const orgId = await getAuthOrgId();
+
+  const { data, error } = await supabase!
     .from('leave_requests')
     .select(`
       id, employee_id, leave_type_id, start_date, end_date, total_days,
-      reason, status, document_url, remarks, created_at,
+      reason, status, document_url, remarks, approved_at, created_at,
       leave_types(code, name),
-      leave_approvals(level, approver_id, status, acted_at, remarks)
+      employees(first_name, last_name, position, department, avatar_url)
     `)
+    .eq('organization_id', orgId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
 
-  return (data as unknown as SupabaseLeaveRequest[]).map((r) => ({
-    id: r.id,
-    employeeId: r.employee_id,
-    leaveTypeId: r.leave_type_id,
-    leaveTypeCode: r.leave_types?.code ?? '',
-    leaveTypeName: r.leave_types?.name ?? '',
-    startDate: r.start_date,
-    endDate: r.end_date,
-    days: Number(r.total_days),
-    reason: r.reason,
-    status: r.status,
-    approvals: (r.leave_approvals ?? []).map((a) => ({
-      level: a.level,
-      approverId: a.approver_id,
-      approverName: null,
-      status: a.status,
-      timestamp: a.acted_at ?? '',
-      remarks: a.remarks ?? '',
-    })),
-    submittedAt: r.created_at,
-    documents: r.document_url ? [r.document_url] : [],
-    notes: r.remarks ?? '',
-  }));
+  return (data as unknown as SupabaseLeaveRequest[]).map((r) => {
+    const emp  = r.employees;
+    const name = emp
+      ? [emp.first_name, emp.last_name].filter(Boolean).join(' ') || r.employee_id
+      : r.employee_id;
+
+    return {
+      id:            r.id,
+      employeeId:    r.employee_id,
+      employeeName:  name,
+      position:      emp?.position   ?? '',
+      department:    emp?.department ?? '',
+      avatarUrl:     emp?.avatar_url ?? null,
+      leaveTypeId:   r.leave_type_id,
+      leaveTypeCode: r.leave_types?.code ?? '',
+      leaveTypeName: r.leave_types?.name ?? '',
+      startDate:     r.start_date,
+      endDate:       r.end_date,
+      days:          Number(r.total_days),
+      isHalfDay:     false,
+      reason:        r.reason,
+      status:        r.status,
+      approvals:     [],
+      approvedByName: null,
+      approvedAt:    r.approved_at ?? null,
+      submittedAt:   r.created_at,
+      documents:     r.document_url ? [r.document_url] : [],
+      notes:         r.remarks ?? '',
+    };
+  });
 }
 
-export async function getLeaveBalances(): Promise<LeaveBalanceRow[]> {
-  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+export async function approveLeaveRequest(id: string, remarks?: string): Promise<void> {
+  const { data: { user } } = await supabase!.auth.getUser();
+  const { error } = await supabase!
+    .from('leave_requests')
+    .update({
+      status:      'approved',
+      approved_by: user?.id ?? null,
+      approved_at: new Date().toISOString(),
+      remarks:     remarks ?? null,
+    })
+    .eq('id', id);
+  if (error) throw error;
+}
 
+export async function rejectLeaveRequest(id: string, remarks?: string): Promise<void> {
+  const { data: { user } } = await supabase!.auth.getUser();
+  const { error } = await supabase!
+    .from('leave_requests')
+    .update({
+      status:      'rejected',
+      approved_by: user?.id ?? null,
+      approved_at: new Date().toISOString(),
+      remarks:     remarks ?? null,
+    })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+// ── Leave Balances ─────────────────────────────────────────────────────────────
+
+export async function getLeaveBalances(): Promise<LeaveBalanceRow[]> {
+  const orgId = await getAuthOrgId();
   const currentYear = new Date().getFullYear();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabase!
     .from('leave_balances')
     .select(`
       employee_id, year, entitled_days, used_days, pending_days, carried_over, balance,
-      leave_types(code)
+      leave_types(code),
+      employees(first_name, last_name, position, department)
     `)
+    .eq('organization_id', orgId)
     .eq('year', currentYear)
     .order('employee_id');
 
   if (error) throw error;
 
   const map: Record<string, LeaveBalanceRow> = {};
+
   for (const b of (data as unknown) as SupabaseLeaveBalance[]) {
     if (!map[b.employee_id]) {
+      const emp  = b.employees;
+      const name = emp
+        ? [emp.first_name, emp.last_name].filter(Boolean).join(' ') || b.employee_id
+        : b.employee_id;
       map[b.employee_id] = {
-        employeeId: b.employee_id,
-        year: b.year,
-        vl: emptyBalance(),
-        sl: emptyBalance(),
-        sil: emptyBalance(),
+        employeeId:   b.employee_id,
+        employeeName: name,
+        position:     emp?.position  ?? '',
+        department:   emp?.department ?? '',
+        year:         b.year,
+        vl:           emptyBalance(),
+        sl:           emptyBalance(),
+        sil:          emptyBalance(),
       };
     }
+
     const code = b.leave_types?.code?.toUpperCase();
     const entry: LeaveBalanceEntry = {
-      entitled: Number(b.entitled_days),
+      entitled:  Number(b.entitled_days),
       carryOver: Number(b.carried_over),
-      used: Number(b.used_days),
-      pending: Number(b.pending_days),
+      used:      Number(b.used_days),
+      pending:   Number(b.pending_days),
       remaining: Number(b.balance),
     };
-    if (code === 'VL') map[b.employee_id].vl = entry;
-    else if (code === 'SL') map[b.employee_id].sl = entry;
+
+    if (code === 'VL')  map[b.employee_id].vl  = entry;
+    else if (code === 'SL')  map[b.employee_id].sl  = entry;
     else if (code === 'SIL') map[b.employee_id].sil = entry;
   }
 
   return Object.values(map);
 }
 
-export async function getLeaveTypes(): Promise<LeaveTypeRow[]> {
-  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
+// ── Leave Types ────────────────────────────────────────────────────────────────
 
-  const { data, error } = await supabase
+export async function getLeaveTypes(): Promise<LeaveTypeRow[]> {
+  const orgId = await getAuthOrgId();
+
+  const { data, error } = await supabase!
     .from('leave_types')
     .select('id, code, name, max_days_per_year, is_paid, requires_document, carry_over_days, description')
+    .eq('organization_id', orgId)
     .eq('is_active', true)
     .order('code');
 
   if (error) throw error;
 
   return (data as SupabaseLeaveType[]).map((t) => ({
-    id: t.id,
-    code: t.code,
-    name: t.name,
-    daysPerYear: Number(t.max_days_per_year ?? 0),
-    isPaid: t.is_paid,
-    isMonetizable: ['VL', 'SL', 'SIL'].includes(t.code),
+    id:                t.id,
+    code:              t.code,
+    name:              t.name,
+    daysPerYear:       Number(t.max_days_per_year ?? 0),
+    isPaid:            t.is_paid,
+    isMonetizable:     ['VL', 'SL', 'SIL'].includes(t.code),
     requiresDocuments: t.requires_document,
-    documentNote: t.requires_document ? 'Documents may be required for this leave type.' : '',
-    maxCarryOver: Number(t.carry_over_days),
-    color: LEAVE_COLOR_MAP[t.code] ?? '#9ca3af',
-    description: t.description ?? '',
+    documentNote:      t.requires_document
+      ? 'Supporting documents are required for this leave type.'
+      : '',
+    maxCarryOver:  Number(t.carry_over_days),
+    color:         LEAVE_COLOR_MAP[t.code] ?? '#9ca3af',
+    description:   t.description ?? '',
   }));
 }

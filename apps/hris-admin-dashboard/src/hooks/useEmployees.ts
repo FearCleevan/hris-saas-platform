@@ -123,6 +123,9 @@ export function useBulkUpdateEmployees() {
   });
 }
 
+// Re-export types for convenience
+export type { EmployeeRow, EmployeeDetail, EmployeeStats, UpdateEmployeePayload, EmployeeBeneficiary } from '@/services/employees';
+
 export function useSyncBeneficiaries() {
   const qc = useQueryClient();
   return useMutation<void, Error, { employeeId: string; beneficiaries: EmployeeBeneficiary[] }>({
