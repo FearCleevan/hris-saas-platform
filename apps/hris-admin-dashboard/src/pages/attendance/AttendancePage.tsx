@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock, CalendarDays, BarChart2, Layers, Globe2,
   CheckCircle2, XCircle, Timer, AlertCircle, Coffee,
-  ChevronLeft, ChevronRight, ChevronDown,
+  ChevronLeft, ChevronRight,
   Check, X, Plus, Search, UserPlus, UserMinus,
   Loader2, MapPin,
 } from 'lucide-react';

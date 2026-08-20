@@ -182,11 +182,11 @@ export default function EmployeeListPage() {
   const confirmBulkDelete = useCallback(async () => {
     try {
       await deleteManyMutation.mutateAsync(selectedIds);
-      toast.success(`Deleted ${selectedIds.length} employee${selectedIds.length !== 1 ? 's' : ''}`);
+      toast.success(`Deactivated ${selectedIds.length} employee${selectedIds.length !== 1 ? 's' : ''}`);
       setSelectedIds([]);
       setShowDeleteModal(false);
     } catch (err) {
-      toast.error(`Delete failed: ${(err as Error).message}`);
+      toast.error(`Deactivation failed: ${(err as Error).message}`);
     }
   }, [selectedIds, deleteManyMutation]);
 
@@ -495,7 +495,7 @@ export default function EmployeeListPage() {
 
             <button type="button" onClick={() => setShowDeleteModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-semibold transition-colors shrink-0">
-              <Trash2 className="w-3.5 h-3.5" /> Delete
+              <Trash2 className="w-3.5 h-3.5" /> Deactivate
             </button>
 
             <button type="button" onClick={() => setSelectedIds([])} title="Clear selection"
@@ -530,11 +530,11 @@ export default function EmployeeListPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                    Delete {selectedIds.length} employee{selectedIds.length !== 1 ? 's' : ''}?
+                    Deactivate {selectedIds.length} employee{selectedIds.length !== 1 ? 's' : ''}?
                   </h3>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    This will permanently remove the selected employee{selectedIds.length !== 1 ? 's' : ''} and all associated records from the database.
-                    <strong className="text-red-600 dark:text-red-400"> This cannot be undone.</strong>
+                    The selected employee{selectedIds.length !== 1 ? 's' : ''} will be marked inactive and removed from active lists.
+                    Their records (attendance, payroll, leave, documents) are kept, not deleted.
                   </p>
                 </div>
               </div>
@@ -557,12 +557,12 @@ export default function EmployeeListPage() {
                   {deleteManyMutation.isPending ? (
                     <>
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Deleting…
+                      Deactivating…
                     </>
                   ) : (
                     <>
                       <Trash2 className="w-4 h-4" />
-                      Delete {selectedIds.length} employee{selectedIds.length !== 1 ? 's' : ''}
+                      Deactivate {selectedIds.length} employee{selectedIds.length !== 1 ? 's' : ''}
                     </>
                   )}
                 </button>

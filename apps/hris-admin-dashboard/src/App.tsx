@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ProtectedRoute } from '@/components/router/ProtectedRoute';
+import { RoleGuard } from '@/components/router/RoleGuard';
 import { useAuthStore } from '@/store/authStore';
 import { lightTheme, darkTheme } from '@/lib/theme';
 import { supabase, isSupabaseConfigured, fetchUserContext } from '@/lib/supabase';
@@ -105,16 +106,51 @@ const router = createBrowserRouter([
       { path: 'attendance', element: <AttendancePage /> },
       { path: 'leaves', element: <LeavesPage /> },
       { path: 'schedule', element: <SchedulePage /> },
-      { path: 'payroll', element: <PayrollPage /> },
+      {
+        path: 'payroll',
+        element: (
+          <RoleGuard allowedRoles={['super_admin', 'hr_manager', 'accountant']}>
+            <PayrollPage />
+          </RoleGuard>
+        ),
+      },
       { path: 'benefits', element: <BenefitsPage /> },
-      { path: 'expenses', element: <ExpensesPage /> },
+      {
+        path: 'expenses',
+        element: (
+          <RoleGuard allowedRoles={['super_admin', 'hr_manager', 'accountant']}>
+            <ExpensesPage />
+          </RoleGuard>
+        ),
+      },
       { path: 'documents', element: <DocumentsPage /> },
       { path: 'performance', element: <PerformancePage /> },
-      { path: 'recruitment', element: <RecruitmentPage /> },
+      {
+        path: 'recruitment',
+        element: (
+          <RoleGuard allowedRoles={['super_admin', 'hr_manager']}>
+            <RecruitmentPage />
+          </RoleGuard>
+        ),
+      },
       { path: 'reports', element: <CompliancePage /> },
-      { path: 'analytics', element: <AnalyticsPage /> },
+      {
+        path: 'analytics',
+        element: (
+          <RoleGuard allowedRoles={['super_admin', 'hr_manager', 'accountant']}>
+            <AnalyticsPage />
+          </RoleGuard>
+        ),
+      },
       { path: 'hr-policy', element: <HRPolicyPage /> },
-      { path: 'settings/*', element: <SettingsPage /> },
+      {
+        path: 'settings/*',
+        element: (
+          <RoleGuard allowedRoles={['super_admin', 'hr_manager']}>
+            <SettingsPage />
+          </RoleGuard>
+        ),
+      },
       { path: 'notifications', element: <NotificationsPage /> },
       { path: '*', element: <ComingSoonPage /> },
     ],

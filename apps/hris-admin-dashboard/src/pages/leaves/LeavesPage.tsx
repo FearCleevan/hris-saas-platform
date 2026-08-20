@@ -17,9 +17,6 @@ import {
   useLeaveTypes,
   useApproveLeaveRequest,
   useRejectLeaveRequest,
-  type LeaveRequestRow,
-  type LeaveBalanceRow,
-  type LeaveTypeRow,
 } from '@/hooks/useLeaves';
 
 type TabId = 'requests' | 'balances' | 'calendar' | 'types' | 'reports';
@@ -139,15 +136,23 @@ function RequestsTab() {
   };
 
   const handleApprove = async (id: string) => {
-    await approve.mutateAsync({ id });
-    setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
-    toast.success('Leave request approved');
+    try {
+      await approve.mutateAsync({ id });
+      setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
+      toast.success('Leave request approved');
+    } catch (err) {
+      toast.error((err as Error).message || 'Could not approve this request');
+    }
   };
 
   const handleReject = async (id: string) => {
-    await reject.mutateAsync({ id });
-    setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
-    toast.error('Leave request rejected');
+    try {
+      await reject.mutateAsync({ id });
+      setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
+      toast.error('Leave request rejected');
+    } catch (err) {
+      toast.error((err as Error).message || 'Could not reject this request');
+    }
   };
 
   const bulkApprove = async () => {
@@ -155,13 +160,15 @@ function RequestsTab() {
       requests.find((r) => r.id === id)?.status === 'pending',
     );
     setIsBulk(true);
-    try {
-      await Promise.all(pending.map((id) => approve.mutateAsync({ id })));
+    const results = await Promise.allSettled(pending.map((id) => approve.mutateAsync({ id })));
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    setIsBulk(false);
+    if (failed > 0) {
+      toast.error(`${pending.length - failed} approved, ${failed} failed — they may have already been actioned`);
+    } else {
       toast.success(`${pending.length} request(s) approved`);
-      setSelected(new Set());
-    } finally {
-      setIsBulk(false);
     }
+    setSelected(new Set());
   };
 
   const bulkReject = async () => {
@@ -169,13 +176,15 @@ function RequestsTab() {
       requests.find((r) => r.id === id)?.status === 'pending',
     );
     setIsBulk(true);
-    try {
-      await Promise.all(pending.map((id) => reject.mutateAsync({ id })));
+    const results = await Promise.allSettled(pending.map((id) => reject.mutateAsync({ id })));
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    setIsBulk(false);
+    if (failed > 0) {
+      toast.error(`${pending.length - failed} rejected, ${failed} failed — they may have already been actioned`);
+    } else {
       toast.error(`${pending.length} request(s) rejected`);
-      setSelected(new Set());
-    } finally {
-      setIsBulk(false);
     }
+    setSelected(new Set());
   };
 
   const docReq = docModal ? requests.find((r) => r.id === docModal) : null;

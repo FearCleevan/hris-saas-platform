@@ -104,7 +104,10 @@ export function useApproveLeaveRequest() {
       isSupabaseConfigured
         ? approveLeaveRequest(id, remarks)
         : Promise.resolve(),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['leave-requests'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['leave-requests'] });
+      qc.invalidateQueries({ queryKey: ['leave-balances'] });
+    },
   });
 }
 
@@ -115,7 +118,12 @@ export function useRejectLeaveRequest() {
       isSupabaseConfigured
         ? rejectLeaveRequest(id, remarks)
         : Promise.resolve(),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['leave-requests'] }),
+    // Reject doesn't touch balances on the backend, but invalidating both
+    // keeps approve/reject symmetric and costs nothing (no-op refetch).
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['leave-requests'] });
+      qc.invalidateQueries({ queryKey: ['leave-balances'] });
+    },
   });
 }
 

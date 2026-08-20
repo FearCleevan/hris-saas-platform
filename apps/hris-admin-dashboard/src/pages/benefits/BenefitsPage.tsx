@@ -8,6 +8,11 @@ import {
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DatePicker } from '@/components/ui/date-picker';
+import {
+  computeSSSContribution,
+  computePhilhealthContribution,
+  computePagibigContribution,
+} from '@hris/shared-utils';
 import employeesData from '@/data/mock/employees.json';
 import rawPlans from '@/data/mock/benefits-hmo-plans.json';
 import rawEnrollments from '@/data/mock/benefits-enrollments.json';
@@ -77,16 +82,20 @@ const COVERAGE_CFG: Record<string, string> = {
 function peso(val: number) { return `₱${val.toLocaleString()}`; }
 function getInitials(name: string) { return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase(); }
 
+// Real 2024 statutory contribution tables from @hris/shared-utils (bracketed SSS,
+// PhilHealth 5% premium, Pag-IBIG Circular 274) — replaces the old flat-rate
+// approximations that produced incorrect figures. See ADMIN_DASHBOARD_AUDIT.md P0 #4.
 function calcSSS(salary: number) {
-  return { ee: Math.min(Math.round(salary * 0.045), 1350), er: Math.min(Math.round(salary * 0.085), 2550) };
+  const c = computeSSSContribution(salary);
+  return { ee: c.employeeShare, er: c.employerShare };
 }
 function calcPhilHealth(salary: number) {
-  const ee = Math.round(Math.min(salary, 80000) * 0.02);
-  return { ee, er: ee };
+  const c = computePhilhealthContribution(salary);
+  return { ee: c.employeeShare, er: c.employerShare };
 }
 function calcPagIBIG(salary: number) {
-  const ee = Math.min(Math.round(salary * 0.02), 100);
-  return { ee, er: ee };
+  const c = computePagibigContribution(salary);
+  return { ee: c.employeeShare, er: c.employerShare };
 }
 
 const fieldCls = 'h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 w-full';
@@ -718,9 +727,9 @@ export default function BenefitsPage() {
                 <p className="text-xs text-gray-400 mb-3">{selectedEmp.position} · {selectedEmp.department} · Monthly Salary: {peso(selectedEmp.salary)}</p>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'SSS',      ee: empGov.sss.ee, er: empGov.sss.er,  note: 'EE 4.5% / ER 8.5%' },
-                    { label: 'PhilHealth', ee: empGov.ph.ee,  er: empGov.ph.er,   note: 'EE 2% / ER 2%' },
-                    { label: 'Pag-IBIG', ee: empGov.pi.ee,  er: empGov.pi.er,   note: 'EE max ₱100' },
+                    { label: 'SSS',      ee: empGov.sss.ee, er: empGov.sss.er,  note: '2024 SSS bracket table' },
+                    { label: 'PhilHealth', ee: empGov.ph.ee,  er: empGov.ph.er,   note: '5% premium, EE/ER split' },
+                    { label: 'Pag-IBIG', ee: empGov.pi.ee,  er: empGov.pi.er,   note: 'Circular 274' },
                   ].map(({ label, ee, er, note }) => (
                     <div key={label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                       <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">{label}</p>

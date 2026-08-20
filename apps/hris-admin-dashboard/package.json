@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.14.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.9.1",
+    "@hris/shared-utils": "workspace:*",
     "@mui/material": "^9.0.0",
     "@mui/x-data-grid": "^9.0.2",
     "@radix-ui/react-checkbox": "^1.3.2",

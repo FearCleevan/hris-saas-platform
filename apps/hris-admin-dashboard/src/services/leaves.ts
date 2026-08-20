@@ -189,31 +189,25 @@ export async function getLeaveRequests(): Promise<LeaveRequestRow[]> {
   });
 }
 
+// Uses approve_leave_request/reject_leave_request RPCs (not a direct .update())
+// so the approval atomically updates leave_balances (used_days/pending_days),
+// leave_approvals, and leave_credits_history too — see
+// backend/supabase/migrations/20260820000022_leave_approval_rpcs.sql.
+// Approving/rejecting an already-actioned request now raises, instead of
+// silently overwriting a prior decision.
 export async function approveLeaveRequest(id: string, remarks?: string): Promise<void> {
-  const { data: { user } } = await supabase!.auth.getUser();
-  const { error } = await supabase!
-    .from('leave_requests')
-    .update({
-      status:      'approved',
-      approved_by: user?.id ?? null,
-      approved_at: new Date().toISOString(),
-      remarks:     remarks ?? null,
-    })
-    .eq('id', id);
+  const { error } = await supabase!.rpc('approve_leave_request', {
+    p_request_id: id,
+    p_remarks:    remarks ?? null,
+  });
   if (error) throw error;
 }
 
 export async function rejectLeaveRequest(id: string, remarks?: string): Promise<void> {
-  const { data: { user } } = await supabase!.auth.getUser();
-  const { error } = await supabase!
-    .from('leave_requests')
-    .update({
-      status:      'rejected',
-      approved_by: user?.id ?? null,
-      approved_at: new Date().toISOString(),
-      remarks:     remarks ?? null,
-    })
-    .eq('id', id);
+  const { error } = await supabase!.rpc('reject_leave_request', {
+    p_request_id: id,
+    p_remarks:    remarks ?? null,
+  });
   if (error) throw error;
 }
 
