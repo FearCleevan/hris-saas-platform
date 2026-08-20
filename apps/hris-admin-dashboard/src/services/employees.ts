@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { findOrCreateDepartment, findOrCreatePosition, findOrCreateEmploymentType } from '@/services/addEmployee';
 
 // ── Shared: resolve the current user's org ID ─────────────────────
 async function getAuthOrgId(): Promise<string> {
@@ -480,18 +481,21 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
     .eq('organization_id', orgId);
   if (empErr) throw empErr;
 
-  // 2. Parallel lookups — scoped to this org so RLS can't return wrong rows
-  const [deptRes, posRes, empTypeRes] = await Promise.all([
-    supabase.from('departments').select('id').eq('name', payload.department).eq('organization_id', orgId).maybeSingle(),
-    supabase.from('positions').select('id').eq('title', payload.position).eq('organization_id', orgId).maybeSingle(),
-    supabase.from('employment_types').select('id').eq('code', payload.type).eq('organization_id', orgId).maybeSingle(),
-  ]);
+  // 2-3. Look up department/position/type, auto-creating any that don't
+  // exist yet for this org — reusing the exact same helpers addEmployee.ts
+  // uses, so a value picked from EditEmployeePage's static fallback list
+  // (shown when the org has zero seeded departments) actually gets created
+  // and saved, instead of the old behavior where a missing lookup silently
+  // dropped that field from the update entirely. See
+  // CRUD_FIXES_FRONTEND_IMPLEMENTATION.md Phase F3.
+  const departmentId = await findOrCreateDepartment(orgId, payload.department ?? '');
+  const positionId = await findOrCreatePosition(orgId, payload.position ?? '', departmentId);
+  const employmentTypeId = await findOrCreateEmploymentType(orgId, payload.type ?? '');
 
-  // 3. Build employment update — only overwrite an ID when the lookup actually found a row
   const empUpdatePayload: Record<string, unknown> = { date_hired: payload.hireDate };
-  if (deptRes.data?.id)    empUpdatePayload.department_id      = deptRes.data.id;
-  if (posRes.data?.id)     empUpdatePayload.position_id        = posRes.data.id;
-  if (empTypeRes.data?.id) empUpdatePayload.employment_type_id = empTypeRes.data.id;
+  if (departmentId)    empUpdatePayload.department_id      = departmentId;
+  if (positionId)       empUpdatePayload.position_id        = positionId;
+  if (employmentTypeId) empUpdatePayload.employment_type_id = employmentTypeId;
 
   const { error: empEmpErr } = await supabase
     .from('employee_employment')
@@ -524,7 +528,12 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
     }, { onConflict: 'employee_id' });
   if (govErr) throw govErr;
 
-  // 6. Upsert primary bank account
+  // 6. Upsert primary bank account — or delete it if the admin blanked both
+  // fields to remove a bad entry. Previously, blanking both fields matched
+  // neither branch below, so the update was skipped entirely and the old row
+  // silently survived — the form appeared to "clear" the fields but reloading
+  // showed the stale values again. See CRUD_FIXES_FRONTEND_IMPLEMENTATION.md
+  // Phase F3.
   if (payload.bankName && payload.accountNumber) {
     const { data: existingBank, error: bankFetchErr } = await supabase
       .from('employee_bank_accounts')
@@ -559,6 +568,13 @@ export async function updateEmployee(id: string, payload: UpdateEmployeePayload)
         });
       if (bankInsErr) throw bankInsErr;
     }
+  } else if (!payload.bankName && !payload.accountNumber) {
+    const { error: bankDelErr } = await supabase
+      .from('employee_bank_accounts')
+      .delete()
+      .eq('employee_id', id)
+      .eq('is_primary', true);
+    if (bankDelErr) throw bankDelErr;
   }
 
   // 7. Upsert primary emergency contact

@@ -132,6 +132,81 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
   return employeeId;
 }
 
+// Shared lookup-or-create helpers — also used by services/employees.ts's
+// updateEmployee(). Extracted here (rather than duplicated) so a department/
+// position/type picked from EditEmployeePage's static fallback list (used
+// when an org has zero seeded departments) creates the row instead of the
+// update silently no-oping that field. See CRUD_FIXES_FRONTEND_IMPLEMENTATION.md
+// Phase F3.
+
+export async function findOrCreateDepartment(orgId: string, name: string): Promise<string | null> {
+  if (!supabase || !name) return null;
+  const { data: dept } = await supabase
+    .from('departments')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('name', name)
+    .maybeSingle();
+  if (dept?.id) return dept.id;
+
+  const deptCode = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+    .slice(0, 20) || 'dept';
+  const { data: newDept } = await supabase
+    .from('departments')
+    .insert({ organization_id: orgId, name, code: deptCode, is_active: true })
+    .select('id')
+    .single();
+  return newDept?.id ?? null;
+}
+
+export async function findOrCreatePosition(
+  orgId: string, title: string, departmentId: string | null,
+): Promise<string | null> {
+  if (!supabase || !title) return null;
+  const { data: pos } = await supabase
+    .from('positions')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('title', title)
+    .maybeSingle();
+  if (pos?.id) return pos.id;
+
+  const { data: newPos } = await supabase
+    .from('positions')
+    .insert({ organization_id: orgId, department_id: departmentId, title, is_active: true })
+    .select('id')
+    .single();
+  return newPos?.id ?? null;
+}
+
+const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
+  regular:      'Regular',
+  probationary: 'Probationary',
+  contractual:  'Contractual',
+  part_time:    'Part Time',
+};
+
+export async function findOrCreateEmploymentType(orgId: string, code: string): Promise<string | null> {
+  if (!supabase || !code) return null;
+  const { data: empType } = await supabase
+    .from('employment_types')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('code', code)
+    .maybeSingle();
+  if (empType?.id) return empType.id;
+
+  const { data: newEmpType } = await supabase
+    .from('employment_types')
+    .insert({ organization_id: orgId, code, name: EMPLOYMENT_TYPE_LABELS[code] ?? code, is_active: true })
+    .select('id')
+    .single();
+  return newEmpType?.id ?? null;
+}
+
 async function addEmployeeDetails(
   employeeId: string,
   orgId: string,
@@ -140,79 +215,13 @@ async function addEmployeeDetails(
   if (!supabase) return;
 
   // 2. Department — look up, auto-create if missing (code is NOT NULL in schema)
-  const { data: dept } = await supabase
-    .from('departments')
-    .select('id')
-    .eq('organization_id', orgId)
-    .eq('name', payload.department)
-    .maybeSingle();
-
-  let departmentId = dept?.id ?? null;
-  if (!departmentId && payload.department) {
-    const deptCode = payload.department
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_|_$/g, '')
-      .slice(0, 20) || 'dept';
-    const { data: newDept } = await supabase
-      .from('departments')
-      .insert({ organization_id: orgId, name: payload.department, code: deptCode, is_active: true })
-      .select('id')
-      .single();
-    if (newDept) departmentId = newDept.id;
-  }
+  const departmentId = await findOrCreateDepartment(orgId, payload.department);
 
   // 3. Position — look up, auto-create if missing
-  const { data: pos } = await supabase
-    .from('positions')
-    .select('id')
-    .eq('organization_id', orgId)
-    .eq('title', payload.position)
-    .maybeSingle();
-
-  let positionId = pos?.id ?? null;
-  if (!positionId && payload.position) {
-    const { data: newPos } = await supabase
-      .from('positions')
-      .insert({
-        organization_id: orgId,
-        department_id:   departmentId,
-        title:           payload.position,
-        is_active:       true,
-      })
-      .select('id')
-      .single();
-    if (newPos) positionId = newPos.id;
-  }
+  const positionId = await findOrCreatePosition(orgId, payload.position, departmentId);
 
   // 4. Employment type — look up, auto-create standard types if missing
-  const { data: empType } = await supabase
-    .from('employment_types')
-    .select('id')
-    .eq('organization_id', orgId)
-    .eq('code', payload.type)
-    .maybeSingle();
-
-  let employmentTypeId = empType?.id ?? null;
-  if (!employmentTypeId && payload.type) {
-    const typeLabels: Record<string, string> = {
-      regular:       'Regular',
-      probationary:  'Probationary',
-      contractual:   'Contractual',
-      part_time:     'Part Time',
-    };
-    const { data: newEmpType } = await supabase
-      .from('employment_types')
-      .insert({
-        organization_id: orgId,
-        code:            payload.type,
-        name:            typeLabels[payload.type] ?? payload.type,
-        is_active:       true,
-      })
-      .select('id')
-      .single();
-    if (newEmpType) employmentTypeId = newEmpType.id;
-  }
+  const employmentTypeId = await findOrCreateEmploymentType(orgId, payload.type);
 
   // 4. Insert employee_employment -----------------------------------
   const { error: empRelErr } = await supabase
