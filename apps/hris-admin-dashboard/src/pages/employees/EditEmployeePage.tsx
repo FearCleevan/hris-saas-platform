@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useEmployee, useUpdateEmployee, useSyncBeneficiaries } from '@/hooks/useEmployees';
-import { uploadEmployeeDocuments } from '@/services/documents';
+import { useEmployeeDocuments } from '@/hooks/useDocuments';
+import { uploadEmployeeDocuments, getDocumentDownloadUrl, type DocumentMeta } from '@/services/documents';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { PH_PROVINCES, PH_CITIES } from '@/data/ph-locations';
 import mockEmployeesData from '@/data/mock/employees.json';
@@ -413,9 +414,28 @@ const DOC_TYPES = [
   { key: 'marriage_cert',label: 'Marriage Certificate',   required: false, hint: 'PSA-authenticated (if married)' },
 ];
 
-function DocumentsStep({ uploads, onChange }: { uploads: Record<string, File | null>; onChange: (u: Record<string, File | null>) => void }) {
+function DocumentsStep({
+  employeeId, uploads, onChange,
+}: {
+  employeeId: string | undefined;
+  uploads: Record<string, File | null>;
+  onChange: (u: Record<string, File | null>) => void;
+}) {
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const handleFile = (key: string, file: File | null) => onChange({ ...uploads, [key]: file });
+
+  // Existing documents already saved for this employee — without this, every
+  // row looked "not yet uploaded" on every edit, even when a file was already
+  // on file, because uploads only tracks what's staged in THIS session.
+  const { data: existingDocs = [], isLoading: existingLoading } = useEmployeeDocuments(employeeId ?? null);
+  const existingByKey = (key: string): DocumentMeta | undefined =>
+    existingDocs.find((d) => d.tags?.includes(key));
+
+  const handleView = async (doc: DocumentMeta) => {
+    const url = await getDocumentDownloadUrl(doc.filePath);
+    if (url) window.open(url, '_blank');
+    else toast.error('Could not generate a link for this file');
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -424,12 +444,14 @@ function DocumentsStep({ uploads, onChange }: { uploads: Record<string, File | n
       </div>
       <div className="flex flex-col gap-2">
         {DOC_TYPES.map((doc) => {
-          const file = uploads[doc.key];
+          const stagedFile = uploads[doc.key];
+          const existing = !stagedFile ? existingByKey(doc.key) : undefined;
+          const hasAny = !!stagedFile || !!existing;
           return (
             <div key={doc.key} className="flex items-center justify-between gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${file ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                  {file ? <Check className="w-4 h-4 text-green-600 dark:text-green-400" /> : <FileText className="w-4 h-4 text-gray-400" />}
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${hasAny ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  {hasAny ? <Check className="w-4 h-4 text-green-600 dark:text-green-400" /> : <FileText className="w-4 h-4 text-gray-400" />}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
@@ -438,17 +460,29 @@ function DocumentsStep({ uploads, onChange }: { uploads: Record<string, File | n
                       {doc.required ? 'Required' : 'Optional'}
                     </span>
                   </div>
-                  {file ? (
+                  {stagedFile ? (
                     <p className="text-xs text-green-600 dark:text-green-400 truncate flex items-center gap-1">
-                      <Paperclip className="w-3 h-3 shrink-0" />{file.name}
+                      <Paperclip className="w-3 h-3 shrink-0" />{stagedFile.name} (new, not yet saved)
                     </p>
+                  ) : existing ? (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
+                      <Paperclip className="w-3 h-3 shrink-0" />On file — {existing.fileName}
+                    </p>
+                  ) : existingLoading ? (
+                    <p className="text-xs text-gray-400 truncate">Checking…</p>
                   ) : (
                     <p className="text-xs text-gray-400 truncate">{doc.hint}</p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                {file && (
+                {existing && !stagedFile && (
+                  <button title="View" type="button" onClick={() => handleView(existing)}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-brand-blue hover:bg-brand-blue/10 transition-colors">
+                    <Eye className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {stagedFile && (
                   <button title="Remove" type="button" onClick={() => handleFile(doc.key, null)}
                     className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                     <X className="w-3.5 h-3.5" />
@@ -458,7 +492,7 @@ function DocumentsStep({ uploads, onChange }: { uploads: Record<string, File | n
                   ref={(el) => { fileRefs.current[doc.key] = el; }}
                   onChange={(e) => handleFile(doc.key, e.target.files?.[0] ?? null)} />
                 <Button type="button" size="sm" variant="outline" onClick={() => fileRefs.current[doc.key]?.click()} className="text-xs h-7 px-2.5">
-                  {file ? 'Change' : 'Upload'}
+                  {hasAny ? 'Replace' : 'Upload'}
                 </Button>
               </div>
             </div>
@@ -1191,7 +1225,7 @@ export default function EditEmployeePage() {
             {/* Step 6: Documents */}
             {step === 6 && (
               <div>
-                <DocumentsStep uploads={uploads} onChange={setUploads} />
+                <DocumentsStep employeeId={id} uploads={uploads} onChange={setUploads} />
                 <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
                   <Button type="button" variant="outline" onClick={() => setStep((s) => s - 1)} className="flex items-center gap-1.5">
                     <ArrowLeft className="w-4 h-4" /> Back
