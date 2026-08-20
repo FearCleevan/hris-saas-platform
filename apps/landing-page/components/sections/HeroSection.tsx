@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Container } from '@/components/layout/Container';
 import { AnimatedHeadline } from '@/components/ui/AnimatedHeadline';
 import { DashboardMockup } from '@/components/ui/DashboardMockup';
+import { PLATFORM_STATS } from '@/data/platform-stats';
 
 const trustBadges = [
   { icon: Shield, label: 'SSS Compliant', color: 'text-blue-600 dark:text-blue-400' },
@@ -17,10 +18,10 @@ const trustBadges = [
 ];
 
 const stats = [
-  { value: '500+', label: 'Philippine Companies' },
-  { value: '120K+', label: 'Employees Managed' },
-  { value: '₱2.4B+', label: 'Payroll Processed' },
-  { value: '99.9%', label: 'Uptime SLA' },
+  { value: PLATFORM_STATS.companies.display, label: PLATFORM_STATS.companies.label },
+  { value: PLATFORM_STATS.employees.display, label: PLATFORM_STATS.employees.label },
+  { value: PLATFORM_STATS.payroll.display,   label: PLATFORM_STATS.payroll.label },
+  { value: PLATFORM_STATS.uptime.display,    label: PLATFORM_STATS.uptime.label },
 ];
 
 export function HeroSection() {

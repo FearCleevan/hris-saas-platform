@@ -34,20 +34,16 @@ export function SignupForm() {
 
     const supabase = createClient();
 
-    const { error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        // These go into auth.users.raw_user_meta_data
-        // The handle_new_user trigger reads them to create org + profile
         data: {
           first_name:   firstName,
           last_name:    lastName,
           company_name: company,
           company_size: companySize,
         },
-        // After email confirmation, Supabase redirects here
-        // Our /auth/callback route then redirects to admin dashboard
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/setup-company`,
       },
     });
@@ -62,16 +58,11 @@ export function SignupForm() {
       return;
     }
 
-    // Supabase sends a confirmation email.
-    // If email confirmations are disabled in the Supabase dashboard,
-    // the user is immediately signed in — redirect to admin dashboard.
-    const { data: sessionData } = await supabase.auth.getSession();
-
-    if (sessionData.session) {
-      // No email confirmation required — go straight to setup
+    // Use the session returned directly from signUp — avoids a second round-trip
+    // and the race condition of cookies not yet being set when getSession() runs.
+    if (authData.session) {
       window.location.href = `${ADMIN_URL}/setup-company`;
     } else {
-      // Email confirmation required — show "check your email" state
       setEmailSent(true);
       setLoading(false);
     }

@@ -155,7 +155,7 @@ function PricingCalculator() {
                 )}
                 {billing === 'annual' && totalMonthly !== null && (
                   <div className="rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium px-3 py-2">
-                    💰 You save {formatCurrency(Math.round(totalMonthly * 12 * 0.25))} per year vs monthly billing
+                    💰 You save {formatCurrency(Math.round(totalMonthly * 12 * 0.20))} per year vs monthly billing
                   </div>
                 )}
               </>

@@ -7,19 +7,20 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const rawNext = searchParams.get('next') ?? '/';
+
+  // Reject anything that isn't a safe relative path to prevent open redirects
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Redirect to admin dashboard after successful email confirmation
       const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://adminhrisph.vercel.app';
       return NextResponse.redirect(`${adminUrl}${next}`);
     }
   }
 
-  // Auth error — redirect back to login with error param
   return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
 }

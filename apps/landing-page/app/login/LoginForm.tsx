@@ -18,6 +18,23 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    const supabase = createClient();
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+      setLoading(false);
+    }
+    // On success Supabase handles the redirect — no need to setLoading(false)
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
@@ -40,10 +57,9 @@ export function LoginForm() {
       return;
     }
 
-    // Session is now set in the browser cookie.
-    // Redirect to admin dashboard — Supabase session is in localStorage/cookie
-    // and will be picked up by the admin dashboard on load.
     window.location.href = `${ADMIN_URL}/`;
+    // Safety: reset spinner if the redirect stalls for any reason
+    setTimeout(() => setLoading(false), 8000);
   };
 
   return (
@@ -120,7 +136,7 @@ export function LoginForm() {
         </div>
       </div>
 
-      <Button type="button" variant="outline" className="w-full h-11 gap-2" disabled={loading}>
+      <Button type="button" variant="outline" className="w-full h-11 gap-2" disabled={loading} onClick={handleGoogleSignIn}>
         <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

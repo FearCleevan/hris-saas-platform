@@ -1,12 +1,29 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+export const CONSENT_KEY = 'hrisph_cookie_consent';
+export const CONSENT_EVENT = 'hrisph_consent_accepted';
 
 export function Analytics() {
-  if (!GA4_ID && !META_PIXEL_ID) return null;
+  const [consented, setConsented] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      if (localStorage.getItem(CONSENT_KEY) === 'accepted') {
+        setConsented(true);
+      }
+    };
+
+    check();
+    window.addEventListener(CONSENT_EVENT, check);
+    return () => window.removeEventListener(CONSENT_EVENT, check);
+  }, []);
+
+  if (!consented || (!GA4_ID && !META_PIXEL_ID)) return null;
 
   return (
     <>

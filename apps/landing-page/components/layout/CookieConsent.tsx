@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-
-const CONSENT_KEY = 'hrisph_cookie_consent';
+import { CONSENT_KEY, CONSENT_EVENT } from '@/components/Analytics';
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -16,6 +15,7 @@ export function CookieConsent() {
 
   const accept = () => {
     localStorage.setItem(CONSENT_KEY, 'accepted');
+    window.dispatchEvent(new Event(CONSENT_EVENT));
     setVisible(false);
   };
 

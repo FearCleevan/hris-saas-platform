@@ -34,13 +34,25 @@ export function ContactForm() {
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    console.log('[Contact Form Submitted]', data);
-    setSubmitting(false);
-    setSubmitted(true);
-    toast.success('Message sent!', {
-      description: "We'll get back to you within 1 business day.",
-    });
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? 'Submission failed');
+      }
+      setSubmitted(true);
+      toast.success('Message sent!', {
+        description: "We'll get back to you within 1 business day.",
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {

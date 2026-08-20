@@ -46,14 +46,25 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
 
   const onSubmit = async (data: DemoFormData) => {
     setSubmitting(true);
-    // Mock submission — log to console (backend wired in Phase 2 of backend setup)
-    await new Promise((r) => setTimeout(r, 1400));
-    console.log('[Demo Request Submitted]', data);
-    setSubmitting(false);
-    setStep('success');
-    toast.success('Demo request received!', {
-      description: `We'll confirm your slot for ${data.preferredDate} at ${data.preferredTime} PHT.`,
-    });
+    try {
+      const res = await fetch('/api/demo-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? 'Submission failed');
+      }
+      setStep('success');
+      toast.success('Demo request received!', {
+        description: `We'll confirm your slot for ${data.preferredDate} at ${data.preferredTime} PHT.`,
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = (open: boolean) => {

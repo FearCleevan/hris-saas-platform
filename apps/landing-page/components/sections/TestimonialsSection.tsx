@@ -13,6 +13,7 @@ import { useCountUp } from '@/hooks/useCountUp';
 import { cn } from '@/lib/utils';
 import testimonialsData from '@/data/testimonials.json';
 import caseStudiesData from '@/data/case-studies.json';
+import { PLATFORM_STATS } from '@/data/platform-stats';
 
 /* ─── Company logos (text-based, no images needed) ──────────────────────── */
 const companyLogos = [
@@ -36,7 +37,7 @@ const stats = [
     icon: Building2,
     value: 500,
     suffix: '+',
-    label: 'Philippine Companies',
+    label: PLATFORM_STATS.companies.label,
     color: 'text-[#0038a8] dark:text-blue-400',
     bg: 'bg-[#0038a8]/10',
   },
@@ -44,16 +45,16 @@ const stats = [
     icon: Users,
     value: 120000,
     suffix: '+',
-    label: 'Employees Managed',
+    label: PLATFORM_STATS.employees.label,
     color: 'text-[#ce1126] dark:text-red-400',
     bg: 'bg-[#ce1126]/10',
     format: (n: number) => n >= 1000 ? `${(n / 1000).toFixed(0)}K` : String(n),
   },
   {
     icon: DollarSign,
-    value: 24,
+    value: 2.4,
     suffix: 'B+',
-    label: 'Payroll Processed (PHP)',
+    label: PLATFORM_STATS.payroll.label,
     color: 'text-green-600 dark:text-green-400',
     bg: 'bg-green-500/10',
     prefix: '₱',
@@ -62,7 +63,7 @@ const stats = [
     icon: TrendingUp,
     value: 99,
     suffix: '.9%',
-    label: 'Platform Uptime SLA',
+    label: PLATFORM_STATS.uptime.label,
     color: 'text-amber-600 dark:text-amber-400',
     bg: 'bg-amber-500/10',
   },
