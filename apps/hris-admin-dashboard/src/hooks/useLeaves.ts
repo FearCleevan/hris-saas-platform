@@ -6,9 +6,12 @@ import {
   getLeaveTypes,
   approveLeaveRequest,
   rejectLeaveRequest,
+  applyLeave,
+  cancelLeave,
   type LeaveRequestRow,
   type LeaveBalanceRow,
   type LeaveTypeRow,
+  type ApplyLeavePayload,
 } from '@/services/leaves';
 import leaveRequestsRaw from '@/data/mock/leave-requests.json';
 import leaveBalancesRaw from '@/data/mock/leave-balances.json';
@@ -120,6 +123,30 @@ export function useRejectLeaveRequest() {
         : Promise.resolve(),
     // Reject doesn't touch balances on the backend, but invalidating both
     // keeps approve/reject symmetric and costs nothing (no-op refetch).
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['leave-requests'] });
+      qc.invalidateQueries({ queryKey: ['leave-balances'] });
+    },
+  });
+}
+
+export function useApplyLeave() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, ApplyLeavePayload>({
+    mutationFn: (payload) =>
+      isSupabaseConfigured ? applyLeave(payload) : Promise.resolve(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['leave-requests'] });
+      qc.invalidateQueries({ queryKey: ['leave-balances'] });
+    },
+  });
+}
+
+export function useCancelLeave() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string }>({
+    mutationFn: ({ id }) =>
+      isSupabaseConfigured ? cancelLeave(id) : Promise.resolve(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['leave-requests'] });
       qc.invalidateQueries({ queryKey: ['leave-balances'] });

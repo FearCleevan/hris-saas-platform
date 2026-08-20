@@ -5,10 +5,11 @@ import {
   CheckCircle2, XCircle, AlertCircle,
   ChevronLeft, ChevronRight, ChevronDown,
   Check, X, FileText, Shield, AlertTriangle, Users, Loader2,
+  Plus, Ban,
 } from 'lucide-react';
 import {
   format, parseISO, getDaysInMonth, startOfMonth, getDay,
-  eachDayOfInterval, isWeekend, subDays,
+  eachDayOfInterval, isWeekend, subDays, differenceInCalendarDays,
 } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -17,7 +18,10 @@ import {
   useLeaveTypes,
   useApproveLeaveRequest,
   useRejectLeaveRequest,
+  useApplyLeave,
+  useCancelLeave,
 } from '@/hooks/useLeaves';
+import { useEmployees } from '@/hooks/useEmployees';
 
 type TabId = 'requests' | 'balances' | 'calendar' | 'types' | 'reports';
 type StatusFilter = 'all' | 'pending' | 'approved' | 'rejected';
@@ -70,18 +74,155 @@ function LeaveCodeBadge({ code }: { code: string }) {
   );
 }
 
+/* ─── New Leave Request Modal ─── */
+function NewLeaveRequestModal({ onClose }: { onClose: () => void }) {
+  const { data: employees = [] } = useEmployees();
+  const { data: leaveTypes = [] } = useLeaveTypes();
+  const apply = useApplyLeave();
+
+  const [employeeId, setEmployeeId] = useState('');
+  const [leaveTypeId, setLeaveTypeId] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [reason, setReason] = useState('');
+
+  const totalDays = startDate && endDate
+    ? Math.max(1, differenceInCalendarDays(parseISO(endDate), parseISO(startDate)) + 1)
+    : 0;
+
+  const canSubmit = employeeId && leaveTypeId && startDate && endDate && reason.trim() && totalDays > 0;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    try {
+      await apply.mutateAsync({
+        employeeId, leaveTypeId, startDate, endDate, totalDays, reason: reason.trim(),
+      });
+      toast.success('Leave request submitted');
+      onClose();
+    } catch (err) {
+      toast.error((err as Error).message || 'Could not submit this request');
+    }
+  };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        onClick={() => !apply.isPending && onClose()}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 8 }}
+        transition={{ duration: 0.18 }}
+        className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6"
+      >
+        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">New Leave Request</h3>
+
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Employee</label>
+            <select
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+              className="w-full h-9 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40"
+            >
+              <option value="">Select employee…</option>
+              {[...employees].sort((a, b) => a.name.localeCompare(b.name)).map((e) => (
+                <option key={e.id} value={e.id}>{e.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Leave Type</label>
+            <select
+              value={leaveTypeId}
+              onChange={(e) => setLeaveTypeId(e.target.value)}
+              className="w-full h-9 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40"
+            >
+              <option value="">Select leave type…</option>
+              {leaveTypes.map((t) => (
+                <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full h-9 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                min={startDate || undefined}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full h-9 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40"
+              />
+            </div>
+          </div>
+          {totalDays > 0 && (
+            <p className="text-[11px] text-gray-400 -mt-1">{totalDays} calendar day{totalDays !== 1 ? 's' : ''}</p>
+          )}
+
+          <div>
+            <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Reason</label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              className="w-full px-2.5 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 resize-none"
+              placeholder="Reason for leave…"
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            disabled={apply.isPending}
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={!canSubmit || apply.isPending}
+            onClick={handleSubmit}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-brand-blue hover:bg-brand-blue-dark transition-colors disabled:opacity-50"
+          >
+            {apply.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            Submit Request
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+}
+
 // ── Requests Tab ──────────────────────────────────────────────────────────────
 
 function RequestsTab() {
   const { data: requests = [], isLoading } = useLeaveRequests();
   const approve = useApproveLeaveRequest();
   const reject  = useRejectLeaveRequest();
+  const cancel  = useCancelLeave();
 
   const [filter,     setFilter]     = useState<StatusFilter>('all');
   const [datePreset, setDatePreset] = useState<DatePreset>('all');
   const [selected,   setSelected]   = useState<Set<string>>(new Set());
   const [docModal,   setDocModal]   = useState<string | null>(null);
   const [isBulk,     setIsBulk]     = useState(false);
+  const [showNewModal, setShowNewModal] = useState(false);
 
   const now = useMemo(() => new Date(), []);
 
@@ -155,6 +296,16 @@ function RequestsTab() {
     }
   };
 
+  const handleCancel = async (id: string) => {
+    try {
+      await cancel.mutateAsync({ id });
+      setSelected((prev) => { const n = new Set(prev); n.delete(id); return n; });
+      toast.info('Leave request cancelled');
+    } catch (err) {
+      toast.error((err as Error).message || 'Could not cancel this request');
+    }
+  };
+
   const bulkApprove = async () => {
     const pending = [...selected].filter((id) =>
       requests.find((r) => r.id === id)?.status === 'pending',
@@ -188,7 +339,7 @@ function RequestsTab() {
   };
 
   const docReq = docModal ? requests.find((r) => r.id === docModal) : null;
-  const isMutating = approve.isPending || reject.isPending || isBulk;
+  const isMutating = approve.isPending || reject.isPending || cancel.isPending || isBulk;
 
   return (
     <div className="relative pb-20">
@@ -253,6 +404,13 @@ function RequestsTab() {
         )}
         {isLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
         <span className="ml-auto text-xs text-gray-400">{filtered.length} records</span>
+        <button
+          type="button"
+          onClick={() => setShowNewModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blue text-white text-xs font-semibold hover:bg-brand-blue-dark transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" />New Request
+        </button>
       </div>
 
       {/* Request cards */}
@@ -379,6 +537,16 @@ function RequestsTab() {
                       {reject.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
                       Reject
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCancel(req.id)}
+                      disabled={isMutating}
+                      title="Withdraw this request on the employee's behalf"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 text-xs font-semibold transition-colors disabled:opacity-50"
+                    >
+                      {cancel.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Ban className="w-3 h-3" />}
+                      Cancel
+                    </button>
                   </div>
                 )}
               </div>
@@ -492,6 +660,10 @@ function RequestsTab() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showNewModal && <NewLeaveRequestModal onClose={() => setShowNewModal(false)} />}
       </AnimatePresence>
     </div>
   );

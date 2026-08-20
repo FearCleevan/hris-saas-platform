@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CalendarDays, Users, Layers, ChevronLeft, ChevronRight, ChevronDown, Clock, Plus,
-  Search, AlertTriangle, Palmtree, X, Check, Loader2, Moon,
+  Search, AlertTriangle, Palmtree, X, Check, Loader2, Moon, Trash2,
 } from 'lucide-react';
 import {
   format, startOfWeek, addDays, addWeeks, subWeeks, parseISO, eachDayOfInterval,
@@ -14,6 +14,7 @@ import {
   useCreateSchedule,
   useUpdateSchedule,
   useUpdateScheduleAssignments,
+  useDeleteSchedule,
   type ScheduleEntry,
   type ScheduleAssignmentEntry,
 } from '@/hooks/useAttendance';
@@ -1159,14 +1160,18 @@ function RosterTab({
 // ── Shift Settings Tab ────────────────────────────────────────────────────────
 
 function ShiftsSettingsTab({
-  shifts, assignments, onEdit, onAdd, isLoading,
+  shifts, assignments, onEdit, onAdd, onDelete, isDeleting, isLoading,
 }: {
   shifts: ScheduleEntry[];
   assignments: ScheduleAssignmentEntry[];
   onEdit: (shift: ScheduleEntry) => void;
   onAdd: () => void;
+  onDelete: (shift: ScheduleEntry) => void;
+  isDeleting: boolean;
   isLoading: boolean;
 }) {
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -1233,13 +1238,44 @@ function ShiftsSettingsTab({
 
             <div className="flex items-center justify-between pt-3 mt-2 border-t border-gray-100 dark:border-gray-800">
               <span className="text-xs text-gray-400">{assignedCount} employee{assignedCount !== 1 ? 's' : ''}</span>
-              <button
-                type="button"
-                onClick={() => onEdit(shift)}
-                className="flex items-center gap-1 text-[10px] font-semibold text-brand-blue hover:underline"
-              >
-                Edit Shift
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => onEdit(shift)}
+                  className="flex items-center gap-1 text-[10px] font-semibold text-brand-blue hover:underline"
+                >
+                  Edit Shift
+                </button>
+                {confirmingId === shift.id ? (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={() => { onDelete(shift); setConfirmingId(null); }}
+                      className="text-[10px] font-bold text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-md disabled:opacity-50"
+                    >
+                      Confirm?
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingId(null)}
+                      className="text-[10px] font-semibold text-gray-400 hover:text-gray-600"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={assignedCount > 0}
+                    title={assignedCount > 0 ? 'Unassign all employees before deleting this shift' : 'Delete this shift'}
+                    onClick={() => setConfirmingId(shift.id)}
+                    className="flex items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-brand-red disabled:opacity-40 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-3 h-3" />Delete
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         );
@@ -1278,6 +1314,16 @@ export default function SchedulePage() {
   const createShift      = useCreateSchedule();
   const updateShift      = useUpdateSchedule();
   const updateAssignments = useUpdateScheduleAssignments();
+  const deleteShift      = useDeleteSchedule();
+
+  const handleDeleteShift = async (shift: ScheduleEntry) => {
+    try {
+      await deleteShift.mutateAsync({ id: shift.id });
+      toast.success(`Shift "${shift.name}" deleted`);
+    } catch (err) {
+      toast.error((err as Error).message || 'Could not delete this shift');
+    }
+  };
 
   const isLoading = loadingShifts || loadingAssign || loadingEmps;
 
@@ -1394,6 +1440,8 @@ export default function SchedulePage() {
                 assignments={assignments}
                 onEdit={(shift) => setShiftModal({ mode: 'edit', shift })}
                 onAdd={() => setShiftModal({ mode: 'add', shift: null })}
+                onDelete={handleDeleteShift}
+                isDeleting={deleteShift.isPending}
                 isLoading={isLoading}
               />
             )}

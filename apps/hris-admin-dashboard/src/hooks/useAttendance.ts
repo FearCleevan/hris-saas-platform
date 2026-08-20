@@ -13,6 +13,8 @@ import {
   toggleScheduleActive,
   getScheduleAssignments,
   updateScheduleAssignments,
+  deleteSchedule,
+  getHolidays,
   type AttendanceLogEntry,
   type OvertimeRequestEntry,
   type ScheduleEntry,
@@ -20,6 +22,7 @@ import {
   type MonthlyDateMap,
   type CreateScheduleInput,
   type UpdateScheduleInput,
+  type HolidayEntry,
 } from '@/services/attendance';
 import attendanceLogsRaw from '@/data/mock/attendance-logs.json';
 import overtimeRequestsRaw from '@/data/mock/overtime-requests.json';
@@ -182,6 +185,17 @@ export function useAttendanceLogsForReports(startDate: string, endDate: string) 
   });
 }
 
+// No mock fallback here on purpose — the old holidays mock JSON only had
+// 2023 dates and was never a real source of truth. getHolidays() already
+// returns [] safely when Supabase isn't configured.
+export function useHolidays(year: number) {
+  return useQuery<HolidayEntry[]>({
+    queryKey:  ['holidays', year],
+    queryFn:   () => getHolidays(year),
+    staleTime: 1000 * 60 * 60,
+  });
+}
+
 export function useOvertimeRequests() {
   return useQuery<OvertimeRequestEntry[]>({
     queryKey:  ['overtime-requests-admin'],
@@ -282,6 +296,14 @@ export function useToggleScheduleActive() {
       isSupabaseConfigured
         ? toggleScheduleActive(id, isActive)
         : Promise.resolve(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['schedules'] }),
+  });
+}
+
+export function useDeleteSchedule() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string }>({
+    mutationFn: ({ id }) => (isSupabaseConfigured ? deleteSchedule(id) : Promise.resolve()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedules'] }),
   });
 }

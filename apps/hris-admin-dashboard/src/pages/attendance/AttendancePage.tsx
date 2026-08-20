@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import { format, parseISO, getDaysInMonth, startOfMonth, startOfWeek, getDay } from 'date-fns';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import employeesData from '@/data/mock/employees.json';
-import holidaysData from '@/data/mock/ph-holidays.json';
 import {
   useAttendanceLogs,
   useMonthlyAttendanceSummary,
@@ -24,6 +24,7 @@ import {
   useToggleScheduleActive,
   useScheduleAssignments,
   useUpdateScheduleAssignments,
+  useHolidays,
   type ScheduleEntry,
   type ScheduleAssignmentEntry,
   type UpdateScheduleInput,
@@ -73,9 +74,10 @@ const OT_STATUS_CFG = {
 };
 
 const HOLIDAY_TYPE_CFG = {
-  regular:             { label: 'Regular Holiday',     color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30' },
+  regular_holiday:     { label: 'Regular Holiday',     color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-50 dark:bg-red-950/30' },
   special_non_working: { label: 'Special Non-Working', color: 'text-amber-600 dark:text-amber-400',bg: 'bg-amber-50 dark:bg-amber-950/30' },
   special_working:     { label: 'Special Working',     color: 'text-blue-600 dark:text-blue-400',  bg: 'bg-blue-50 dark:bg-blue-950/30' },
+  company:             { label: 'Company Holiday',     color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30' },
 };
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
@@ -718,6 +720,7 @@ function CalendarTab({
   const month = viewMonth.getMonth();
 
   const { data: dateMap = {}, isLoading } = useMonthlyAttendanceSummary(year, month);
+  const { data: holidays = [] } = useHolidays(year);
 
   const daysInMonth    = getDaysInMonth(viewMonth);
   const firstDayOfWeek = getDay(startOfMonth(viewMonth));
@@ -773,7 +776,7 @@ function CalendarTab({
           const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const isWeekendDay = idx % 7 === 0 || idx % 7 === 6;
           const data = dateMap[dateStr];
-          const holiday = (holidaysData as any[]).find((h) => h.date === dateStr);
+          const holiday = holidays.find((h) => h.date === dateStr);
 
           let cellBg = 'bg-gray-50 dark:bg-gray-800/40';
           let pct = 0;
@@ -1160,43 +1163,51 @@ function ShiftsTab({
 
 function HolidaysTab() {
   const currentYear = new Date().getFullYear();
-  const yearHolidays = (holidaysData as any[]).filter((h) =>
-    h.date.startsWith(String(currentYear)) || h.date.startsWith('2023')
-  );
+  const { data: yearHolidays = [], isLoading } = useHolidays(currentYear);
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
       <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-800">
         <h3 className="text-sm font-bold text-gray-800 dark:text-white">Philippine Public Holidays</h3>
         <p className="text-xs text-gray-400 mt-0.5">
-          {yearHolidays.length} holidays · Per Proclamation No. 90 & RA 9849
+          {yearHolidays.length} holidays · {currentYear}
         </p>
       </div>
-      <div className="divide-y divide-gray-50 dark:divide-gray-800/80">
-        {yearHolidays.map((h: any) => {
-          const typeCfg = HOLIDAY_TYPE_CFG[h.type as keyof typeof HOLIDAY_TYPE_CFG] ?? HOLIDAY_TYPE_CFG.regular;
-          const isPast = new Date(h.date) < new Date();
-          return (
-            <div
-              key={h.id}
-              className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30 ${isPast ? 'opacity-40' : ''}`}
-            >
-              <div className="w-12 shrink-0 text-center">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase">{format(parseISO(h.date), 'MMM')}</p>
-                <p className="text-xl font-extrabold text-brand-blue leading-tight">{format(parseISO(h.date), 'd')}</p>
-                <p className="text-[9px] text-gray-400">{format(parseISO(h.date), 'EEE')}</p>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <LoadingSpinner />
+        </div>
+      ) : yearHolidays.length === 0 ? (
+        <div className="text-center py-10 text-sm text-gray-400">
+          No {currentYear} holidays have been added yet for this organization.
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-50 dark:divide-gray-800/80">
+          {yearHolidays.map((h) => {
+            const typeCfg = HOLIDAY_TYPE_CFG[h.type] ?? HOLIDAY_TYPE_CFG.regular_holiday;
+            const isPast = new Date(h.date) < new Date();
+            return (
+              <div
+                key={h.id}
+                className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30 ${isPast ? 'opacity-40' : ''}`}
+              >
+                <div className="w-12 shrink-0 text-center">
+                  <p className="text-[10px] font-semibold text-gray-400 uppercase">{format(parseISO(h.date), 'MMM')}</p>
+                  <p className="text-xl font-extrabold text-brand-blue leading-tight">{format(parseISO(h.date), 'd')}</p>
+                  <p className="text-[9px] text-gray-400">{format(parseISO(h.date), 'EEE')}</p>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-white leading-tight">{h.name}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{h.isNationwide ? 'Nationwide' : 'Company-specific'}</p>
+                </div>
+                <span className={`text-[10px] font-semibold px-2 py-1 rounded-lg ${typeCfg.bg} ${typeCfg.color} shrink-0 hidden sm:block`}>
+                  {typeCfg.label}
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 dark:text-white leading-tight">{h.name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{h.description}</p>
-              </div>
-              <span className={`text-[10px] font-semibold px-2 py-1 rounded-lg ${typeCfg.bg} ${typeCfg.color} shrink-0 hidden sm:block`}>
-                {typeCfg.label}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

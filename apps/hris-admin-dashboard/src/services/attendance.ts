@@ -371,6 +371,16 @@ export async function toggleScheduleActive(id: string, isActive: boolean): Promi
   if (error) throw error;
 }
 
+// A real hard delete — safe because the caller (ShiftsSettingsTab) only
+// enables this when the shift has zero current assignments. `employee_schedules`
+// has `schedule_id ... ON DELETE CASCADE`, so deleting a shift that still had
+// assignments would silently wipe their assignment history, not just
+// unassign them — that's why this isn't exposed for in-use shifts.
+export async function deleteSchedule(id: string): Promise<void> {
+  const { error } = await supabase!.from('schedules').delete().eq('id', id);
+  if (error) throw error;
+}
+
 // ── Schedule Assignments ───────────────────────────────────────────────────────
 
 export async function getScheduleAssignments(): Promise<ScheduleAssignmentEntry[]> {
@@ -416,6 +426,43 @@ export async function updateScheduleAssignments(
   }));
   const { error } = await supabase!.from('employee_schedules').insert(rows);
   if (error) throw error;
+}
+
+// ── Holidays ─────────────────────────────────────────────────────────────────
+// Real `holidays` table only — the mock JSON this replaced only had 2023
+// dates and was never wired to anything. See FRONTEND_IMPLEMENTATION.md
+// Phase F7: shared-utils' PH_HOLIDAYS_2026 is also missing (only has
+// 2024/2025), so callers should expect this to be empty until real 2026
+// dates are seeded — an honest empty state, not a bug.
+
+export interface HolidayEntry {
+  id: string;
+  name: string;
+  date: string; // YYYY-MM-DD
+  type: 'regular_holiday' | 'special_non_working' | 'special_working' | 'company';
+  isNationwide: boolean;
+}
+
+export async function getHolidays(year: number): Promise<HolidayEntry[]> {
+  if (!isSupabaseConfigured || !supabase) return [];
+
+  const orgId = await getAuthOrgId();
+  const { data, error } = await supabase
+    .from('holidays')
+    .select('id, name, date, type, is_nationwide, organization_id')
+    .or(`organization_id.eq.${orgId},organization_id.is.null`)
+    .gte('date', `${year}-01-01`)
+    .lte('date', `${year}-12-31`)
+    .order('date');
+  if (error) throw error;
+
+  return (data ?? []).map((h) => ({
+    id: h.id,
+    name: h.name,
+    date: h.date,
+    type: h.type as HolidayEntry['type'],
+    isNationwide: h.is_nationwide,
+  }));
 }
 
 // ── Local helper ───────────────────────────────────────────────────────────────

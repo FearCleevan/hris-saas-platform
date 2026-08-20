@@ -211,6 +211,109 @@ export async function rejectLeaveRequest(id: string, remarks?: string): Promise<
   if (error) throw error;
 }
 
+export interface ApplyLeavePayload {
+  employeeId:  string;
+  leaveTypeId: string;
+  startDate:   string; // YYYY-MM-DD
+  endDate:     string;
+  totalDays:   number;
+  reason:      string;
+}
+
+// Submits a new request AND bumps leave_balances.pending_days so the
+// balance ledger reflects it immediately — mirrors what
+// approve_leave_request does on the other side of the lifecycle (see
+// backend/supabase/migrations/20260820000022_leave_approval_rpcs.sql).
+// Not wrapped in a DB RPC like approve/reject: a single admin filing one
+// request has no concurrent-race risk the way two approvers double-clicking
+// the same request would.
+export async function applyLeave(payload: ApplyLeavePayload): Promise<void> {
+  const orgId = await getAuthOrgId();
+  const year = new Date(payload.startDate).getFullYear();
+
+  const { error: insertError } = await supabase!
+    .from('leave_requests')
+    .insert({
+      employee_id:     payload.employeeId,
+      organization_id: orgId,
+      leave_type_id:   payload.leaveTypeId,
+      start_date:      payload.startDate,
+      end_date:        payload.endDate,
+      total_days:      payload.totalDays,
+      reason:          payload.reason,
+      status:          'pending',
+    });
+  if (insertError) throw insertError;
+
+  const { data: existing, error: balanceFetchError } = await supabase!
+    .from('leave_balances')
+    .select('id, pending_days')
+    .eq('employee_id', payload.employeeId)
+    .eq('leave_type_id', payload.leaveTypeId)
+    .eq('year', year)
+    .maybeSingle();
+  if (balanceFetchError) throw balanceFetchError;
+
+  if (existing) {
+    const { error } = await supabase!
+      .from('leave_balances')
+      .update({ pending_days: Number(existing.pending_days) + payload.totalDays })
+      .eq('id', existing.id);
+    if (error) throw error;
+  } else {
+    const { error } = await supabase!
+      .from('leave_balances')
+      .insert({
+        employee_id:     payload.employeeId,
+        organization_id: orgId,
+        leave_type_id:   payload.leaveTypeId,
+        year,
+        pending_days:    payload.totalDays,
+      });
+    if (error) throw error;
+  }
+}
+
+// Only allowed while the request is still 'pending' — once approved/rejected
+// the balance ledger has already moved (or a decision has been recorded)
+// and withdrawing it here would silently corrupt that history.
+export async function cancelLeave(requestId: string): Promise<void> {
+  const { data: req, error: fetchError } = await supabase!
+    .from('leave_requests')
+    .select('id, status, employee_id, leave_type_id, start_date, total_days')
+    .eq('id', requestId)
+    .single();
+  if (fetchError) throw fetchError;
+  if (req.status !== 'pending') {
+    throw new Error('Only pending requests can be cancelled');
+  }
+
+  const { error: updateError } = await supabase!
+    .from('leave_requests')
+    .update({ status: 'cancelled' })
+    .eq('id', requestId);
+  if (updateError) throw updateError;
+
+  const year = new Date(req.start_date as string).getFullYear();
+  const { data: bal, error: balanceFetchError } = await supabase!
+    .from('leave_balances')
+    .select('id, pending_days')
+    .eq('employee_id', req.employee_id as string)
+    .eq('leave_type_id', req.leave_type_id as string)
+    .eq('year', year)
+    .maybeSingle();
+  if (balanceFetchError) throw balanceFetchError;
+
+  if (bal) {
+    const newPending = Math.max(0, Number(bal.pending_days) - Number(req.total_days));
+    const { error } = await supabase!
+      .from('leave_balances')
+      .update({ pending_days: newPending })
+      .eq('id', bal.id);
+    if (error) throw error;
+  }
+}
+
 // ── Leave Balances ─────────────────────────────────────────────────────────────
 
 export async function getLeaveBalances(): Promise<LeaveBalanceRow[]> {
