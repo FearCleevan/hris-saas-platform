@@ -57,10 +57,39 @@ export const PH_HOLIDAYS_2025: PHHoliday[] = [
   { date: '2025-12-31', name: "New Year's Eve", type: 'special_non_working' },
 ];
 
+// 2026: Eid al-Fitr and Eid al-Adha deliberately omitted — moon-sighting
+// dependent, only confirmed via a specific Presidential Proclamation closer
+// to the date. Do not guess these; add them once officially confirmed.
+export const PH_HOLIDAYS_2026: PHHoliday[] = [
+  // Regular Holidays
+  { date: '2026-01-01', name: "New Year's Day", type: 'regular' },
+  { date: '2026-04-09', name: 'Araw ng Kagitingan (Day of Valor)', type: 'regular' },
+  { date: '2026-04-02', name: 'Maundy Thursday', type: 'regular' },
+  { date: '2026-04-03', name: 'Good Friday', type: 'regular' },
+  { date: '2026-05-01', name: "Labor Day", type: 'regular' },
+  { date: '2026-06-12', name: 'Independence Day', type: 'regular' },
+  { date: '2026-08-31', name: 'National Heroes Day', type: 'regular' },
+  { date: '2026-11-30', name: "Bonifacio Day", type: 'regular' },
+  { date: '2026-12-25', name: 'Christmas Day', type: 'regular' },
+  { date: '2026-12-30', name: 'Rizal Day', type: 'regular' },
+
+  // Special Non-Working Holidays
+  { date: '2026-02-17', name: 'Chinese New Year', type: 'special_non_working' },
+  { date: '2026-02-25', name: 'EDSA People Power Anniversary', type: 'special_non_working' },
+  { date: '2026-04-04', name: 'Black Saturday', type: 'special_non_working' },
+  { date: '2026-08-21', name: 'Ninoy Aquino Day', type: 'special_non_working' },
+  { date: '2026-11-01', name: "All Saints' Day", type: 'special_non_working' },
+  { date: '2026-11-02', name: "All Souls' Day (Additional Special Day)", type: 'special_non_working' },
+  { date: '2026-12-08', name: "Feast of the Immaculate Conception", type: 'special_non_working' },
+  { date: '2026-12-24', name: 'Christmas Eve', type: 'special_non_working' },
+  { date: '2026-12-31', name: "New Year's Eve", type: 'special_non_working' },
+];
+
 export function getHolidaysForYear(year: number): PHHoliday[] {
   switch (year) {
     case 2024: return PH_HOLIDAYS_2024;
     case 2025: return PH_HOLIDAYS_2025;
+    case 2026: return PH_HOLIDAYS_2026;
     default: return [];
   }
 }
