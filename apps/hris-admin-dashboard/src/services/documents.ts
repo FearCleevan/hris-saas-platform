@@ -69,7 +69,12 @@ async function uploadSingleDocument(
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin';
   const fileName = `${docKey}-${Date.now()}.${ext}`;
-  const filePath = `documents/${orgId}/${employeeId}/${fileName}`;
+  // No leading "documents/" — the bucket (selected via .from('documents') below)
+  // already provides that; RLS policies require (storage.foldername(name))[1]
+  // to be the org ID (see 20250501000019_storage.sql:53-74). Prepending the
+  // bucket name here shifted every folder index by one and made every real
+  // upload/read fail RLS silently until this was found and fixed.
+  const filePath = `${orgId}/${employeeId}/${fileName}`;
 
   const { error: storageErr } = await supabase.storage
     .from('documents')
@@ -207,7 +212,8 @@ export async function uploadDocument(payload: UploadDocumentPayload): Promise<vo
   const ext = payload.file.name.split('.').pop()?.toLowerCase() ?? 'bin';
   const scope = payload.employeeId ?? 'company-wide';
   const fileName = `${payload.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-${Date.now()}.${ext}`;
-  const filePath = `documents/${orgId}/${scope}/${fileName}`;
+  // Same fix as uploadSingleDocument above — no leading "documents/" (see its comment).
+  const filePath = `${orgId}/${scope}/${fileName}`;
 
   const { error: storageErr } = await supabase.storage
     .from('documents')
