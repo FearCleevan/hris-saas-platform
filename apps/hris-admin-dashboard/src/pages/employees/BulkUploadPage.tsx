@@ -103,11 +103,20 @@ function parseCSV(text: string): ParsedRow[] {
   });
 }
 
+type RowResult = { status: 'success' | 'failed'; error?: string };
+
 export default function BulkUploadPage() {
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [file, setFile] = useState<File | null>(null);
   const [rows, setRows] = useState<ParsedRow[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  // Real per-row outcome from the actual upload attempt — distinct from
+  // `rows[].valid`/`errors`, which is only client-side validation done before
+  // upload even starts. Without this, a server-side failure (e.g. an RLS
+  // rejection) was silently discarded (`catch { failed++; }`, never logged)
+  // and the toast told the user to "check console" though nothing was ever
+  // written there.
+  const [results, setResults] = useState<Record<number, RowResult>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -141,20 +150,27 @@ export default function BulkUploadPage() {
       return;
     }
     setStatus('uploading');
+    setResults({});
     if (isSupabaseConfigured) {
       let succeeded = 0;
       let failed = 0;
+      const newResults: Record<number, RowResult> = {};
       for (const row of validRows) {
         try {
           await addEmployee(row.payload);
           succeeded++;
-        } catch {
+          newResults[row.row] = { status: 'success' };
+        } catch (err) {
           failed++;
+          const message = (err as Error)?.message || 'Unknown error';
+          console.error(`Bulk upload — row ${row.row} (${row.name}) failed:`, err);
+          newResults[row.row] = { status: 'failed', error: message };
         }
       }
+      setResults(newResults);
       setStatus('done');
       if (failed > 0) {
-        toast.warning(`${succeeded} added, ${failed} failed. Check console for details.`);
+        toast.warning(`${succeeded} added, ${failed} failed — see the row-by-row results below.`);
       } else {
         toast.success(`${succeeded} employee${succeeded !== 1 ? 's' : ''} added successfully!`);
       }
@@ -169,6 +185,7 @@ export default function BulkUploadPage() {
     setStatus('idle');
     setFile(null);
     setRows([]);
+    setResults({});
   };
 
   const validCount = rows.filter((r) => r.valid).length;
@@ -238,16 +255,33 @@ export default function BulkUploadPage() {
                 <p className="text-xs text-gray-400 mt-1">CSV files only · Max 500 employees per batch</p>
               </motion.div>
             ) : status === 'done' ? (
-              <motion.div
-                key="done"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center py-10 text-center"
-              >
-                <CheckCircle className="w-12 h-12 text-green-500 mb-3" />
-                <p className="text-sm font-semibold text-gray-800 dark:text-white">{validCount} employees added successfully!</p>
-                <Button variant="outline" size="sm" onClick={reset} className="mt-4">Upload another file</Button>
-              </motion.div>
+              (() => {
+                const failedCount = Object.values(results).filter((r) => r.status === 'failed').length;
+                const succeededCount = Object.values(results).filter((r) => r.status === 'success').length;
+                return (
+                  <motion.div
+                    key="done"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center py-10 text-center"
+                  >
+                    {failedCount > 0 ? (
+                      <AlertCircle className="w-12 h-12 text-amber-500 mb-3" />
+                    ) : (
+                      <CheckCircle className="w-12 h-12 text-green-500 mb-3" />
+                    )}
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                      {failedCount > 0
+                        ? `${succeededCount} added, ${failedCount} failed`
+                        : `${succeededCount || validCount} employees added successfully!`}
+                    </p>
+                    {failedCount > 0 && (
+                      <p className="text-xs text-gray-400 mt-1">See the row-by-row results below for the reason each row failed.</p>
+                    )}
+                    <Button variant="outline" size="sm" onClick={reset} className="mt-4">Upload another file</Button>
+                  </motion.div>
+                );
+              })()
             ) : (
               <motion.div key="file-info" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <FileSpreadsheet className="w-8 h-8 text-brand-blue shrink-0" />
@@ -263,18 +297,31 @@ export default function BulkUploadPage() {
           </AnimatePresence>
         </div>
 
-        {/* Step 3: Preview & confirm */}
-        {(status === 'preview' || status === 'uploading') && rows.length > 0 && (
+        {/* Step 3: Preview & confirm (and, after upload, real per-row results) */}
+        {(status === 'preview' || status === 'uploading' || (status === 'done' && Object.keys(results).length > 0)) && rows.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5"
           >
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-gray-800 dark:text-white">Step 3 — Review &amp; confirm</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                {status === 'done' ? 'Upload results' : 'Step 3 — Review & confirm'}
+              </p>
               <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1 text-green-600"><CheckCircle className="w-3.5 h-3.5" />{validCount} valid</span>
-                {errorCount > 0 && <span className="flex items-center gap-1 text-red-500"><AlertCircle className="w-3.5 h-3.5" />{errorCount} errors</span>}
+                {status === 'done' ? (
+                  <>
+                    <span className="flex items-center gap-1 text-green-600"><CheckCircle className="w-3.5 h-3.5" />{Object.values(results).filter((r) => r.status === 'success').length} added</span>
+                    {Object.values(results).some((r) => r.status === 'failed') && (
+                      <span className="flex items-center gap-1 text-red-500"><AlertCircle className="w-3.5 h-3.5" />{Object.values(results).filter((r) => r.status === 'failed').length} failed</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="flex items-center gap-1 text-green-600"><CheckCircle className="w-3.5 h-3.5" />{validCount} valid</span>
+                    {errorCount > 0 && <span className="flex items-center gap-1 text-red-500"><AlertCircle className="w-3.5 h-3.5" />{errorCount} errors</span>}
+                  </>
+                )}
               </div>
             </div>
 
@@ -290,45 +337,60 @@ export default function BulkUploadPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.row} className="border-t border-gray-100 dark:border-gray-800">
-                      <td className="p-2.5 text-gray-400">{r.row}</td>
-                      <td className="p-2.5 font-medium text-gray-800 dark:text-gray-200">{r.name}</td>
-                      <td className="p-2.5 text-gray-500 hidden sm:table-cell">{r.position}</td>
-                      <td className="p-2.5 text-gray-500 hidden sm:table-cell">{r.department}</td>
-                      <td className="p-2.5">
-                        {r.valid ? (
-                          <span className="text-green-600 flex items-center gap-1"><CheckCircle className="w-3 h-3" />OK</span>
-                        ) : (
-                          <span className="text-red-500 flex items-center gap-1" title={r.errors.join(', ')}><AlertCircle className="w-3 h-3" />Error</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {rows.map((r) => {
+                    const result = results[r.row];
+                    return (
+                      <tr key={r.row} className="border-t border-gray-100 dark:border-gray-800">
+                        <td className="p-2.5 text-gray-400">{r.row}</td>
+                        <td className="p-2.5 font-medium text-gray-800 dark:text-gray-200">{r.name}</td>
+                        <td className="p-2.5 text-gray-500 hidden sm:table-cell">{r.position}</td>
+                        <td className="p-2.5 text-gray-500 hidden sm:table-cell">{r.department}</td>
+                        <td className="p-2.5">
+                          {result ? (
+                            result.status === 'success' ? (
+                              <span className="text-green-600 flex items-center gap-1"><CheckCircle className="w-3 h-3" />Added</span>
+                            ) : (
+                              <span className="text-red-500 flex items-center gap-1" title={result.error}><AlertCircle className="w-3 h-3" />{result.error ?? 'Failed'}</span>
+                            )
+                          ) : r.valid ? (
+                            <span className="text-green-600 flex items-center gap-1"><CheckCircle className="w-3 h-3" />OK</span>
+                          ) : (
+                            <span className="text-red-500 flex items-center gap-1" title={r.errors.join(', ')}><AlertCircle className="w-3 h-3" />Error</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            {errorCount > 0 && (
+            {errorCount > 0 && status !== 'done' && (
               <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
                 Rows with errors will be skipped. Fix them in your CSV and re-upload, or proceed to import only valid rows.
               </p>
             )}
 
             <div className="flex items-center justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={reset}>Cancel</Button>
-              <Button
-                size="sm"
-                onClick={handleUpload}
-                disabled={status === 'uploading' || validCount === 0}
-                className="flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white"
-              >
-                {status === 'uploading' ? (
-                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Uploading…</>
-                ) : (
-                  <><Upload className="w-4 h-4" />Import {validCount} Employee{validCount !== 1 ? 's' : ''}</>
-                )}
-              </Button>
+              {status === 'done' ? (
+                <Button variant="outline" size="sm" onClick={reset}>Upload another file</Button>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" onClick={reset}>Cancel</Button>
+                  <Button
+                    size="sm"
+                    onClick={handleUpload}
+                    disabled={status === 'uploading' || validCount === 0}
+                    className="flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white"
+                  >
+                    {status === 'uploading' ? (
+                      <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Uploading…</>
+                    ) : (
+                      <><Upload className="w-4 h-4" />Import {validCount} Employee{validCount !== 1 ? 's' : ''}</>
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         )}

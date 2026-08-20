@@ -114,6 +114,31 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
   if (empErr) throw empErr;
   const employeeId = employee.id;
 
+  // Steps 2-10 are not wrapped in a DB transaction (this codebase doesn't use
+  // RPCs for multi-table writes elsewhere either). Instead, any failure here
+  // deletes the just-created employees row as a compensating rollback, so a
+  // failed create never leaves a permanent "ghost" employee (blank name/dept/
+  // salary) visible in the list with no way to fix or remove it. Department/
+  // position/employment-type auto-created below are org-level catalog data,
+  // not employee-scoped, so they're deliberately NOT rolled back — they're
+  // fine to persist and reuse even if this particular employee create fails.
+  try {
+    await addEmployeeDetails(employeeId, orgId, payload);
+  } catch (err) {
+    await supabase.from('employees').delete().eq('id', employeeId);
+    throw err;
+  }
+
+  return employeeId;
+}
+
+async function addEmployeeDetails(
+  employeeId: string,
+  orgId: string,
+  payload: AddEmployeePayload,
+): Promise<void> {
+  if (!supabase) return;
+
   // 2. Department — look up, auto-create if missing (code is NOT NULL in schema)
   const { data: dept } = await supabase
     .from('departments')
@@ -283,6 +308,4 @@ export async function addEmployee(payload: AddEmployeePayload): Promise<string> 
   if (payload.uploads && Object.values(payload.uploads).some(Boolean)) {
     await uploadEmployeeDocuments(employeeId, payload.uploads);
   }
-
-  return employeeId;
 }
