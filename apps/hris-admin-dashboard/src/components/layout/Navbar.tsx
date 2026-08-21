@@ -168,7 +168,7 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => { logout(); navigate('/login'); }}
+              onClick={logout}
               className="text-brand-red focus:text-brand-red focus:bg-red-50 dark:focus:bg-red-950/20"
             >
               <LogOut className="w-4 h-4" />

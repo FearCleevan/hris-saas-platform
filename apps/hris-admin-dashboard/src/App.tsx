@@ -251,10 +251,13 @@ function SupabaseSessionSync() {
 
     syncSession();
 
-    // Keep the store in sync with Supabase auth events (token refresh, sign-out)
+    // Keep the store in sync with Supabase auth events (token refresh, sign-out).
+    // Must call clearSession(), not logout() — logout() itself calls
+    // supabase.auth.signOut(), which is what fires this SIGNED_OUT event in
+    // the first place; calling logout() here would recurse indefinitely.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        useAuthStore.getState().logout();
+        useAuthStore.getState().clearSession();
       }
     });
 
