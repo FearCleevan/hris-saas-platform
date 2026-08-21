@@ -78,6 +78,7 @@ function LeaveCodeBadge({ code }: { code: string }) {
 function NewLeaveRequestModal({ onClose }: { onClose: () => void }) {
   const { data: employees = [] } = useEmployees();
   const { data: leaveTypes = [] } = useLeaveTypes();
+  const { data: balances = [] } = useLeaveBalances();
   const apply = useApplyLeave();
 
   const [employeeId, setEmployeeId] = useState('');
@@ -90,7 +91,23 @@ function NewLeaveRequestModal({ onClose }: { onClose: () => void }) {
     ? Math.max(1, differenceInCalendarDays(parseISO(endDate), parseISO(startDate)) + 1)
     : 0;
 
-  const canSubmit = employeeId && leaveTypeId && startDate && endDate && reason.trim() && totalDays > 0;
+  // Informational UX guard, not a security boundary — useLeaveBalances()
+  // only aggregates the current calendar year and only tracks VL/SL/SIL by
+  // code, so a mismatched year or an unmapped leave type just means "can't
+  // verify," and the check is skipped rather than incorrectly blocking.
+  const remainingForType = (() => {
+    const type = leaveTypes.find((t) => t.id === leaveTypeId);
+    const bal  = balances.find((b) => b.employeeId === employeeId);
+    if (!type || !bal || !startDate || parseISO(startDate).getFullYear() !== bal.year) return null;
+    const code = type.code?.toUpperCase();
+    if (code === 'VL')  return bal.vl.remaining;
+    if (code === 'SL')  return bal.sl.remaining;
+    if (code === 'SIL') return bal.sil.remaining;
+    return null;
+  })();
+  const exceedsBalance = remainingForType !== null && totalDays > remainingForType;
+
+  const canSubmit = employeeId && leaveTypeId && startDate && endDate && reason.trim() && totalDays > 0 && !exceedsBalance;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -170,7 +187,10 @@ function NewLeaveRequestModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
           {totalDays > 0 && (
-            <p className="text-[11px] text-gray-400 -mt-1">{totalDays} calendar day{totalDays !== 1 ? 's' : ''}</p>
+            <p className={`text-[11px] -mt-1 ${exceedsBalance ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+              {totalDays} calendar day{totalDays !== 1 ? 's' : ''}
+              {exceedsBalance && ` — exceeds remaining balance (${remainingForType} day${remainingForType !== 1 ? 's' : ''} left)`}
+            </p>
           )}
 
           <div>

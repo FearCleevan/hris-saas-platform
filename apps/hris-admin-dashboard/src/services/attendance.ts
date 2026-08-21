@@ -165,12 +165,7 @@ function normalizeOT(row: any): OvertimeRequestEntry {
   };
 }
 
-const DEFAULT_SHIFT_COLORS = [
-  '#0038a8', '#1d4ed8', '#7c3aed', '#6366f1',
-  '#0891b2', '#059669', '#ca8a04', '#f97316',
-];
-
-function normalizeSchedule(row: any, index = 0): ScheduleEntry {
+function normalizeSchedule(row: any): ScheduleEntry {
   return {
     id:                row.id,
     name:              row.name,
@@ -183,9 +178,9 @@ function normalizeSchedule(row: any, index = 0): ScheduleEntry {
     isNightShift:      row.is_night_shift,
     isFlexible:        row.is_flexible,
     isActive:          row.is_active,
-    color:             DEFAULT_SHIFT_COLORS[index % DEFAULT_SHIFT_COLORS.length],
-    departments:       [],
-    workDays:          ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    color:             row.color,
+    departments:       row.departments ?? [],
+    workDays:          row.work_days ?? [],
   };
 }
 
@@ -317,50 +312,38 @@ export async function createSchedule(input: CreateScheduleInput): Promise<Schedu
       is_night_shift:       input.isNightShift,
       is_flexible:          input.isFlexible,
       is_active:            true,
+      color:                input.color,
+      departments:          input.departments,
+      work_days:            input.workDays,
     })
     .select()
     .single();
   if (error) throw error;
-  const entry = normalizeSchedule(data);
-  entry.color       = input.color;
-  entry.departments = input.departments;
-  entry.workDays    = input.workDays;
-  return entry;
+  return normalizeSchedule(data);
 }
 
 export async function updateSchedule(id: string, input: UpdateScheduleInput): Promise<ScheduleEntry> {
-  const { error } = await supabase!
+  const { data, error } = await supabase!
     .from('schedules')
     .update({
-      name:               input.name,
-      code:               input.code,
-      shift_start:        input.startTime,
-      shift_end:          input.endTime,
-      break_minutes:      input.breakMinutes,
+      name:                 input.name,
+      code:                 input.code,
+      shift_start:          input.startTime,
+      shift_end:            input.endTime,
+      break_minutes:        input.breakMinutes,
       grace_period_minutes: input.gracePeriodMinutes,
-      work_hours:         calcWorkHoursFromTimes(input.startTime, input.endTime, input.breakMinutes),
-      is_night_shift:     input.isNightShift,
-      is_flexible:        input.isFlexible,
+      work_hours:           calcWorkHoursFromTimes(input.startTime, input.endTime, input.breakMinutes),
+      is_night_shift:       input.isNightShift,
+      is_flexible:          input.isFlexible,
+      color:                input.color,
+      departments:          input.departments,
+      work_days:            input.workDays,
     })
-    .eq('id', id);
+    .eq('id', id)
+    .select()
+    .single();
   if (error) throw error;
-  const entry: ScheduleEntry = {
-    id,
-    name:              input.name,
-    code:              input.code,
-    startTime:         input.startTime,
-    endTime:           input.endTime,
-    breakMinutes:      input.breakMinutes,
-    workHours:         calcWorkHoursFromTimes(input.startTime, input.endTime, input.breakMinutes),
-    gracePeriodMinutes: input.gracePeriodMinutes,
-    isNightShift:      input.isNightShift,
-    isFlexible:        input.isFlexible,
-    isActive:          true,
-    color:             input.color,
-    departments:       input.departments,
-    workDays:          input.workDays,
-  };
-  return entry;
+  return normalizeSchedule(data);
 }
 
 export async function toggleScheduleActive(id: string, isActive: boolean): Promise<void> {
@@ -405,27 +388,60 @@ export async function updateScheduleAssignments(
 ): Promise<void> {
   const orgId = await getAuthOrgId();
   const today = new Date().toISOString().slice(0, 10);
+  const incoming = new Set(employeeIds);
 
-  // End current assignments for this schedule
-  await supabase!
+  // End assignments for anyone being *removed* from this schedule (currently
+  // on it, but not in the new list) — safe to do up front since they aren't
+  // being re-inserted anywhere.
+  const { data: currentOnSchedule, error: currentErr } = await supabase!
     .from('employee_schedules')
-    .update({ is_current: false, end_date: today })
+    .select('employee_id')
     .eq('schedule_id', scheduleId)
     .eq('organization_id', orgId)
     .eq('is_current', true);
+  if (currentErr) throw currentErr;
 
-  if (employeeIds.length === 0) return;
+  const removedIds = (currentOnSchedule ?? [])
+    .map((r) => r.employee_id as string)
+    .filter((id) => !incoming.has(id));
 
-  // Upsert new assignments
-  const rows = employeeIds.map((empId) => ({
-    employee_id:    empId,
-    organization_id: orgId,
-    schedule_id:    scheduleId,
-    effective_date: today,
-    is_current:     true,
-  }));
-  const { error } = await supabase!.from('employee_schedules').insert(rows);
-  if (error) throw error;
+  if (removedIds.length > 0) {
+    const { error } = await supabase!
+      .from('employee_schedules')
+      .update({ is_current: false, end_date: today })
+      .in('employee_id', removedIds)
+      .eq('schedule_id', scheduleId)
+      .eq('organization_id', orgId)
+      .eq('is_current', true);
+    if (error) throw error;
+  }
+
+  // For each incoming employee, end their current assignment on *any*
+  // schedule (not just this one — fixes double-booking when moving someone
+  // from a different schedule) and insert their new row right after, one
+  // employee at a time. This keeps the "ended but not yet re-inserted"
+  // window scoped to a single employee instead of the whole batch if a
+  // later insert fails.
+  for (const empId of employeeIds) {
+    const { error: endErr } = await supabase!
+      .from('employee_schedules')
+      .update({ is_current: false, end_date: today })
+      .eq('employee_id', empId)
+      .eq('organization_id', orgId)
+      .eq('is_current', true);
+    if (endErr) throw endErr;
+
+    const { error: insErr } = await supabase!
+      .from('employee_schedules')
+      .insert({
+        employee_id:     empId,
+        organization_id: orgId,
+        schedule_id:     scheduleId,
+        effective_date:  today,
+        is_current:      true,
+      });
+    if (insErr) throw insErr;
+  }
 }
 
 // ── Holidays ─────────────────────────────────────────────────────────────────

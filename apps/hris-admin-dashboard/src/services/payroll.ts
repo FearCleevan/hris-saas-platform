@@ -38,6 +38,10 @@ export interface PayrollRunRow {
   payDate: string;
   frequency: string;
   status: PayrollRunStatus;
+  // True when the DB's real status is 'computed' — mapped to 'draft' above
+  // for workflow-stage purposes (no dedicated UI stage/button for it yet),
+  // but the badge should say "Computed" rather than mislabel it "Draft".
+  isComputed: boolean;
   totalEmployees: number;
   totalGross: number;
   totalDeductions: number;
@@ -112,6 +116,7 @@ export async function getPayrollRuns(): Promise<PayrollRunRow[]> {
       payDate: r.payDate,
       frequency: r.type,
       status: r.status as PayrollRunStatus,
+      isComputed: (r.status as string) === 'computed',
       totalEmployees: r.employeeCount,
       totalGross: r.totalGross,
       totalDeductions: r.totalDeductions,
@@ -144,6 +149,7 @@ export async function getPayrollRuns(): Promise<PayrollRunRow[]> {
     payDate: r.payroll_periods.pay_date,
     frequency: r.payroll_periods.frequency,
     status: DB_TO_UI_RUN_STATUS[r.status] ?? 'draft',
+    isComputed: r.status === 'computed',
     totalEmployees: r.total_employees,
     totalGross: num(r.total_gross_pay),
     totalDeductions: num(r.total_deductions),

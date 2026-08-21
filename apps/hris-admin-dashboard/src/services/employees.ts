@@ -624,7 +624,16 @@ export async function bulkUpdateEmployees(
   const orgId = await getAuthOrgId();
   const tasks: Promise<void>[] = [];
 
-  if (patch.status) {
+  if (patch.status === 'terminated') {
+    // Reuse delete_employees_hard (the round-1 soft-delete RPC) instead of a plain
+    // status update — it already sets is_active/deactivated_at/deactivated_by
+    // together with status in one org-scoped, admin-gated call, keeping "terminated"
+    // consistent everywhere rather than leaving is_active=true here.
+    tasks.push((async () => {
+      const { error } = await supabase.rpc('delete_employees_hard', { p_ids: ids });
+      if (error) throw error;
+    })());
+  } else if (patch.status) {
     tasks.push((async () => {
       const { error } = await supabase
         .from('employees')

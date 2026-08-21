@@ -18,7 +18,12 @@ import {
 import { addEmployee } from '@/services/addEmployee';
 import mockEmployees from '@/data/mock/employees.json';
 
-const MOCK_STATS: EmployeeStats = {
+// Exported for KPICards.tsx and DashboardPage.tsx, which deliberately stay
+// mock-only like every other dashboard widget — see
+// CRUD_FIXES_FRONTEND_IMPLEMENTATION.md Phase F10. useEmployeeStats() below
+// is kept as a hybrid Supabase+mock hook for future real use elsewhere, but
+// as of F10 it has no callers of its own.
+export const MOCK_STATS: EmployeeStats = {
   total: mockEmployees.length,
   active: mockEmployees.filter((e) => e.status === 'active').length,
   onLeave: mockEmployees.filter((e) => e.status === 'on_leave').length,

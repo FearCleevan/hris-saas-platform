@@ -48,6 +48,18 @@ const DISPUTE_STATUS_CFG: Record<DisputeStatus, { label: string; color: string; 
 
 const WORKFLOW: PayrollRunStatus[] = ['draft', 'review', 'approved', 'released'];
 
+// 'computed' isn't its own workflow stage (it maps to 'draft' for the
+// stepper/advance logic), but it should still say "Computed" rather than
+// be mislabeled "Draft" — see services/payroll.ts's isComputed flag.
+const COMPUTED_STATUS_CFG = {
+  label: 'Computed',
+  color: 'text-purple-700 dark:text-purple-400',
+  bg: 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800',
+};
+function runStatusCfg(run: PayrollRunRow) {
+  return run.isComputed ? COMPUTED_STATUS_CFG : RUN_STATUS_CFG[run.status];
+}
+
 /* ─── Helpers ─── */
 function peso(n: number) {
   return `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -120,7 +132,7 @@ function RunsTab({
 
       <div className="flex flex-col gap-3">
         {[...runs].reverse().map((run, i) => {
-          const cfg = RUN_STATUS_CFG[run.status];
+          const cfg = runStatusCfg(run);
           const statusIdx = WORKFLOW.indexOf(run.status);
           const nextStatus = statusIdx < WORKFLOW.length - 1
             ? (WORKFLOW[statusIdx + 1] as Exclude<PayrollRunStatus, 'draft'>)
@@ -653,8 +665,8 @@ function ReportsTab({ runs, employees }: { runs: PayrollRunRow[]; employees: Emp
                         <span className="text-[9px] font-bold text-white whitespace-nowrap">{peso(run.totalGross)}</span>
                       </div>
                     </div>
-                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border shrink-0 ${RUN_STATUS_CFG[run.status].bg} ${RUN_STATUS_CFG[run.status].color}`}>
-                      {RUN_STATUS_CFG[run.status].label}
+                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border shrink-0 ${runStatusCfg(run).bg} ${runStatusCfg(run).color}`}>
+                      {runStatusCfg(run).label}
                     </span>
                   </div>
                 </div>
@@ -923,8 +935,9 @@ function DisputesTab({ employees, runs }: { employees: EmployeeRow[]; runs: Payr
                       {d.status === 'open' && (
                         <button
                           type="button"
+                          disabled={review.isPending}
                           onClick={() => handleReview(d.id)}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold transition-colors"
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold transition-colors disabled:opacity-50"
                         >
                           <AlertTriangle className="w-3 h-3" />Review
                         </button>
@@ -933,14 +946,14 @@ function DisputesTab({ employees, runs }: { employees: EmployeeRow[]; runs: Payr
                         <>
                           <button
                             type="button"
-                            onClick={() => setResolvingId({ id: d.id, action: 'resolve' })}
+                            onClick={() => { setResolvingId({ id: d.id, action: 'resolve' }); setResolutionText(''); }}
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold transition-colors"
                           >
                             <Check className="w-3 h-3" />Resolve
                           </button>
                           <button
                             type="button"
-                            onClick={() => setResolvingId({ id: d.id, action: 'reject' })}
+                            onClick={() => { setResolvingId({ id: d.id, action: 'reject' }); setResolutionText(''); }}
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-[10px] font-bold transition-colors"
                           >
                             <X className="w-3 h-3" />Reject
@@ -1000,8 +1013,8 @@ export default function PayrollPage() {
         <div className="flex items-center gap-2 flex-wrap">
           {latestRun && (
             <>
-              <div className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${RUN_STATUS_CFG[latestRun.status].bg} ${RUN_STATUS_CFG[latestRun.status].color}`}>
-                {RUN_STATUS_CFG[latestRun.status].label}
+              <div className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${runStatusCfg(latestRun).bg} ${runStatusCfg(latestRun).color}`}>
+                {runStatusCfg(latestRun).label}
               </div>
               <div className="px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-400">
                 {peso(latestRun.totalNetPay)} net

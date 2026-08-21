@@ -2,19 +2,24 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, UserCheck, CalendarOff, Clock, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
-import { useEmployeeStats } from '@/hooks/useEmployees';
+import { MOCK_STATS } from '@/hooks/useEmployees';
 
+// Deliberately mock-only, like every sibling dashboard widget (ActivityFeed,
+// AnnouncementBoard, DepartmentChart, etc.) — see
+// CRUD_FIXES_FRONTEND_IMPLEMENTATION.md Phase F10. Was previously the one
+// widget on this page hitting real Supabase data via useEmployeeStats(),
+// which could visibly disagree with the rest of the still-mock dashboard.
 export function KPICards() {
   const navigate = useNavigate();
-  const { data: stats, isLoading } = useEmployeeStats();
+  const stats = MOCK_STATS;
 
-  const presentToday = stats ? Math.round(stats.active * 0.94) : 0;
+  const presentToday = Math.round(stats.active * 0.94);
 
   const cards = [
     {
       title: 'Total Employees',
-      value: stats?.total ?? '—',
-      change: stats ? `+${stats.newThisMonth} this month` : '…',
+      value: stats.total,
+      change: `+${stats.newThisMonth} this month`,
       trend: 'up' as const,
       icon: Users,
       iconBg: 'bg-[#0038a8]/10',
@@ -23,10 +28,8 @@ export function KPICards() {
     },
     {
       title: 'Present Today',
-      value: stats ? presentToday : '—',
-      change: stats && stats.total
-        ? `${Math.round((presentToday / stats.total) * 100)}% attendance rate`
-        : '…',
+      value: presentToday,
+      change: `${Math.round((presentToday / stats.total) * 100)}% attendance rate`,
       trend: 'up' as const,
       icon: UserCheck,
       iconBg: 'bg-green-100 dark:bg-green-950/30',
@@ -35,7 +38,7 @@ export function KPICards() {
     },
     {
       title: 'On Leave Today',
-      value: stats?.onLeave ?? '—',
+      value: stats.onLeave,
       change: 'approved leaves',
       trend: 'neutral' as const,
       icon: CalendarOff,
@@ -55,7 +58,7 @@ export function KPICards() {
     },
     {
       title: 'Monthly Payroll',
-      value: stats ? formatCurrency(stats.totalMonthlySalary) : '—',
+      value: formatCurrency(stats.totalMonthlySalary),
       change: 'total basic salaries',
       trend: 'up' as const,
       icon: DollarSign,
@@ -64,24 +67,6 @@ export function KPICards() {
       link: '/payroll',
     },
   ];
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className={cn(
-            'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5 animate-pulse',
-            i === 4 && 'col-span-2 sm:col-span-1',
-          )}>
-            <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-700 mb-4" />
-            <div className="h-7 w-16 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
-            <div className="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800 mb-1.5" />
-            <div className="h-3 w-20 rounded bg-gray-100 dark:bg-gray-800" />
-          </div>
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">

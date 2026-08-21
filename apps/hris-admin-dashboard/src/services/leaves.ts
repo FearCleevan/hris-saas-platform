@@ -227,11 +227,17 @@ export interface ApplyLeavePayload {
 // Not wrapped in a DB RPC like approve/reject: a single admin filing one
 // request has no concurrent-race risk the way two approvers double-clicking
 // the same request would.
+//
+// Not atomic (two separate writes) — if the balance step fails after the
+// request insert succeeded, the just-inserted request is deleted as a
+// compensating rollback (same pattern as addEmployee.ts's ghost-row
+// rollback) so a thrown error never leaves a real, invisible-to-the-caller
+// 'pending' request behind that could get accidentally duplicated by retry.
 export async function applyLeave(payload: ApplyLeavePayload): Promise<void> {
   const orgId = await getAuthOrgId();
   const year = new Date(payload.startDate).getFullYear();
 
-  const { error: insertError } = await supabase!
+  const { data: inserted, error: insertError } = await supabase!
     .from('leave_requests')
     .insert({
       employee_id:     payload.employeeId,
@@ -242,35 +248,42 @@ export async function applyLeave(payload: ApplyLeavePayload): Promise<void> {
       total_days:      payload.totalDays,
       reason:          payload.reason,
       status:          'pending',
-    });
+    })
+    .select('id')
+    .single();
   if (insertError) throw insertError;
 
-  const { data: existing, error: balanceFetchError } = await supabase!
-    .from('leave_balances')
-    .select('id, pending_days')
-    .eq('employee_id', payload.employeeId)
-    .eq('leave_type_id', payload.leaveTypeId)
-    .eq('year', year)
-    .maybeSingle();
-  if (balanceFetchError) throw balanceFetchError;
+  try {
+    const { data: existing, error: balanceFetchError } = await supabase!
+      .from('leave_balances')
+      .select('id, pending_days')
+      .eq('employee_id', payload.employeeId)
+      .eq('leave_type_id', payload.leaveTypeId)
+      .eq('year', year)
+      .maybeSingle();
+    if (balanceFetchError) throw balanceFetchError;
 
-  if (existing) {
-    const { error } = await supabase!
-      .from('leave_balances')
-      .update({ pending_days: Number(existing.pending_days) + payload.totalDays })
-      .eq('id', existing.id);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase!
-      .from('leave_balances')
-      .insert({
-        employee_id:     payload.employeeId,
-        organization_id: orgId,
-        leave_type_id:   payload.leaveTypeId,
-        year,
-        pending_days:    payload.totalDays,
-      });
-    if (error) throw error;
+    if (existing) {
+      const { error } = await supabase!
+        .from('leave_balances')
+        .update({ pending_days: Number(existing.pending_days) + payload.totalDays })
+        .eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase!
+        .from('leave_balances')
+        .insert({
+          employee_id:     payload.employeeId,
+          organization_id: orgId,
+          leave_type_id:   payload.leaveTypeId,
+          year,
+          pending_days:    payload.totalDays,
+        });
+      if (error) throw error;
+    }
+  } catch (err) {
+    await supabase!.from('leave_requests').delete().eq('id', inserted.id);
+    throw err;
   }
 }
 

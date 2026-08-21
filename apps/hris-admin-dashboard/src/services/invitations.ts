@@ -178,43 +178,47 @@ export async function revokeInvite(inviteId: string): Promise<void> {
 }
 
 /**
- * Change a user's role within an organization.
- * Deletes the old user_role row and inserts the new one atomically.
+ * Change a user's role within the caller's organization, via the
+ * change_user_role RPC (org/admin checks and the delete+insert are
+ * done atomically server-side).
  */
 export async function changeUserRole(
   userId: string,
-  oldRoleSlug: InviteRole,
   newRoleSlug: InviteRole,
-  organizationId: string,
 ): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error('Supabase is not configured');
   }
 
-  const { data: roles, error: rolesError } = await supabase
-    .from('roles')
-    .select('id, slug')
-    .in('slug', [oldRoleSlug, newRoleSlug])
-    .is('organization_id', null);
+  const { error } = await supabase.rpc('change_user_role', {
+    p_user_id: userId,
+    p_new_role_slug: newRoleSlug,
+  });
+  if (error) throw error;
+}
 
-  if (rolesError) throw rolesError;
+/**
+ * Deactivate a team member via the deactivate_member RPC.
+ */
+export async function deactivateMember(userId: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase is not configured');
+  }
 
-  const oldRole = (roles ?? []).find((r: any) => r.slug === oldRoleSlug);
-  const newRole = (roles ?? []).find((r: any) => r.slug === newRoleSlug);
-  if (!oldRole || !newRole) throw new Error('Role not found');
+  const { error } = await supabase.rpc('deactivate_member', { p_user_id: userId });
+  if (error) throw error;
+}
 
-  const { error: deleteError } = await supabase
-    .from('user_roles')
-    .delete()
-    .match({ user_id: userId, role_id: oldRole.id, organization_id: organizationId });
+/**
+ * Reactivate a team member via the reactivate_member RPC.
+ */
+export async function reactivateMember(userId: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase is not configured');
+  }
 
-  if (deleteError) throw deleteError;
-
-  const { error: insertError } = await supabase
-    .from('user_roles')
-    .insert({ user_id: userId, role_id: newRole.id, organization_id: organizationId });
-
-  if (insertError) throw insertError;
+  const { error } = await supabase.rpc('reactivate_member', { p_user_id: userId });
+  if (error) throw error;
 }
 
 export { ROLE_NAMES, ROLE_COLORS };

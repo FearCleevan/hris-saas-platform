@@ -18,6 +18,8 @@ import {
   getTeamMembers as getTeamMembersReal,
   revokeInvite as revokeInviteReal,
   changeUserRole as changeUserRoleReal,
+  deactivateMember as deactivateMemberReal,
+  reactivateMember as reactivateMemberReal,
 } from '@/services/invitations';
 import employeesData from '@/data/mock/employees.json';
 import companyData from '@/data/mock/settings-company.json';
@@ -144,6 +146,9 @@ export default function SettingsPage() {
   const [inviteRole, setInviteRole] = useState<InviteRole>('hr_staff');
   const [inviteOrgId, setInviteOrgId] = useState(user?.tenantIds?.[0] ?? 't001');
   const [changingRoleFor, setChangingRoleFor] = useState<string | null>(null);
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [revokingIds, setRevokingIds] = useState<Set<string>>(new Set());
+  const [togglingStatusFor, setTogglingStatusFor] = useState<string | null>(null);
 
   // Orgs this super admin manages (for multi-org invite)
   const myOrgs = useMemo(
@@ -192,6 +197,7 @@ export default function SettingsPage() {
   };
 
   const handleSendInvite = async () => {
+    if (sendingInvite) return;
     const email = inviteEmail.trim().toLowerCase();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast.error('Please enter a valid email address');
@@ -204,6 +210,8 @@ export default function SettingsPage() {
 
     const roleInfo = INVITE_ROLES.find(r => r.value === inviteRole)!;
     const orgInfo  = myOrgs.find((o: any) => o.id === inviteOrgId) as any;
+
+    setSendingInvite(true);
 
     // Optimistic update
     const tempInvite: Invitation = {
@@ -221,55 +229,100 @@ export default function SettingsPage() {
     setInvitations(prev => [tempInvite, ...prev]);
     setInviteEmail('');
 
-    if (isSupabaseConfigured) {
-      try {
-        await sendInviteReal({ email, role: inviteRole, organizationId: inviteOrgId });
-        toast.success(`Invitation email sent to ${email}`);
-      } catch (err: any) {
-        // Roll back optimistic update on failure
-        setInvitations(prev => prev.filter(i => i.id !== tempInvite.id));
-        setInviteEmail(email);
-        toast.error(err?.message ?? 'Failed to send invitation');
+    try {
+      if (isSupabaseConfigured) {
+        try {
+          await sendInviteReal({ email, role: inviteRole, organizationId: inviteOrgId });
+          toast.success(`Invitation email sent to ${email}`);
+        } catch (err: any) {
+          // Roll back optimistic update on failure
+          setInvitations(prev => prev.filter(i => i.id !== tempInvite.id));
+          setInviteEmail(email);
+          toast.error(err?.message ?? 'Failed to send invitation');
+        }
+      } else {
+        toast.success(`Invitation sent to ${email} (demo mode — no email sent)`);
       }
-    } else {
-      toast.success(`Invitation sent to ${email} (demo mode — no email sent)`);
+    } finally {
+      setSendingInvite(false);
     }
   };
 
   const handleRevokeInvite = async (id: string) => {
+    if (revokingIds.has(id)) return;
+    setRevokingIds(prev => new Set(prev).add(id));
     setInvitations(prev => prev.filter(i => i.id !== id));
+    try {
+      if (isSupabaseConfigured) {
+        try {
+          await revokeInviteReal(id);
+          toast.success('Invitation revoked');
+        } catch (err: any) {
+          toast.error(err?.message ?? 'Failed to revoke invitation');
+          loadTeamData(); // re-sync
+        }
+      } else {
+        toast.success('Invitation revoked (demo mode)');
+      }
+    } finally {
+      setRevokingIds(prev => { const next = new Set(prev); next.delete(id); return next; });
+    }
+  };
+
+  const handleResendInvite = async (inv: Invitation) => {
     if (isSupabaseConfigured) {
+      // The invite-member edge function 409s on a still-pending invite for the same
+      // email+org, so "resend" has to revoke the old one before sending a new one.
       try {
-        await revokeInviteReal(id);
-        toast.success('Invitation revoked');
+        await revokeInviteReal(inv.id);
       } catch (err: any) {
-        toast.error(err?.message ?? 'Failed to revoke invitation');
+        toast.error(err?.message ?? 'Failed to resend invitation');
+        return;
+      }
+      try {
+        const result = await sendInviteReal({ email: inv.email, role: inv.role, organizationId: inv.organizationId });
+        setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, sentAt: new Date().toISOString(), expiresAt: result.expiresAt } : i));
+        toast.success(`Invitation resent to ${inv.email}`);
+      } catch (err: any) {
+        toast.error(err?.message ?? 'Old invite was revoked, but resending failed — invite this email again');
         loadTeamData(); // re-sync
       }
     } else {
-      toast.success('Invitation revoked (demo mode)');
+      toast.success(`Invitation resent to ${inv.email} (demo mode)`);
     }
   };
 
-  const handleResendInvite = async (email: string) => {
-    if (isSupabaseConfigured) {
-      try {
-        await sendInviteReal({ email, role: inviteRole, organizationId: inviteOrgId });
-        toast.success(`Invitation resent to ${email}`);
-      } catch (err: any) {
-        toast.error(err?.message ?? 'Failed to resend invitation');
-      }
-    } else {
-      toast.success(`Invitation resent to ${email} (demo mode)`);
-    }
-  };
-
-  const handleToggleMemberStatus = (userId: string) => {
-    setTeamMembers(prev =>
-      prev.map(m => m.userId === userId ? { ...m, isActive: !m.isActive } : m)
-    );
+  const handleToggleMemberStatus = async (userId: string) => {
+    if (togglingStatusFor === userId) return;
     const member = teamMembers.find(m => m.userId === userId);
-    toast.success(`${member?.name} ${member?.isActive ? 'deactivated' : 'reactivated'}`);
+    if (!member) return;
+    const wasActive = member.isActive;
+
+    setTogglingStatusFor(userId);
+    // Optimistic update
+    setTeamMembers(prev =>
+      prev.map(m => m.userId === userId ? { ...m, isActive: !wasActive } : m)
+    );
+
+    try {
+      if (isSupabaseConfigured) {
+        try {
+          if (wasActive) {
+            await deactivateMemberReal(userId);
+          } else {
+            await reactivateMemberReal(userId);
+          }
+          toast.success(`${member.name} ${wasActive ? 'deactivated' : 'reactivated'}`);
+        } catch (err: any) {
+          toast.error(err?.message ?? `Failed to ${wasActive ? 'deactivate' : 'reactivate'} member`);
+          loadTeamData(); // re-sync
+        }
+      } else {
+        toast.success(`${member.name} ${wasActive ? 'deactivated' : 'reactivated'} (demo mode)`);
+      }
+    } finally {
+      setTogglingStatusFor(null);
+    }
   };
 
   const handleChangeRole = async (userId: string, newRole: InviteRole) => {
@@ -286,7 +339,7 @@ export default function SettingsPage() {
 
     if (isSupabaseConfigured && member) {
       try {
-        await changeUserRoleReal(userId, member.role, newRole, inviteOrgId);
+        await changeUserRoleReal(userId, newRole);
         toast.success('Role updated successfully');
       } catch (err: any) {
         toast.error(err?.message ?? 'Failed to update role');
@@ -645,9 +698,10 @@ export default function SettingsPage() {
                     )}
                     <button
                       onClick={handleSendInvite}
-                      className="h-9 px-4 rounded-lg bg-brand-blue text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap hover:bg-[#0030a0] transition-colors"
+                      disabled={sendingInvite}
+                      className="h-9 px-4 rounded-lg bg-brand-blue text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap hover:bg-[#0030a0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Send className="w-3.5 h-3.5" />Send Invite
+                      <Send className="w-3.5 h-3.5" />{sendingInvite ? 'Sending…' : 'Send Invite'}
                     </button>
                   </div>
                   <p className="text-[10px] text-gray-400 mt-2">
@@ -690,11 +744,16 @@ export default function SettingsPage() {
                             {isSuperAdmin && (
                               <td className="px-4 py-2.5 text-center">
                                 <div className="flex items-center justify-center gap-3">
-                                  <button type="button" onClick={() => handleResendInvite(inv.email)} className="text-[10px] font-semibold text-brand-blue hover:underline flex items-center gap-0.5">
+                                  <button type="button" onClick={() => handleResendInvite(inv)} className="text-[10px] font-semibold text-brand-blue hover:underline flex items-center gap-0.5">
                                     <RefreshCw className="w-3 h-3" />Resend
                                   </button>
-                                  <button type="button" onClick={() => handleRevokeInvite(inv.id)} className="text-[10px] font-semibold text-red-500 hover:underline flex items-center gap-0.5">
-                                    <Trash2 className="w-3 h-3" />Revoke
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRevokeInvite(inv.id)}
+                                    disabled={revokingIds.has(inv.id)}
+                                    className="text-[10px] font-semibold text-red-500 hover:underline flex items-center gap-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+                                  >
+                                    <Trash2 className="w-3 h-3" />{revokingIds.has(inv.id) ? 'Revoking…' : 'Revoke'}
                                   </button>
                                 </div>
                               </td>
@@ -798,7 +857,8 @@ export default function SettingsPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleToggleMemberStatus(member.userId)}
-                                    className={`text-[10px] font-semibold hover:underline flex items-center gap-0.5 ${member.isActive ? 'text-red-500' : 'text-green-600'}`}
+                                    disabled={togglingStatusFor === member.userId}
+                                    className={`text-[10px] font-semibold hover:underline flex items-center gap-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline ${member.isActive ? 'text-red-500' : 'text-green-600'}`}
                                   >
                                     {member.isActive ? <><UserX className="w-3 h-3" />Deactivate</> : <><UserCheck className="w-3 h-3" />Reactivate</>}
                                   </button>

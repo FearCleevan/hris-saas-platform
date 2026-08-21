@@ -39,6 +39,20 @@ const STATUS_CFG: Record<DocumentMeta['status'], { label: string; color: string;
 
 const EXPIRING_OPTIONS = [7, 14, 30, 60, 90];
 
+// Must match the `documents` bucket's real config in
+// backend/supabase/migrations/20250501000019_storage.sql — a different
+// bucket (e.g. receipts=10MB) would have different limits, so don't reuse
+// this outside the Documents module.
+const DOCUMENTS_MAX_BYTES = 50 * 1024 * 1024;
+const DOCUMENTS_ALLOWED_MIME = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const DOCUMENTS_ALLOWED_LABEL = 'PDF, JPEG, PNG, DOC, DOCX';
+
 function bytesToLabel(n: number) {
   if (n <= 0) return '—';
   if (n < 1024) return `${n} B`;
@@ -146,6 +160,14 @@ export default function DocumentsPage() {
 
   const handleUpload = async () => {
     if (!uploadFile || !uploadTitle.trim()) return;
+    if (uploadFile.size > DOCUMENTS_MAX_BYTES) {
+      toast.error(`File is too large — max ${bytesToLabel(DOCUMENTS_MAX_BYTES)}`);
+      return;
+    }
+    if (!DOCUMENTS_ALLOWED_MIME.includes(uploadFile.type)) {
+      toast.error(`Unsupported file type — allowed: ${DOCUMENTS_ALLOWED_LABEL}`);
+      return;
+    }
     try {
       await upload.mutateAsync({
         employeeId: uploadEmployeeId || null,
@@ -395,10 +417,11 @@ export default function DocumentsPage() {
                     <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">File</label>
                     <input
                       type="file"
+                      accept={DOCUMENTS_ALLOWED_MIME.join(',')}
                       onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
                       className="w-full text-xs text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-blue/10 file:text-brand-blue hover:file:bg-brand-blue/20"
                     />
-                    <p className="text-[10px] text-gray-400 mt-1">Max 10MB — enforced by Supabase Storage bucket policy</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Max {bytesToLabel(DOCUMENTS_MAX_BYTES)} — {DOCUMENTS_ALLOWED_LABEL}</p>
                   </div>
                   <button
                     type="button"

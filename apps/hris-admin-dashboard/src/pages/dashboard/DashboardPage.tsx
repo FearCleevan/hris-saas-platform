@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useEmployeeStats } from '@/hooks/useEmployees';
+import { MOCK_STATS } from '@/hooks/useEmployees';
 import { KPICards } from './components/KPICards';
 import { AttendanceHeatmap } from './components/AttendanceHeatmap';
 import { DepartmentChart } from './components/DepartmentChart';
@@ -20,7 +20,7 @@ const greetingByHour = () => {
 
 export default function DashboardPage() {
   const { user, tenant } = useAuth();
-  const { data: stats } = useEmployeeStats();
+  const stats = MOCK_STATS;
 
   return (
     <motion.div

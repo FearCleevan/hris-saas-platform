@@ -326,12 +326,41 @@ export async function updateClearanceItem(input: UpdateClearanceInput): Promise<
     const allCleared = items.every((i) => i.status === 'cleared');
     const anyHeld    = items.some((i) => i.status === 'held');
     const newStatus  = allCleared ? 'cleared' : anyHeld ? 'held' : 'in_progress';
+    const offboardingId = (all as any).offboarding_id;
 
     await supabase
       .from('offboarding_records')
       .update({ clearance_status: newStatus })
-      .eq('id', (all as any).offboarding_id)
+      .eq('id', offboardingId)
       .eq('organization_id', orgId);
+
+    // Clearance is the last thing to finish? Check whether final pay is
+    // already released too — if so, this action just completed offboarding.
+    if (newStatus === 'cleared') {
+      await completeIfBothDone(offboardingId, orgId, 'final_pay_status', 'released');
+    }
+  }
+}
+
+// Calls complete_offboarding once both clearance and final pay have reached
+// their terminal state — safe to call from either update path (clearance or
+// final pay), whichever one finishes second, since the RPC re-derives
+// completion server-side and no-ops if called again.
+async function completeIfBothDone(
+  offboardingId: string,
+  orgId: string,
+  otherColumn: 'clearance_status' | 'final_pay_status',
+  otherTerminalValue: string,
+): Promise<void> {
+  const { data: rec } = await supabase!
+    .from('offboarding_records')
+    .select(otherColumn)
+    .eq('id', offboardingId)
+    .eq('organization_id', orgId)
+    .single();
+  if ((rec as any)?.[otherColumn] === otherTerminalValue) {
+    const { error } = await supabase!.rpc('complete_offboarding', { p_offboarding_id: offboardingId });
+    if (error) throw error;
   }
 }
 
@@ -402,6 +431,12 @@ export async function updateFinalPayStatus(
     .eq('organization_id', orgId);
 
   if (error) throw error;
+
+  // Final pay is the last thing to finish? Check whether clearance is
+  // already cleared too — if so, this action just completed offboarding.
+  if (status === 'released') {
+    await completeIfBothDone(offboardingId, orgId, 'clearance_status', 'cleared');
+  }
 }
 
 // ── INITIATE OFFBOARDING ────────────────────────────────────────────────────────

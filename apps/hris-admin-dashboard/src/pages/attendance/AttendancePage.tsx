@@ -1,16 +1,15 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Clock, CalendarDays, BarChart2, Layers, Globe2,
+  Clock, CalendarDays, BarChart2, Globe2,
   CheckCircle2, XCircle, Timer, AlertCircle, Coffee,
   ChevronLeft, ChevronRight,
-  Check, X, Plus, Search, UserPlus, UserMinus,
+  Check, X,
   Loader2, MapPin,
 } from 'lucide-react';
 import { format, parseISO, getDaysInMonth, startOfMonth, startOfWeek, getDay } from 'date-fns';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import employeesData from '@/data/mock/employees.json';
 import {
   useAttendanceLogs,
   useMonthlyAttendanceSummary,
@@ -18,38 +17,12 @@ import {
   useOvertimeRequests,
   useApproveOvertimeRequest,
   useRejectOvertimeRequest,
-  useSchedules,
-  useCreateSchedule,
-  useUpdateSchedule,
-  useToggleScheduleActive,
-  useScheduleAssignments,
-  useUpdateScheduleAssignments,
   useHolidays,
-  type ScheduleEntry,
-  type ScheduleAssignmentEntry,
-  type UpdateScheduleInput,
 } from '@/hooks/useAttendance';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type TabId = 'daily' | 'calendar' | 'reports' | 'overtime' | 'shifts' | 'holidays';
-
-interface ShiftFormInput {
-  name: string;
-  code: string;
-  startTime: string;
-  endTime: string;
-  breakMinutes: number;
-  gracePeriodMinutes: number;
-  isNightShift: boolean;
-  isFlexible: boolean;
-  workDays: string[];
-  departments: string[];
-  color: string;
-  assignedEmployeeIds: string[];
-}
-
-type FormErrors = Partial<Record<keyof ShiftFormInput, string>>;
+type TabId = 'daily' | 'calendar' | 'reports' | 'overtime' | 'holidays';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -85,44 +58,13 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'calendar', label: 'Calendar', icon: CalendarDays },
   { id: 'reports',  label: 'Reports',  icon: BarChart2 },
   { id: 'overtime', label: 'Overtime', icon: Timer },
-  { id: 'shifts',   label: 'Shifts',   icon: Layers },
   { id: 'holidays', label: 'Holidays', icon: Globe2 },
 ];
-
-const COLOR_PALETTE = [
-  '#0038a8', '#1d4ed8', '#7c3aed', '#6366f1',
-  '#0891b2', '#059669', '#ca8a04', '#f97316',
-  '#dc2626', '#ce1126', '#db2777', '#64748b',
-];
-
-const ALL_DEPARTMENTS = [...new Set((employeesData as any[]).map((e) => e.department))].sort();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getInitials(name: string) {
   return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
-}
-
-function calcWorkHours(startTime: string, endTime: string, breakMins: number): number {
-  const [sh, sm] = startTime.split(':').map(Number);
-  const [eh, em] = endTime.split(':').map(Number);
-  const startMins = sh * 60 + sm;
-  let endMins = eh * 60 + em;
-  if (endMins <= startMins) endMins += 24 * 60;
-  const total = (endMins - startMins - breakMins) / 60;
-  return Math.max(0, parseFloat(total.toFixed(1)));
-}
-
-function validateShiftForm(data: ShiftFormInput): FormErrors {
-  const errors: FormErrors = {};
-  if (!data.name.trim()) errors.name = 'Name is required';
-  if (!data.code.trim()) errors.code = 'Code is required';
-  else if (data.code.length > 6) errors.code = 'Max 6 characters';
-  if (!data.startTime) errors.startTime = 'Required';
-  if (!data.endTime) errors.endTime = 'Required';
-  if (data.breakMinutes < 0) errors.breakMinutes = 'Cannot be negative';
-  if (data.gracePeriodMinutes < 0) errors.gracePeriodMinutes = 'Cannot be negative';
-  return errors;
 }
 
 // ── Shared UI ─────────────────────────────────────────────────────────────────
@@ -157,422 +99,6 @@ function LoadingRow({ cols }: { cols: number }) {
         <Loader2 className="w-6 h-6 animate-spin mx-auto text-gray-400" />
       </td>
     </tr>
-  );
-}
-
-// ── Shift Form Modal ──────────────────────────────────────────────────────────
-
-function ShiftFormModal({
-  mode, initialData, allEmployees, currentAssignments, onSave, onClose, isSaving,
-}: {
-  mode: 'add' | 'edit';
-  initialData: ScheduleEntry | null;
-  allEmployees: typeof employeesData;
-  currentAssignments: ScheduleAssignmentEntry[];
-  onSave: (data: ShiftFormInput) => void;
-  onClose: () => void;
-  isSaving: boolean;
-}) {
-  const currentAssignedIds = useMemo(() => {
-    if (mode === 'add' || !initialData) return [];
-    return currentAssignments
-      .filter((a) => a.scheduleId === initialData.id)
-      .map((a) => a.employeeId);
-  }, [mode, initialData, currentAssignments]);
-
-  const [form, setForm] = useState<ShiftFormInput>(() =>
-    initialData
-      ? {
-          name:               initialData.name,
-          code:               initialData.code,
-          startTime:          initialData.startTime,
-          endTime:            initialData.endTime,
-          breakMinutes:       initialData.breakMinutes,
-          gracePeriodMinutes: initialData.gracePeriodMinutes,
-          isNightShift:       initialData.isNightShift,
-          isFlexible:         initialData.isFlexible,
-          workDays:           [...initialData.workDays],
-          departments:        [...initialData.departments],
-          color:              initialData.color,
-          assignedEmployeeIds: [...currentAssignedIds],
-        }
-      : {
-          name: '', code: '', startTime: '08:00', endTime: '17:00',
-          breakMinutes: 60, gracePeriodMinutes: 15,
-          isNightShift: false, isFlexible: false,
-          workDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-          departments: [], color: '#0038a8',
-          assignedEmployeeIds: [],
-        },
-  );
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [employeeSearch, setEmployeeSearch] = useState('');
-
-  const computedHours = useMemo(
-    () => calcWorkHours(form.startTime, form.endTime, form.breakMinutes),
-    [form.startTime, form.endTime, form.breakMinutes],
-  );
-
-  const assignedEmployees = useMemo(
-    () => (allEmployees as any[]).filter((e) => form.assignedEmployeeIds.includes(e.id)),
-    [allEmployees, form.assignedEmployeeIds],
-  );
-
-  const unassignedEmployees = useMemo(() => {
-    const q = employeeSearch.toLowerCase().trim();
-    return (allEmployees as any[]).filter(
-      (e) =>
-        !form.assignedEmployeeIds.includes(e.id) &&
-        (!q || e.name.toLowerCase().includes(q) || e.department.toLowerCase().includes(q) || e.position.toLowerCase().includes(q)),
-    );
-  }, [allEmployees, form.assignedEmployeeIds, employeeSearch]);
-
-  const set = (patch: Partial<ShiftFormInput>) => setForm((p) => ({ ...p, ...patch }));
-
-  const toggleDept = (dept: string) => {
-    set({
-      departments: form.departments.includes(dept)
-        ? form.departments.filter((d) => d !== dept)
-        : [...form.departments, dept],
-    });
-  };
-
-  const addEmployee = (empId: string) => {
-    set({ assignedEmployeeIds: [...form.assignedEmployeeIds, empId] });
-    setEmployeeSearch('');
-  };
-
-  const removeEmployee = (empId: string) => {
-    set({ assignedEmployeeIds: form.assignedEmployeeIds.filter((id) => id !== empId) });
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const errs = validateShiftForm(form);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    onSave(form);
-  };
-
-  const inputCls = (field: keyof ShiftFormInput) =>
-    `w-full h-9 px-3 rounded-lg border text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors ${
-      errors[field] ? 'border-red-400 dark:border-red-600' : 'border-gray-200 dark:border-gray-700'
-    }`;
-
-  const showPreview = form.name.trim() && form.code.trim();
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.15 }}
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white dark:bg-gray-900 z-10">
-          <div>
-            <h2 className="text-base font-bold text-gray-800 dark:text-white">
-              {mode === 'add' ? 'Add New Shift' : `Edit — ${initialData?.name ?? 'Shift'}`}
-            </h2>
-            <p className="text-[10px] text-gray-400 mt-0.5">
-              {mode === 'add' ? 'Define a new work shift' : 'Update shift definition'}
-            </p>
-          </div>
-          <button
-            type="button"
-            title="Close"
-            onClick={onClose}
-            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <X className="w-4 h-4 text-gray-500" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
-          {/* Name + Code */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="col-span-2">
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Shift Name <span className="text-brand-red">*</span>
-              </label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => set({ name: e.target.value })}
-                placeholder="e.g. Morning Shift"
-                className={inputCls('name')}
-              />
-              {errors.name && <p className="text-[10px] text-red-500 mt-0.5">{errors.name}</p>}
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Code <span className="text-brand-red">*</span>
-              </label>
-              <input
-                type="text"
-                value={form.code}
-                onChange={(e) => set({ code: e.target.value.toUpperCase().slice(0, 6) })}
-                placeholder="RDS"
-                className={`${inputCls('code')} font-mono font-bold tracking-wider`}
-              />
-              {errors.code && <p className="text-[10px] text-red-500 mt-0.5">{errors.code}</p>}
-            </div>
-          </div>
-
-          {/* Times */}
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Start Time <span className="text-brand-red">*</span>
-              </label>
-              <input
-                type="time"
-                title="Start time"
-                value={form.startTime}
-                onChange={(e) => set({ startTime: e.target.value })}
-                className={inputCls('startTime')}
-              />
-              {errors.startTime && <p className="text-[10px] text-red-500 mt-0.5">{errors.startTime}</p>}
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                End Time <span className="text-brand-red">*</span>
-              </label>
-              <input
-                type="time"
-                title="End time"
-                value={form.endTime}
-                onChange={(e) => set({ endTime: e.target.value })}
-                className={inputCls('endTime')}
-              />
-              {errors.endTime && <p className="text-[10px] text-red-500 mt-0.5">{errors.endTime}</p>}
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Work Hours</label>
-              <div className="h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm font-mono font-bold text-gray-700 dark:text-gray-300 flex items-center select-none">
-                {computedHours > 0 ? `${computedHours}h` : '—'}
-              </div>
-            </div>
-          </div>
-
-          {/* Break + Grace */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Break (minutes)</label>
-              <input
-                type="number"
-                title="Break duration in minutes"
-                min={0}
-                max={180}
-                value={form.breakMinutes}
-                onChange={(e) => set({ breakMinutes: Math.max(0, Number(e.target.value)) })}
-                className={inputCls('breakMinutes')}
-              />
-              {errors.breakMinutes && <p className="text-[10px] text-red-500 mt-0.5">{errors.breakMinutes}</p>}
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Grace Period (minutes)</label>
-              <input
-                type="number"
-                title="Grace period in minutes"
-                min={0}
-                max={60}
-                value={form.gracePeriodMinutes}
-                onChange={(e) => set({ gracePeriodMinutes: Math.max(0, Number(e.target.value)) })}
-                className={inputCls('gracePeriodMinutes')}
-              />
-              {errors.gracePeriodMinutes && <p className="text-[10px] text-red-500 mt-0.5">{errors.gracePeriodMinutes}</p>}
-            </div>
-          </div>
-
-          {/* Color */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Shift Color</label>
-            <div className="flex flex-wrap gap-2">
-              {COLOR_PALETTE.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  title={c}
-                  onClick={() => set({ color: c })}
-                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${
-                    form.color === c ? 'ring-2 ring-offset-2 dark:ring-offset-gray-900 ring-gray-500 scale-110' : ''
-                  }`}
-                  style={{ backgroundColor: c }}
-                >
-                  {form.color === c && <Check className="w-3.5 h-3.5 text-white" />}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Departments */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-              Applicable Departments
-              <span className="ml-1 text-gray-400 font-normal">(optional)</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {ALL_DEPARTMENTS.map((dept) => {
-                const active = form.departments.includes(dept);
-                return (
-                  <button
-                    key={dept}
-                    type="button"
-                    onClick={() => toggleDept(dept)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${
-                      active
-                        ? 'text-white border-transparent'
-                        : 'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
-                    style={active ? { backgroundColor: form.color, borderColor: form.color } : undefined}
-                  >
-                    {active && <Check className="w-2.5 h-2.5 inline mr-1" />}
-                    {dept}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Employee Assignment (edit only) */}
-          {mode === 'edit' && (
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                Assigned Employees
-                <span className="ml-1 text-gray-400 font-normal">({assignedEmployees.length} assigned)</span>
-              </label>
-
-              <div className="relative mb-2">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search employee to add…"
-                  value={employeeSearch}
-                  onChange={(e) => setEmployeeSearch(e.target.value)}
-                  className="w-full h-9 pl-8 pr-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/40 transition-colors"
-                />
-              </div>
-
-              {employeeSearch.trim() && unassignedEmployees.length > 0 && (
-                <div className="mb-2 border border-gray-200 dark:border-gray-700 rounded-lg max-h-36 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
-                  {unassignedEmployees.slice(0, 8).map((emp: any) => (
-                    <button
-                      key={emp.id}
-                      type="button"
-                      onClick={() => addEmployee(emp.id)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
-                        {getInitials(emp.name)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{emp.name}</p>
-                        <p className="text-[10px] text-gray-400">{emp.department} · {emp.position}</p>
-                      </div>
-                      <UserPlus className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                    </button>
-                  ))}
-                </div>
-              )}
-              {employeeSearch.trim() && unassignedEmployees.length === 0 && (
-                <p className="text-[10px] text-gray-400 mb-2">No matching employees found</p>
-              )}
-
-              <div className="border border-gray-100 dark:border-gray-800 rounded-lg divide-y divide-gray-50 dark:divide-gray-800/60 max-h-48 overflow-y-auto">
-                {assignedEmployees.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-4">No employees assigned</p>
-                ) : (
-                  (assignedEmployees as any[]).map((emp) => (
-                    <div
-                      key={emp.id}
-                      className="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-                    >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                        style={{ backgroundColor: form.color }}
-                      >
-                        {getInitials(emp.name)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{emp.name}</p>
-                        <p className="text-[10px] text-gray-400">{emp.department} · {emp.position}</p>
-                      </div>
-                      <button
-                        type="button"
-                        title={`Remove ${emp.name}`}
-                        onClick={() => removeEmployee(emp.id)}
-                        className="p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-400 hover:text-brand-red transition-colors shrink-0"
-                      >
-                        <UserMinus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Preview */}
-          <AnimatePresence>
-            {showPreview && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="rounded-xl p-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Preview</p>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                      style={{ backgroundColor: form.color }}
-                    >
-                      {form.code}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-800 dark:text-white">{form.name}</p>
-                      <p className="text-xs text-gray-400">
-                        {form.startTime} – {form.endTime} · {computedHours}h · {form.breakMinutes}m break · {form.gracePeriodMinutes}min grace
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="flex-1 h-10 rounded-xl text-white text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ backgroundColor: form.color || '#0038a8' }}
-            >
-              {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-              {mode === 'add' ? 'Add Shift' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
-      </motion.div>
-    </motion.div>
   );
 }
 
@@ -1073,92 +599,6 @@ function OvertimeTab() {
   );
 }
 
-// ── Shifts Tab ────────────────────────────────────────────────────────────────
-
-function ShiftsTab({
-  shifts, onEdit, onAdd, onToggleActive,
-}: {
-  shifts: ScheduleEntry[];
-  onEdit: (shift: ScheduleEntry) => void;
-  onAdd: () => void;
-  onToggleActive: (id: string, isActive: boolean) => void;
-}) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {shifts.map((shift, i) => (
-        <motion.div
-          key={shift.id}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.06 }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 sm:p-5"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-              style={{ backgroundColor: shift.color }}
-            >
-              {shift.code}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{shift.name}</p>
-              <p className="text-xs text-gray-400">{shift.workHours}h/day · {shift.breakMinutes}m break</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 mb-2 text-sm font-mono font-semibold text-gray-700 dark:text-gray-300">
-            <Clock className="w-4 h-4 text-gray-400" />
-            {shift.startTime} – {shift.endTime}
-          </div>
-          <p className="text-xs text-gray-400 mb-2">Grace period: {shift.gracePeriodMinutes} min</p>
-          {shift.departments.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {shift.departments.map((dept) => (
-                <span key={dept} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  {dept}
-                </span>
-              ))}
-            </div>
-          )}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-            <button
-              type="button"
-              onClick={() => onToggleActive(shift.id, !shift.isActive)}
-              className={`text-[10px] font-semibold transition-colors ${
-                shift.isActive
-                  ? 'text-green-600 hover:text-red-500'
-                  : 'text-gray-400 hover:text-green-600'
-              }`}
-            >
-              {shift.isActive ? 'Active' : 'Inactive'}
-            </button>
-            <button
-              type="button"
-              onClick={() => onEdit(shift)}
-              className="flex items-center gap-1 text-[10px] font-semibold text-brand-blue hover:underline"
-            >
-              Edit Shift
-            </button>
-          </div>
-        </motion.div>
-      ))}
-
-      <motion.button
-        type="button"
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: shifts.length * 0.06 }}
-        onClick={onAdd}
-        className="bg-gray-50 dark:bg-gray-900/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-gray-400 min-h-45 hover:border-brand-blue/50 hover:text-brand-blue hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-colors group"
-      >
-        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 group-hover:bg-brand-blue/10 flex items-center justify-center transition-colors">
-          <Plus className="w-5 h-5" />
-        </div>
-        <span className="text-xs font-semibold">Add New Shift</span>
-      </motion.button>
-    </div>
-  );
-}
-
 // ── Holidays Tab ──────────────────────────────────────────────────────────────
 
 function HolidaysTab() {
@@ -1217,48 +657,10 @@ function HolidaysTab() {
 export default function AttendancePage() {
   const [activeTab, setActiveTab] = useState<TabId>('daily');
   const [selectedDate, setSelectedDate] = useState(TODAY);
-  const [shiftModal, setShiftModal] = useState<{ mode: 'add' | 'edit'; shift: ScheduleEntry | null } | null>(null);
-
-  // Shifts data
-  const { data: shifts = [], isLoading: shiftsLoading } = useSchedules();
-  const { data: assignments = [] } = useScheduleAssignments();
-  const createShift   = useCreateSchedule();
-  const updateShift   = useUpdateSchedule();
-  const toggleActive  = useToggleScheduleActive();
-  const updateAssigns = useUpdateScheduleAssignments();
-
-  const isSavingShift = createShift.isPending || updateShift.isPending;
 
   // OT pending count for header badge
   const { data: otRequests = [] } = useOvertimeRequests();
   const pendingOT = otRequests.filter((r) => r.status === 'pending').length;
-
-  const handleSaveShift = async (data: ShiftFormInput) => {
-    if (!shiftModal) return;
-
-    if (shiftModal.mode === 'add') {
-      await createShift.mutateAsync(data);
-      toast.success(`Shift "${data.name}" added`);
-    } else if (shiftModal.shift) {
-      const updateInput: { id: string } & UpdateScheduleInput = {
-        id:                shiftModal.shift.id,
-        ...data,
-        assignedEmployeeIds: data.assignedEmployeeIds,
-      };
-      await updateShift.mutateAsync(updateInput);
-      await updateAssigns.mutateAsync({
-        scheduleId:  shiftModal.shift.id,
-        employeeIds: data.assignedEmployeeIds,
-      });
-      toast.success(`Shift "${data.name}" updated`);
-    }
-    setShiftModal(null);
-  };
-
-  const handleToggleActive = async (id: string, isActive: boolean) => {
-    await toggleActive.mutateAsync({ id, isActive });
-    toast.success(isActive ? 'Shift activated' : 'Shift deactivated');
-  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
@@ -1267,7 +669,7 @@ export default function AttendancePage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">Attendance</h1>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Track daily attendance, manage overtime, shifts and schedules
+            Track daily attendance, overtime, and holidays
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -1360,37 +762,8 @@ export default function AttendancePage() {
           )}
           {activeTab === 'reports' && <ReportsTab />}
           {activeTab === 'overtime' && <OvertimeTab />}
-          {activeTab === 'shifts' && (
-            shiftsLoading ? (
-              <div className="flex items-center justify-center py-24">
-                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-              </div>
-            ) : (
-              <ShiftsTab
-                shifts={shifts}
-                onEdit={(shift) => setShiftModal({ mode: 'edit', shift })}
-                onAdd={() => setShiftModal({ mode: 'add', shift: null })}
-                onToggleActive={handleToggleActive}
-              />
-            )
-          )}
           {activeTab === 'holidays' && <HolidaysTab />}
         </motion.div>
-      </AnimatePresence>
-
-      {/* Shift form modal */}
-      <AnimatePresence>
-        {shiftModal && (
-          <ShiftFormModal
-            mode={shiftModal.mode}
-            initialData={shiftModal.shift}
-            allEmployees={employeesData}
-            currentAssignments={assignments}
-            onSave={handleSaveShift}
-            onClose={() => setShiftModal(null)}
-            isSaving={isSavingShift}
-          />
-        )}
       </AnimatePresence>
     </motion.div>
   );

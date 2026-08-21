@@ -142,6 +142,11 @@ export function useUpdateClearance() {
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['offboarding-records'] });
       qc.invalidateQueries({ queryKey: ['offboarding-detail', vars.offboardingId] });
+      // This can be the action that pushes clearance+final-pay both to their
+      // terminal state, which now deactivates the employee (Phase F8/B3) —
+      // invalidate so EmployeeListPage's active-only view drops them without
+      // a manual refresh.
+      qc.invalidateQueries({ queryKey: ['employees'] });
     },
   });
 }
@@ -169,6 +174,9 @@ export function useUpdateFinalPay() {
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['offboarding-records'] });
       qc.invalidateQueries({ queryKey: ['offboarding-detail', vars.offboardingId] });
+      // Same as useUpdateClearance — releasing final pay can be the action
+      // that completes offboarding and deactivates the employee.
+      qc.invalidateQueries({ queryKey: ['employees'] });
     },
   });
 }
