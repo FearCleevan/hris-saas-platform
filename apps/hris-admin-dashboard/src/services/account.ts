@@ -30,6 +30,12 @@ export async function changePassword(
  */
 export async function changeEmail(newEmail: string): Promise<void> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase is not configured');
-  const { error } = await supabase.auth.updateUser({ email: newEmail });
+  // Route the confirmation link through /auth/callback (same as
+  // SignUpPage/ForgotPasswordPage) so the returned session hash actually
+  // gets processed instead of landing on the bare root unhandled.
+  const { error } = await supabase.auth.updateUser(
+    { email: newEmail },
+    { emailRedirectTo: `${window.location.origin}/auth/callback` },
+  );
   if (error) throw error;
 }
