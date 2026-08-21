@@ -158,7 +158,7 @@ export function Navbar({ onMobileMenuClick }: NavbarProps) {
               ))}
               <DropdownMenuSeparator />
             </div>
-            <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User className="w-4 h-4 text-gray-400" />
               My Profile
             </DropdownMenuItem>

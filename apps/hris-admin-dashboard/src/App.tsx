@@ -47,6 +47,7 @@ import AnalyticsPage from '@/pages/analytics/AnalyticsPage';
 import HRPolicyPage from '@/pages/hr-policy/HRPolicyPage';
 import NotificationsPage from '@/pages/notifications/NotificationsPage';
 import SettingsPage from '@/pages/settings/SettingsPage';
+import ProfilePage from '@/pages/account/ProfilePage';
 import ComingSoonPage from '@/pages/ComingSoonPage';
 
 const queryClient = new QueryClient({
@@ -143,6 +144,9 @@ const router = createBrowserRouter([
         ),
       },
       { path: 'hr-policy', element: <HRPolicyPage /> },
+      // Not role-gated — every authenticated user (any role) can manage
+      // their own account, unlike settings/* below which is admin-only.
+      { path: 'profile', element: <ProfilePage /> },
       {
         path: 'settings/*',
         element: (
