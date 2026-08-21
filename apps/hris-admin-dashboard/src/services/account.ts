@@ -39,3 +39,17 @@ export async function changeEmail(newEmail: string): Promise<void> {
   );
   if (error) throw error;
 }
+
+/**
+ * Completes an email-change confirmation given the token_hash from the
+ * confirmation link. Called from a page requiring an explicit button click
+ * (ConfirmActionPage) rather than on page load — the email's link points
+ * there instead of straight to Supabase's verify endpoint specifically so
+ * automated link-prescanning (Gmail/security gateways visiting links before
+ * a human clicks) can't consume the single-use token first.
+ */
+export async function confirmEmailChange(tokenHash: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) throw new Error('Supabase is not configured');
+  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'email_change' });
+  if (error) throw error;
+}

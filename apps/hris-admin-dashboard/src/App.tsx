@@ -22,6 +22,7 @@ import TwoFactorPage from '@/pages/auth/TwoFactorPage';
 import TenantSelectorPage from '@/pages/auth/TenantSelectorPage';
 import CompanySetupPage from '@/pages/auth/CompanySetupPage';
 import AuthCallbackPage from '@/pages/auth/AuthCallbackPage';
+import ConfirmActionPage from '@/pages/auth/ConfirmActionPage';
 import DashboardPage from '@/pages/dashboard/DashboardPage';
 import EmployeeListPage from '@/pages/employees/EmployeeListPage';
 import EmployeeProfilePage from '@/pages/employees/EmployeeProfilePage';
@@ -59,6 +60,10 @@ const queryClient = new QueryClient({
 const router = createBrowserRouter([
   // Public auth callback — no layout wrapper needed
   { path: '/auth/callback', element: <AuthCallbackPage /> },
+  // Public confirm-button landing page (email-change token, etc.) — must
+  // work for unauthenticated browser contexts (link opened on another
+  // device/browser than the one the user is logged in on).
+  { path: '/confirm-action', element: <ConfirmActionPage /> },
 
   {
     element: <AuthLayout />,
