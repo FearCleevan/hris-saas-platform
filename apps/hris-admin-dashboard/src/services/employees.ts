@@ -192,12 +192,18 @@ function mapRow(row: SupabaseEmployeeRow): EmployeeRow {
 }
 
 // ── LIST ─────────────────────────────────────────────────────────
-export async function getEmployees(): Promise<EmployeeRow[]> {
+// activeOnly defaults true since most callers (leave/schedule/payroll
+// pickers, org chart, onboarding/offboarding) must never surface a
+// terminated employee as selectable. EmployeeListPage is the one caller
+// that passes false, since it already has its own client-side status
+// filter (including "Terminated") that was built expecting this data —
+// see CRUD_FIXES_QA_CHECKLIST.md follow-up, 2026-08-24.
+export async function getEmployees(activeOnly = true): Promise<EmployeeRow[]> {
   if (!isSupabaseConfigured || !supabase) throw new Error('Supabase not configured');
 
   const orgId = await getAuthOrgId();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('employees')
     .select(`
       id, employee_no, first_name, last_name, middle_name,
@@ -210,9 +216,11 @@ export async function getEmployees(): Promise<EmployeeRow[]> {
       ),
       employee_compensation(basic_salary, is_current)
     `)
-    .eq('organization_id', orgId)
-    .eq('is_active', true)
-    .order('last_name');
+    .eq('organization_id', orgId);
+
+  if (activeOnly) query = query.eq('is_active', true);
+
+  const { data, error } = await query.order('last_name');
 
   if (error) throw error;
   return (data as unknown as SupabaseEmployeeRow[]).map(mapRow);

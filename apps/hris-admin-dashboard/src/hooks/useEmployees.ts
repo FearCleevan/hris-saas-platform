@@ -32,11 +32,11 @@ export const MOCK_STATS: EmployeeStats = {
   totalMonthlySalary: mockEmployees.reduce((s, e) => s + e.salary, 0),
 };
 
-export function useEmployees() {
+export function useEmployees(activeOnly = true) {
   return useQuery<EmployeeRow[]>({
-    queryKey: ['employees'],
+    queryKey: ['employees', activeOnly],
     queryFn: isSupabaseConfigured
-      ? getEmployees
+      ? () => getEmployees(activeOnly)
       : async () =>
           mockEmployees.map((e) => ({
             id: e.id,

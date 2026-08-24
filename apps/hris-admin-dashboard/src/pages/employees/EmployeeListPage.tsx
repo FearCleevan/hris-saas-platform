@@ -110,7 +110,11 @@ function FilterSelect({
 
 export default function EmployeeListPage() {
   const navigate = useNavigate();
-  const { data: employees = [], isLoading, error } = useEmployees();
+  // false: this page's own status filter (STATUSES/statusConfig above,
+  // includes 'terminated') needs terminated employees in the data to
+  // filter over — every other useEmployees() caller keeps the active-only
+  // default.
+  const { data: employees = [], isLoading, error } = useEmployees(false);
   const deleteManyMutation = useDeleteManyEmployees();
   const bulkUpdateMutation = useBulkUpdateEmployees();
 
@@ -122,7 +126,10 @@ export default function EmployeeListPage() {
   const [search,         setSearch]         = useState('');
   const [department,     setDepartment]     = useState('All');
   const [positionFilter, setPositionFilter] = useState('All');
-  const [status,         setStatus]         = useState('All');
+  // Defaults to 'active' (not 'All') so terminated employees stay out of the
+  // default view — they're now fetched (for this filter to work at all) but
+  // shouldn't appear until explicitly selected.
+  const [status,         setStatus]         = useState('active');
   const [type,           setType]           = useState('All');
 
   // Bulk action state
@@ -194,11 +201,11 @@ export default function EmployeeListPage() {
     setSearch('');
     setDepartment('All');
     setPositionFilter('All');
-    setStatus('All');
+    setStatus('active');
     setType('All');
   }, []);
 
-  const hasActiveFilters = search || department !== 'All' || positionFilter !== 'All' || status !== 'All' || type !== 'All';
+  const hasActiveFilters = search || department !== 'All' || positionFilter !== 'All' || status !== 'active' || type !== 'All';
 
   // Apply filters
   const filtered = useMemo(() => {
@@ -218,11 +225,14 @@ export default function EmployeeListPage() {
   }, [employees, search, department, positionFilter, status, type]);
 
   const kpis = useMemo(() => ({
-    total:   employees.length,
+    // employees now includes terminated rows (needed for the status filter
+    // below to have anything to filter) — current headcount must exclude
+    // them, not count raw fetched length.
+    total:   employees.filter((e) => e.status !== 'terminated').length,
     active:  employees.filter((e) => e.status === 'active').length,
     onLeave: employees.filter((e) => e.status === 'on_leave').length,
     newThisYear: employees.filter(
-      (e) => e.hireDate && new Date(e.hireDate).getFullYear() === new Date().getFullYear()
+      (e) => e.status !== 'terminated' && e.hireDate && new Date(e.hireDate).getFullYear() === new Date().getFullYear()
     ).length,
   }), [employees]);
 
