@@ -234,6 +234,12 @@ export default function SettingsPage() {
         try {
           await sendInviteReal({ email, role: inviteRole, organizationId: inviteOrgId });
           toast.success(`Invitation email sent to ${email}`);
+          // The optimistic tempInvite has a fake client-generated id
+          // (inv${Date.now()}), not the real invite_tokens UUID — the edge
+          // function's response doesn't return one. Re-sync from the server
+          // so Resend/Revoke on this row use the real id instead of sending
+          // a non-UUID string into a UUID column.
+          loadTeamData();
         } catch (err: any) {
           // Roll back optimistic update on failure
           setInvitations(prev => prev.filter(i => i.id !== tempInvite.id));
