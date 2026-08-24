@@ -137,7 +137,13 @@ Deno.serve(async (req: Request) => {
 
   if (inviteErr) {
     console.error('inviteUserByEmail:', inviteErr);
-    return err(inviteErr.message || 'Failed to send invitation', 500, req);
+    // Pass through Supabase Auth's real status (e.g. 422 for "already
+    // registered") instead of a blanket 500 — this is almost always a
+    // client-facing validation failure, not a server crash, and reporting
+    // it as 500 misleads debugging/monitoring even though the message text
+    // shown to the user was already correct.
+    const status = (inviteErr as { status?: number }).status ?? 400;
+    return err(inviteErr.message || 'Failed to send invitation', status, req);
   }
 
   // Track invite in invite_tokens for the pending invitations UI
