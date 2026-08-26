@@ -221,4 +221,35 @@ export async function reactivateMember(userId: string): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * Notifies a just-deactivated member by email via the notify-deactivation
+ * Edge Function. Deliberately best-effort — deactivate_member has already
+ * succeeded by the time this is called, so a failure here (missing
+ * RESEND_API_KEY, network issue, etc.) must never look like the
+ * deactivation itself failed. Swallows errors and returns false instead
+ * of throwing.
+ */
+export async function notifyDeactivation(userId: string): Promise<boolean> {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return false;
+
+    const res = await fetch(getEdgeFunctionUrl('notify-deactivation'), {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey':        import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+      },
+      body: JSON.stringify({ userId }),
+    });
+    const data = await res.json();
+    return res.ok && data.success === true;
+  } catch {
+    return false;
+  }
+}
+
 export { ROLE_NAMES, ROLE_COLORS };
