@@ -19,6 +19,7 @@ import LoginPage from '@/pages/auth/LoginPage';
 import SignUpPage from '@/pages/auth/SignUpPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import TwoFactorPage from '@/pages/auth/TwoFactorPage';
+import SetPasswordPage from '@/pages/auth/SetPasswordPage';
 import TenantSelectorPage from '@/pages/auth/TenantSelectorPage';
 import CompanySetupPage from '@/pages/auth/CompanySetupPage';
 import AuthCallbackPage from '@/pages/auth/AuthCallbackPage';
@@ -85,6 +86,20 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requireAuth requireTwoFactor requireTenant={false}>
             <CompanySetupPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        // No requireTwoFactor/requireTenant gate here on purpose — this is
+        // the very first stop for an invited user (who has isTwoFactorVerified
+        // already skipped-true via the magic-link login, but may not have
+        // finished org setup yet), and ProtectedRoute's own mustChangePassword
+        // check already forces every other protected route to redirect here
+        // first regardless of what those routes individually require.
+        path: '/set-password',
+        element: (
+          <ProtectedRoute requireAuth requireTwoFactor={false} requireTenant={false}>
+            <SetPasswordPage />
           </ProtectedRoute>
         ),
       },
@@ -231,6 +246,7 @@ function SupabaseSessionSync() {
             role:      (role ?? 'hr_staff') as User['role'],
             avatar:    resolvedProfile.avatar_url ?? undefined,
             tenantIds: org ? [org.id] : [],
+            mustChangePassword: resolvedProfile.must_change_password,
           };
           login(user, true);
 

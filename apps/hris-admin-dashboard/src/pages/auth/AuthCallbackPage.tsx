@@ -86,6 +86,7 @@ export default function AuthCallbackPage() {
         role:      (role ?? 'hr_staff') as User['role'],
         avatar:    profile.avatar_url ?? undefined,
         tenantIds: org ? [org.id] : [],
+        mustChangePassword: profile.must_change_password,
       };
 
       login(user, true);

@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   avatar?: string | null;
   tenantIds: string[];
+  mustChangePassword: boolean;
 }
 
 export interface Tenant {

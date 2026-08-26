@@ -74,6 +74,7 @@ export default function LoginPage() {
         role:      (role ?? 'hr_staff') as User['role'],
         avatar:    profile.avatar_url ?? undefined,
         tenantIds: org ? [org.id] : [],
+        mustChangePassword: profile.must_change_password,
       };
 
       storeLogin(user, true);
@@ -112,7 +113,8 @@ export default function LoginPage() {
       return;
     }
 
-    const { password: _pw, twoFactorCode: _tfc, ...safeUser } = mockUser;
+    const { password: _pw, twoFactorCode: _tfc, ...rest } = mockUser;
+    const safeUser = { ...rest, mustChangePassword: false };
 
     if (mockUser.twoFactorEnabled) {
       setPendingEmail(mockUser.email);

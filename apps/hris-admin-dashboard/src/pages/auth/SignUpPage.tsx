@@ -86,6 +86,7 @@ export default function SignUpPage() {
           name: fullName,
           role: 'hr_staff',
           tenantIds: [],
+          mustChangePassword: false,
         };
         storeLogin(user, true);
         toast.success("Account created! Let's set up your company.");
@@ -106,6 +107,7 @@ export default function SignUpPage() {
       name: fullName,
       role: 'hr_staff',
       tenantIds: [],
+      mustChangePassword: false,
     };
     storeLogin(mockUser, true);
     toast.success("Account created! Let's set up your company.");
