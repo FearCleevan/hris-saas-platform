@@ -11,7 +11,7 @@ import {
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
   sendInvite as sendInviteReal,
   getPendingInvites as getPendingInvitesReal,
@@ -166,11 +166,28 @@ export default function SettingsPage() {
     const orgName = (myOrgs[0] as any)?.name ?? '';
     if (!orgId) return;
     setTeamLoading(true);
+    const fetchOnce = () => Promise.all([
+      getTeamMembersReal(orgId, orgName),
+      getPendingInvitesReal(orgId, orgName),
+    ]);
     try {
-      const [members, invites] = await Promise.all([
-        getTeamMembersReal(orgId, orgName),
-        getPendingInvitesReal(orgId, orgName),
-      ]);
+      let members, invites;
+      try {
+        [members, invites] = await fetchOnce();
+      } catch (err: any) {
+        // "JWT issued at future" is a transient clock-skew symptom that
+        // shows up right as the session token is being auto-refreshed —
+        // the token's iat momentarily looks like it's from the future to
+        // the server. It always resolves with a fresh token (matches what
+        // a manual page reload was doing) — retry once instead of leaving
+        // the user stuck on stale mock data.
+        if (String(err?.message ?? '').toLowerCase().includes('issued at future') && supabase) {
+          await supabase.auth.refreshSession();
+          [members, invites] = await fetchOnce();
+        } else {
+          throw err;
+        }
+      }
       setTeamMembers(members);
       setInvitations(invites);
     } catch (err: any) {
