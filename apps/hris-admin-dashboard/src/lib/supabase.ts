@@ -54,22 +54,36 @@ export async function fetchUserContext(userId: string): Promise<{
 }> {
   if (!supabase) return { profile: null, org: null, role: null };
 
+  const fetchRole = () =>
+    supabase!
+      .from('user_roles')
+      .select('roles(slug)')
+      .eq('user_id', userId)
+      .limit(1)
+      .single();
+
   const [profileRes, roleRes] = await Promise.all([
     supabase
       .from('user_profiles')
       .select('id, organization_id, full_name, avatar_url, must_change_password')
       .eq('id', userId)
       .single(),
-    supabase
-      .from('user_roles')
-      .select('roles(slug)')
-      .eq('user_id', userId)
-      .limit(1)
-      .single(),
+    fetchRole(),
   ]);
 
   const profile = profileRes.data as SupabaseProfile | null;
-  const roleName = (roleRes.data as { roles: { slug: string } } | null)?.roles?.slug ?? null;
+  let roleName = (roleRes.data as { roles: { slug: string } } | null)?.roles?.slug ?? null;
+
+  // Every account with a completed profile should always have a role row
+  // by this point (handle_new_user()/setup_invited_user() assign it
+  // synchronously before this is ever called) — a null result here has
+  // been a transient timing race right after sign-in, not a real "no role
+  // yet" state. Retry once rather than let a caller silently treat a
+  // failed fetch as "this user has the lowest-privilege role."
+  if (!roleName) {
+    const retryRes = await fetchRole();
+    roleName = (retryRes.data as { roles: { slug: string } } | null)?.roles?.slug ?? null;
+  }
 
   let org: SupabaseOrg | null = null;
   if (profile?.organization_id) {

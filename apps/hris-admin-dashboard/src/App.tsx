@@ -238,6 +238,17 @@ function SupabaseSessionSync() {
           };
         }
 
+        // A user with an org already assigned should always have a
+        // resolvable role by this point — null here means the fetch
+        // genuinely failed, not that this account has no permissions.
+        // Skip syncing this session rather than silently logging them in
+        // at the lowest privilege level; the next fetch attempt (e.g. a
+        // manual sign-in) will retry from a clean state.
+        if (resolvedProfile && org && !role) {
+          setChecked(true);
+          return;
+        }
+
         if (resolvedProfile) {
           const user: User = {
             id:        session.user.id,

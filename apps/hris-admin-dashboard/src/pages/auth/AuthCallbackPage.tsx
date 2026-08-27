@@ -79,6 +79,16 @@ export default function AuthCallbackPage() {
         }
       }
 
+      if (org && !role) {
+        // A user with an org already assigned should always have a
+        // resolvable role by this point — null here means the fetch
+        // genuinely failed, not that this account has no permissions.
+        // (A brand-new user with no org yet legitimately has no role
+        // either, but they're routed to /setup-company below, not here.)
+        setStatus('error');
+        return;
+      }
+
       const user: User = {
         id:        session.user.id,
         email:     session.user.email!,

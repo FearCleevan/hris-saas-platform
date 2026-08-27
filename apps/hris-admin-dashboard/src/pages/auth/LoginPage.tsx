@@ -67,11 +67,21 @@ export default function LoginPage() {
         return;
       }
 
+      if (!role) {
+        // Every account should have a role assigned by now — a missing
+        // one here means the fetch genuinely failed, not that this user
+        // has no permissions. Don't silently sign them in at the lowest
+        // privilege level; let them retry instead.
+        toast.error('Could not load your account permissions. Please try signing in again.');
+        setIsLoading(false);
+        return;
+      }
+
       const user: User = {
         id:        authData.session.user.id,
         email:     authData.session.user.email!,
         name:      profile.full_name,
-        role:      (role ?? 'hr_staff') as User['role'],
+        role:      role as User['role'],
         avatar:    profile.avatar_url ?? undefined,
         tenantIds: org ? [org.id] : [],
         mustChangePassword: profile.must_change_password,
