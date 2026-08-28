@@ -4,6 +4,7 @@ import { resolveEffectiveActor } from '../actor.js'
 import { withActorClaims } from '../db.js'
 import { assertOrgUsable } from '../orgGuard.js'
 import { safeTool, jsonResult, errorResult } from '../toolResult.js'
+import { registerTools, type ToolDef } from './types.js'
 
 const ROLE_SLUGS = ['super_admin', 'hr_manager', 'hr_staff', 'accountant'] as const
 
@@ -41,161 +42,189 @@ function wouldStripLastSuperAdmin(
   return otherActiveSuperAdmins.length === 0
 }
 
-export function registerTeamAccessTools(server: McpServer) {
-  server.tool(
-    'list_team_members',
+export const listTeamMembersTool: ToolDef<{ org_id: string; actor_email?: string }> = {
+  name: 'list_team_members',
+  description:
     'List all team members (active and inactive) for an organization, via the org-scoped get_team_members RPC. ' +
-      'Requires the acting user to be a member of that org — see this file\'s header comment.',
-    { org_id: z.string().uuid(), actor_email: z.string().email().optional() },
-    safeTool(async ({ org_id, actor_email }) => {
-      await assertOrgUsable(org_id)
-      const actor = await resolveEffectiveActor(actor_email)
+    'Requires the acting user to be a member of that org — see this file\'s header comment.',
+  schema: { org_id: z.string().uuid(), actor_email: z.string().email().optional() },
+  handler: safeTool(async ({ org_id, actor_email }) => {
+    await assertOrgUsable(org_id)
+    const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        const { rows } = await query('SELECT * FROM get_team_members($1)', [org_id])
-        return jsonResult(rows)
-      })
-    }),
-  )
+    return withActorClaims(actor, async (query) => {
+      const { rows } = await query('SELECT * FROM get_team_members($1)', [org_id])
+      return jsonResult(rows)
+    })
+  }),
+}
 
-  server.tool(
-    'list_pending_invites',
+export const listPendingInvitesTool: ToolDef<{ org_id: string; actor_email?: string }> = {
+  name: 'list_pending_invites',
+  description:
     'List pending invitations for an organization, via the org-scoped get_pending_invites RPC. Requires the ' +
-      'acting user to be a member of that org.',
-    { org_id: z.string().uuid(), actor_email: z.string().email().optional() },
-    safeTool(async ({ org_id, actor_email }) => {
-      await assertOrgUsable(org_id)
-      const actor = await resolveEffectiveActor(actor_email)
+    'acting user to be a member of that org.',
+  schema: { org_id: z.string().uuid(), actor_email: z.string().email().optional() },
+  handler: safeTool(async ({ org_id, actor_email }) => {
+    await assertOrgUsable(org_id)
+    const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        const { rows } = await query('SELECT * FROM get_pending_invites($1)', [org_id])
-        return jsonResult(rows)
-      })
-    }),
-  )
+    return withActorClaims(actor, async (query) => {
+      const { rows } = await query('SELECT * FROM get_pending_invites($1)', [org_id])
+      return jsonResult(rows)
+    })
+  }),
+}
 
-  server.tool(
-    'get_team_member',
+export const getTeamMemberTool: ToolDef<{ org_id: string; user_id: string; actor_email?: string }> = {
+  name: 'get_team_member',
+  description:
     'Get one team member from an org\'s roster by user_id (filters list_team_members\' result — there is no ' +
-      'single-row RPC for this).',
-    { org_id: z.string().uuid(), user_id: z.string().uuid(), actor_email: z.string().email().optional() },
-    safeTool(async ({ org_id, user_id, actor_email }) => {
-      await assertOrgUsable(org_id)
-      const actor = await resolveEffectiveActor(actor_email)
+    'single-row RPC for this).',
+  schema: { org_id: z.string().uuid(), user_id: z.string().uuid(), actor_email: z.string().email().optional() },
+  handler: safeTool(async ({ org_id, user_id, actor_email }) => {
+    await assertOrgUsable(org_id)
+    const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        const { rows } = await query('SELECT * FROM get_team_members($1)', [org_id])
-        const member = rows.find((r: any) => r.user_id === user_id)
-        if (!member) return errorResult(`No team member with user_id ${user_id} found in org ${org_id}.`)
-        return jsonResult(member)
-      })
-    }),
-  )
+    return withActorClaims(actor, async (query) => {
+      const { rows } = await query('SELECT * FROM get_team_members($1)', [org_id])
+      const member = rows.find((r: any) => r.user_id === user_id)
+      if (!member) return errorResult(`No team member with user_id ${user_id} found in org ${org_id}.`)
+      return jsonResult(member)
+    })
+  }),
+}
 
-  server.tool(
-    'deactivate_member',
+export const deactivateMemberTool: ToolDef<{
+  org_id: string
+  user_id: string
+  confirm: boolean
+  actor_email?: string
+}> = {
+  name: 'deactivate_member',
+  description:
     'Deactivate a team member, immediately revoking their access to HRISPH. Requires confirm: true. The underlying ' +
-      'deactivate_member RPC itself refuses if the target is the last active super_admin in the org.',
-    {
-      org_id: z.string().uuid(),
-      user_id: z.string().uuid(),
-      confirm: z.boolean().default(false),
-      actor_email: z.string().email().optional(),
-    },
-    safeTool(async ({ org_id, user_id, confirm, actor_email }) => {
-      await assertOrgUsable(org_id)
-      if (!confirm) {
-        return errorResult(
-          `Deactivating user ${user_id} in org ${org_id} will immediately revoke their access to HRISPH. ` +
-            `Re-call with confirm: true to proceed.`,
-        )
-      }
-      const actor = await resolveEffectiveActor(actor_email)
+    'deactivate_member RPC itself refuses if the target is the last active super_admin in the org.',
+  schema: {
+    org_id: z.string().uuid(),
+    user_id: z.string().uuid(),
+    confirm: z.boolean().default(false),
+    actor_email: z.string().email().optional(),
+  },
+  handler: safeTool(async ({ org_id, user_id, confirm, actor_email }) => {
+    await assertOrgUsable(org_id)
+    if (!confirm) {
+      return errorResult(
+        `Deactivating user ${user_id} in org ${org_id} will immediately revoke their access to HRISPH. ` +
+          `Re-call with confirm: true to proceed.`,
+      )
+    }
+    const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        await query('SELECT deactivate_member($1)', [user_id])
-        return jsonResult({ org_id, user_id, deactivated: true })
-      })
-    }),
-  )
+    return withActorClaims(actor, async (query) => {
+      await query('SELECT deactivate_member($1)', [user_id])
+      return jsonResult({ org_id, user_id, deactivated: true })
+    })
+  }),
+}
 
-  server.tool(
-    'reactivate_member',
+export const reactivateMemberTool: ToolDef<{ org_id: string; user_id: string; actor_email?: string }> = {
+  name: 'reactivate_member',
+  description:
     'Reactivate a previously deactivated team member, restoring their access to HRISPH. Not guarded — restoring ' +
-      'access is treated as low-risk, matching the app\'s own UI (no confirm dialog on Reactivate, only Deactivate).',
-    { org_id: z.string().uuid(), user_id: z.string().uuid(), actor_email: z.string().email().optional() },
-    safeTool(async ({ org_id, user_id, actor_email }) => {
-      await assertOrgUsable(org_id)
-      const actor = await resolveEffectiveActor(actor_email)
+    'access is treated as low-risk, matching the app\'s own UI (no confirm dialog on Reactivate, only Deactivate).',
+  schema: { org_id: z.string().uuid(), user_id: z.string().uuid(), actor_email: z.string().email().optional() },
+  handler: safeTool(async ({ org_id, user_id, actor_email }) => {
+    await assertOrgUsable(org_id)
+    const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        await query('SELECT reactivate_member($1)', [user_id])
-        return jsonResult({ org_id, user_id, reactivated: true })
-      })
-    }),
-  )
+    return withActorClaims(actor, async (query) => {
+      await query('SELECT reactivate_member($1)', [user_id])
+      return jsonResult({ org_id, user_id, reactivated: true })
+    })
+  }),
+}
 
-  server.tool(
-    'change_user_role',
+export const changeUserRoleTool: ToolDef = {
+  name: 'change_user_role',
+  description:
     'Change a team member\'s role within an org. Requires confirm: true. Unlike deactivate_member, the underlying ' +
-      'change_user_role RPC has NO guard against demoting the last active super_admin — this tool adds that check ' +
-      'itself and refuses outright (no confirm override) if the change would strip an org of its last super_admin.',
-    {
-      org_id: z.string().uuid(),
-      user_id: z.string().uuid(),
-      new_role_slug: z.enum(ROLE_SLUGS),
-      confirm: z.boolean().default(false),
-      actor_email: z.string().email().optional(),
-    },
-    safeTool(async ({ org_id, user_id, new_role_slug, confirm, actor_email }) => {
-      await assertOrgUsable(org_id)
-      const actor = await resolveEffectiveActor(actor_email)
+    'change_user_role RPC has NO guard against demoting the last active super_admin — this tool adds that check ' +
+    'itself and refuses outright (no confirm override) if the change would strip an org of its last super_admin.',
+  schema: {
+    org_id: z.string().uuid(),
+    user_id: z.string().uuid(),
+    new_role_slug: z.enum(ROLE_SLUGS),
+    confirm: z.boolean().default(false),
+    actor_email: z.string().email().optional(),
+  },
+  handler: safeTool(async ({ org_id, user_id, new_role_slug, confirm, actor_email }) => {
+    await assertOrgUsable(org_id)
+    const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        const { rows: members } = await query('SELECT * FROM get_team_members($1)', [org_id])
+    return withActorClaims(actor, async (query) => {
+      const { rows: members } = await query('SELECT * FROM get_team_members($1)', [org_id])
 
-        if (wouldStripLastSuperAdmin(members, user_id, new_role_slug)) {
-          return errorResult(
-            `Refusing: changing user ${user_id}'s role to "${new_role_slug}" would leave org ${org_id} with no ` +
-              `active super_admin. This isn't guarded by confirm — pick a different target or promote another ` +
-              `super_admin first.`,
-          )
-        }
-
-        if (!confirm) {
-          return errorResult(
-            `Changing user ${user_id}'s role to "${new_role_slug}" in org ${org_id}. Re-call with confirm: true to proceed.`,
-          )
-        }
-
-        await query('SELECT change_user_role($1, $2)', [user_id, new_role_slug])
-        return jsonResult({ org_id, user_id, new_role_slug, changed: true })
-      })
-    }),
-  )
-
-  server.tool(
-    'revoke_invite',
-    'Revoke a pending invitation so it can no longer be accepted. Requires confirm: true.',
-    {
-      org_id: z.string().uuid(),
-      invite_id: z.string().uuid(),
-      confirm: z.boolean().default(false),
-      actor_email: z.string().email().optional(),
-    },
-    safeTool(async ({ org_id, invite_id, confirm, actor_email }) => {
-      await assertOrgUsable(org_id)
-      if (!confirm) {
+      if (wouldStripLastSuperAdmin(members, user_id, new_role_slug)) {
         return errorResult(
-          `Revoking invite ${invite_id} will prevent it from ever being accepted. Re-call with confirm: true to proceed.`,
+          `Refusing: changing user ${user_id}'s role to "${new_role_slug}" would leave org ${org_id} with no ` +
+            `active super_admin. This isn't guarded by confirm — pick a different target or promote another ` +
+            `super_admin first.`,
         )
       }
-      const actor = await resolveEffectiveActor(actor_email)
 
-      return withActorClaims(actor, async (query) => {
-        await query('SELECT revoke_invite($1)', [invite_id])
-        return jsonResult({ org_id, invite_id, revoked: true })
-      })
-    }),
-  )
+      if (!confirm) {
+        return errorResult(
+          `Changing user ${user_id}'s role to "${new_role_slug}" in org ${org_id}. Re-call with confirm: true to proceed.`,
+        )
+      }
+
+      await query('SELECT change_user_role($1, $2)', [user_id, new_role_slug])
+      return jsonResult({ org_id, user_id, new_role_slug, changed: true })
+    })
+  }),
+}
+
+export const revokeInviteTool: ToolDef<{
+  org_id: string
+  invite_id: string
+  confirm: boolean
+  actor_email?: string
+}> = {
+  name: 'revoke_invite',
+  description: 'Revoke a pending invitation so it can no longer be accepted. Requires confirm: true.',
+  schema: {
+    org_id: z.string().uuid(),
+    invite_id: z.string().uuid(),
+    confirm: z.boolean().default(false),
+    actor_email: z.string().email().optional(),
+  },
+  handler: safeTool(async ({ org_id, invite_id, confirm, actor_email }) => {
+    await assertOrgUsable(org_id)
+    if (!confirm) {
+      return errorResult(
+        `Revoking invite ${invite_id} will prevent it from ever being accepted. Re-call with confirm: true to proceed.`,
+      )
+    }
+    const actor = await resolveEffectiveActor(actor_email)
+
+    return withActorClaims(actor, async (query) => {
+      await query('SELECT revoke_invite($1)', [invite_id])
+      return jsonResult({ org_id, invite_id, revoked: true })
+    })
+  }),
+}
+
+export const teamAccessTools: ToolDef[] = [
+  listTeamMembersTool,
+  listPendingInvitesTool,
+  getTeamMemberTool,
+  deactivateMemberTool,
+  reactivateMemberTool,
+  changeUserRoleTool,
+  revokeInviteTool,
+]
+
+export function registerTeamAccessTools(server: McpServer) {
+  registerTools(server, teamAccessTools)
 }

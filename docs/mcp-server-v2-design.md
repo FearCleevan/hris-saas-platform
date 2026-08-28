@@ -1,7 +1,8 @@
 # HRISPH MCP Server v2 — Remote claude.ai Connector — Design Plan
 
-Status: **Phase 1 (spike) done — `pg` works in Deno Edge Functions.
-Phases 2-5 not started.** Written after v1 (local stdio server,
+Status: **Phase 1 (spike) done — `pg` works in Deno Edge Functions. Phase 2
+(shared tool-definition refactor) done — 130 tests still pass unchanged.
+Phases 3-5 not started.** Written after v1 (local stdio server,
 `hris-saas-platform/mcp-server/`) was fully built, unit-tested (130 tests),
 and confirmed working from a real Claude Code session. User asked how to
 get the same "Connectors" entry in claude.ai's own settings that
@@ -199,7 +200,17 @@ HRISPH admins configure themselves."
    Function. **Status: DONE (2026-08-28) — `pg` works, see §2.**
 2. **Refactor v1 for shared tool definitions** (§3) — no new capability,
    pure restructuring, full v1 test suite must still pass unchanged
-   afterward (proves the refactor didn't change behavior).
+   afterward (proves the refactor didn't change behavior). **Status: DONE
+   (2026-08-28)** — every tool in all 8 `tools/*.ts` files now exported as
+   a `ToolDef` object (`src/tools/types.ts`); `registerXTools(server)` is a
+   one-line loop (`registerTools(server, xTools)`) instead of inline
+   `server.tool()` calls. All 130 unit tests pass unchanged, `npm run
+   verify` still pulls real live data — confirms zero behavior change.
+   `index.ts` needed no changes at all (same `registerXTools(server)`
+   call signature). A v2 dispatcher can now `import { teamAccessTools }
+   from './tools/teamAccess.js'` etc. and feed the flat arrays into its own
+   JSON-RPC `tools/call` switch, matching CRM's `tools/registry.ts` shape,
+   without duplicating any handler body.
 3. **OAuth + JSON-RPC scaffold**: `hris-mcp` Edge Function with `index.ts`/
    `auth.ts`/`oauth.ts` (adapted from CRM's), zero tools wired in yet —
    verify claude.ai will actually accept it as a Custom Connector before

@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { supabase } from '../supabaseClient.js'
 import { assertOrgUsable } from '../orgGuard.js'
 import { safeTool, jsonResult, errorResult } from '../toolResult.js'
+import { registerTools, type ToolDef } from './types.js'
 
 const SCHEDULE_SELECT =
   'id, name, code, shift_start, shift_end, break_minutes, grace_period_minutes, work_hours, is_night_shift, is_flexible, color, departments, work_days'
@@ -35,162 +36,178 @@ const scheduleFields = {
   departments: z.array(z.string()).default([]),
 }
 
-export function registerScheduleTools(server: McpServer) {
-  server.tool(
-    'list_schedules',
-    'List active shift schedules for an org.',
-    { org_id: z.string().uuid() },
-    safeTool(async ({ org_id }) => {
-      await assertOrgUsable(org_id)
-      const { data, error } = await supabase
-        .from('schedules')
-        .select(SCHEDULE_SELECT)
-        .eq('organization_id', org_id)
-        .eq('is_active', true)
-        .order('name')
-      if (error) return errorResult(error.message)
-      return jsonResult(data)
-    }),
-  )
+export const listSchedulesTool: ToolDef<{ org_id: string }> = {
+  name: 'list_schedules',
+  description: 'List active shift schedules for an org.',
+  schema: { org_id: z.string().uuid() },
+  handler: safeTool(async ({ org_id }) => {
+    await assertOrgUsable(org_id)
+    const { data, error } = await supabase
+      .from('schedules')
+      .select(SCHEDULE_SELECT)
+      .eq('organization_id', org_id)
+      .eq('is_active', true)
+      .order('name')
+    if (error) return errorResult(error.message)
+    return jsonResult(data)
+  }),
+}
 
-  server.tool(
-    'get_schedule_assignments',
-    'List current employee->schedule assignments for an org, optionally filtered to one schedule.',
-    { org_id: z.string().uuid(), schedule_id: z.string().uuid().optional() },
-    safeTool(async ({ org_id, schedule_id }) => {
-      await assertOrgUsable(org_id)
-      let q = supabase
-        .from('employee_schedules')
-        .select('id, employee_id, schedule_id, effective_date')
-        .eq('organization_id', org_id)
-        .eq('is_current', true)
-      if (schedule_id) q = q.eq('schedule_id', schedule_id)
-      const { data, error } = await q
-      if (error) return errorResult(error.message)
-      return jsonResult(data)
-    }),
-  )
+export const getScheduleAssignmentsTool: ToolDef<{ org_id: string; schedule_id?: string }> = {
+  name: 'get_schedule_assignments',
+  description: 'List current employee->schedule assignments for an org, optionally filtered to one schedule.',
+  schema: { org_id: z.string().uuid(), schedule_id: z.string().uuid().optional() },
+  handler: safeTool(async ({ org_id, schedule_id }) => {
+    await assertOrgUsable(org_id)
+    let q = supabase
+      .from('employee_schedules')
+      .select('id, employee_id, schedule_id, effective_date')
+      .eq('organization_id', org_id)
+      .eq('is_current', true)
+    if (schedule_id) q = q.eq('schedule_id', schedule_id)
+    const { data, error } = await q
+    if (error) return errorResult(error.message)
+    return jsonResult(data)
+  }),
+}
 
-  server.tool(
-    'create_schedule',
-    'Create a new shift schedule for an org. Not guarded — purely additive, no existing data at risk.',
-    { org_id: z.string().uuid(), ...scheduleFields },
-    safeTool(async ({ org_id, ...fields }) => {
-      await assertOrgUsable(org_id)
-      const { data, error } = await supabase
-        .from('schedules')
-        .insert({
-          organization_id: org_id,
-          name: fields.name,
-          code: fields.code,
-          shift_start: fields.start_time,
-          shift_end: fields.end_time,
-          break_minutes: fields.break_minutes,
-          grace_period_minutes: fields.grace_period_minutes,
-          work_hours: calcWorkHours(fields.start_time, fields.end_time, fields.break_minutes),
-          is_night_shift: fields.is_night_shift,
-          is_flexible: fields.is_flexible,
-          is_active: true,
-          color: fields.color,
-          departments: fields.departments,
-          work_days: fields.work_days,
-        })
-        .select(SCHEDULE_SELECT)
-        .single()
-      if (error) return errorResult(error.message)
-      return jsonResult(data)
-    }),
-  )
+export const createScheduleTool: ToolDef = {
+  name: 'create_schedule',
+  description: 'Create a new shift schedule for an org. Not guarded — purely additive, no existing data at risk.',
+  schema: { org_id: z.string().uuid(), ...scheduleFields },
+  handler: safeTool(async ({ org_id, ...fields }) => {
+    await assertOrgUsable(org_id)
+    const { data, error } = await supabase
+      .from('schedules')
+      .insert({
+        organization_id: org_id,
+        name: fields.name,
+        code: fields.code,
+        shift_start: fields.start_time,
+        shift_end: fields.end_time,
+        break_minutes: fields.break_minutes,
+        grace_period_minutes: fields.grace_period_minutes,
+        work_hours: calcWorkHours(fields.start_time, fields.end_time, fields.break_minutes),
+        is_night_shift: fields.is_night_shift,
+        is_flexible: fields.is_flexible,
+        is_active: true,
+        color: fields.color,
+        departments: fields.departments,
+        work_days: fields.work_days,
+      })
+      .select(SCHEDULE_SELECT)
+      .single()
+    if (error) return errorResult(error.message)
+    return jsonResult(data)
+  }),
+}
 
-  server.tool(
-    'update_schedule',
+export const updateScheduleTool: ToolDef = {
+  name: 'update_schedule',
+  description:
     'Update an existing shift schedule\'s config (times, color, departments, work days). Not guarded — reversible ' +
-      'by another update, and touches no employee assignments.',
-    { org_id: z.string().uuid(), schedule_id: z.string().uuid(), ...scheduleFields },
-    safeTool(async ({ org_id, schedule_id, ...fields }) => {
-      await assertOrgUsable(org_id)
-      const { data, error } = await supabase
-        .from('schedules')
-        .update({
-          name: fields.name,
-          code: fields.code,
-          shift_start: fields.start_time,
-          shift_end: fields.end_time,
-          break_minutes: fields.break_minutes,
-          grace_period_minutes: fields.grace_period_minutes,
-          work_hours: calcWorkHours(fields.start_time, fields.end_time, fields.break_minutes),
-          is_night_shift: fields.is_night_shift,
-          is_flexible: fields.is_flexible,
-          color: fields.color,
-          departments: fields.departments,
-          work_days: fields.work_days,
-        })
-        .eq('id', schedule_id)
-        .eq('organization_id', org_id)
-        .select(SCHEDULE_SELECT)
-        .maybeSingle()
-      if (error) return errorResult(error.message)
-      if (!data) return errorResult(`No schedule with id ${schedule_id} found in org ${org_id}.`)
-      return jsonResult(data)
-    }),
-  )
+    'by another update, and touches no employee assignments.',
+  schema: { org_id: z.string().uuid(), schedule_id: z.string().uuid(), ...scheduleFields },
+  handler: safeTool(async ({ org_id, schedule_id, ...fields }) => {
+    await assertOrgUsable(org_id)
+    const { data, error } = await supabase
+      .from('schedules')
+      .update({
+        name: fields.name,
+        code: fields.code,
+        shift_start: fields.start_time,
+        shift_end: fields.end_time,
+        break_minutes: fields.break_minutes,
+        grace_period_minutes: fields.grace_period_minutes,
+        work_hours: calcWorkHours(fields.start_time, fields.end_time, fields.break_minutes),
+        is_night_shift: fields.is_night_shift,
+        is_flexible: fields.is_flexible,
+        color: fields.color,
+        departments: fields.departments,
+        work_days: fields.work_days,
+      })
+      .eq('id', schedule_id)
+      .eq('organization_id', org_id)
+      .select(SCHEDULE_SELECT)
+      .maybeSingle()
+    if (error) return errorResult(error.message)
+    if (!data) return errorResult(`No schedule with id ${schedule_id} found in org ${org_id}.`)
+    return jsonResult(data)
+  }),
+}
 
-  server.tool(
-    'assign_employees_to_schedule',
+export const assignEmployeesToScheduleTool: ToolDef<{
+  org_id: string
+  schedule_id: string
+  employee_ids: string[]
+}> = {
+  name: 'assign_employees_to_schedule',
+  description:
     'Set the full list of employees currently assigned to a schedule. Reproduces ' +
-      'services/attendance.ts\'s updateScheduleAssignments() exactly: for every incoming employee, ends their ' +
-      'current assignment on *any* schedule first (not just this one) before inserting the new one — this is the ' +
-      'no-double-booking behavior F6 of the QA checklist verified. Employees on this schedule but missing from ' +
-      'employee_ids are unassigned. Not guarded — reassignment is a routine, reversible HR operation.',
-    { org_id: z.string().uuid(), schedule_id: z.string().uuid(), employee_ids: z.array(z.string().uuid()) },
-    safeTool(async ({ org_id, schedule_id, employee_ids }) => {
-      await assertOrgUsable(org_id)
-      const today = new Date().toISOString().slice(0, 10)
-      const incoming = new Set(employee_ids)
+    'services/attendance.ts\'s updateScheduleAssignments() exactly: for every incoming employee, ends their ' +
+    'current assignment on *any* schedule first (not just this one) before inserting the new one — this is the ' +
+    'no-double-booking behavior F6 of the QA checklist verified. Employees on this schedule but missing from ' +
+    'employee_ids are unassigned. Not guarded — reassignment is a routine, reversible HR operation.',
+  schema: { org_id: z.string().uuid(), schedule_id: z.string().uuid(), employee_ids: z.array(z.string().uuid()) },
+  handler: safeTool(async ({ org_id, schedule_id, employee_ids }) => {
+    await assertOrgUsable(org_id)
+    const today = new Date().toISOString().slice(0, 10)
+    const incoming = new Set(employee_ids)
 
-      const { data: currentOnSchedule, error: currentErr } = await supabase
+    const { data: currentOnSchedule, error: currentErr } = await supabase
+      .from('employee_schedules')
+      .select('employee_id')
+      .eq('schedule_id', schedule_id)
+      .eq('organization_id', org_id)
+      .eq('is_current', true)
+    if (currentErr) return errorResult(currentErr.message)
+
+    const removedIds = (currentOnSchedule ?? [])
+      .map((r: { employee_id: string }) => r.employee_id)
+      .filter((id: string) => !incoming.has(id))
+
+    if (removedIds.length > 0) {
+      const { error } = await supabase
         .from('employee_schedules')
-        .select('employee_id')
+        .update({ is_current: false, end_date: today })
+        .in('employee_id', removedIds)
         .eq('schedule_id', schedule_id)
         .eq('organization_id', org_id)
         .eq('is_current', true)
-      if (currentErr) return errorResult(currentErr.message)
+      if (error) return errorResult(error.message)
+    }
 
-      const removedIds = (currentOnSchedule ?? [])
-        .map((r: { employee_id: string }) => r.employee_id)
-        .filter((id: string) => !incoming.has(id))
+    for (const empId of employee_ids) {
+      const { error: endErr } = await supabase
+        .from('employee_schedules')
+        .update({ is_current: false, end_date: today })
+        .eq('employee_id', empId)
+        .eq('organization_id', org_id)
+        .eq('is_current', true)
+      if (endErr) return errorResult(endErr.message)
 
-      if (removedIds.length > 0) {
-        const { error } = await supabase
-          .from('employee_schedules')
-          .update({ is_current: false, end_date: today })
-          .in('employee_id', removedIds)
-          .eq('schedule_id', schedule_id)
-          .eq('organization_id', org_id)
-          .eq('is_current', true)
-        if (error) return errorResult(error.message)
-      }
+      const { error: insErr } = await supabase.from('employee_schedules').insert({
+        employee_id: empId,
+        organization_id: org_id,
+        schedule_id,
+        effective_date: today,
+        is_current: true,
+      })
+      if (insErr) return errorResult(insErr.message)
+    }
 
-      for (const empId of employee_ids) {
-        const { error: endErr } = await supabase
-          .from('employee_schedules')
-          .update({ is_current: false, end_date: today })
-          .eq('employee_id', empId)
-          .eq('organization_id', org_id)
-          .eq('is_current', true)
-        if (endErr) return errorResult(endErr.message)
+    return jsonResult({ org_id, schedule_id, assigned: employee_ids, unassigned: removedIds })
+  }),
+}
 
-        const { error: insErr } = await supabase.from('employee_schedules').insert({
-          employee_id: empId,
-          organization_id: org_id,
-          schedule_id,
-          effective_date: today,
-          is_current: true,
-        })
-        if (insErr) return errorResult(insErr.message)
-      }
+export const scheduleTools: ToolDef[] = [
+  listSchedulesTool,
+  getScheduleAssignmentsTool,
+  createScheduleTool,
+  updateScheduleTool,
+  assignEmployeesToScheduleTool,
+]
 
-      return jsonResult({ org_id, schedule_id, assigned: employee_ids, unassigned: removedIds })
-    }),
-  )
+export function registerScheduleTools(server: McpServer) {
+  registerTools(server, scheduleTools)
 }
