@@ -1,11 +1,29 @@
 # HRISPH MCP Server v2 — Remote claude.ai Connector — Design Plan
 
-Status: **plan only, not started.** Written after v1 (local stdio server,
+Status: **Phase 1 (spike) done — `pg` works in Deno Edge Functions.
+Phases 2-5 not started.** Written after v1 (local stdio server,
 `hris-saas-platform/mcp-server/`) was fully built, unit-tested (130 tests),
 and confirmed working from a real Claude Code session. User asked how to
 get the same "Connectors" entry in claude.ai's own settings that
 `crm-project` has, and this is the plan for that — a genuinely separate,
 much larger build than v1, not a config toggle.
+
+**Spike result (2026-08-28)**: deployed a throwaway `pg-spike` Edge
+Function to the real `hrisph` project and confirmed `pg` (via
+`npm:pg@8.13.1`) correctly holds one connection across
+`BEGIN`/`set_config()`/`SELECT`/`COMMIT` — the exact multi-statement
+transaction pattern `db.ts`'s `withActorClaims` needs — using
+`Deno.env.get('SUPABASE_DB_URL')`, which is **auto-provided to every Edge
+Function by default, no secret needs setting**. Confirmed via a real HTTP
+call: `set_config('request.jwt.claims', ...)` written inside the
+transaction was correctly read back by a subsequent query in the same
+transaction, then committed. This resolves §2's open question — the `pg`
+approach can be ported directly, no fallback to a different driver or the
+dispatcher-RPC alternative needed. (Worth noting: Supabase's own official
+docs example for direct-Postgres-from-Edge-Functions uses `postgres`/
+postgres.js instead of `pg` — that may still be worth trying if `pg` ever
+shows problems at higher concurrency/cold-start scale, but wasn't needed
+for this spike.)
 
 ---
 
@@ -66,14 +84,15 @@ write tools (team-access, leave approvals, offboarding completion) actually
 need, and it's not something `supabase-js` can do at all (see v1's own
 design doc, section 3.1, for why).
 
-**Open technical question, not yet answered — needs a spike before
-committing to full v2 implementation**: does the `pg` npm package work
-correctly inside a Supabase Edge Function's Deno runtime via an `npm:`
-specifier, including holding one connection across multiple sequential
-statements? Supabase Edge Functions increasingly support `npm:` imports,
-but connection-pooling behavior, cold-start connection limits, and whether
-`pg.Pool`/`PoolClient.query()` sequencing behaves identically under Deno's
-runtime are unverified. If `pg` doesn't work cleanly there, options include:
+**RESOLVED (2026-08-28) — `pg` works.** Deployed a real throwaway Edge
+Function (`pg-spike`) to confirm: `npm:pg@8.13.1` correctly holds one
+connection across `BEGIN`/`set_config()`/`SELECT`/`COMMIT`, using the
+auto-provided `Deno.env.get('SUPABASE_DB_URL')` — no secret to configure.
+A value set via `set_config` inside the transaction was correctly read
+back by a later query in the same transaction, then committed. The
+concerns below (connection pooling, cold starts) weren't stress-tested at
+scale, but the core mechanism v1 depends on works. If `pg` ever does show
+problems at higher concurrency, options include:
 
 - Deno's native `postgres` module (a different driver, would need the
   `withActorClaims` logic re-verified against its API, not a drop-in swap).
@@ -177,8 +196,7 @@ HRISPH admins configure themselves."
 
 1. **Spike**: confirm `pg` (or an alternative) actually works for
    multi-statement transactions inside a real deployed Supabase Edge
-   Function. This gates everything else — don't proceed past this until
-   it's answered one way or the other.
+   Function. **Status: DONE (2026-08-28) — `pg` works, see §2.**
 2. **Refactor v1 for shared tool definitions** (§3) — no new capability,
    pure restructuring, full v1 test suite must still pass unchanged
    afterward (proves the refactor didn't change behavior).
