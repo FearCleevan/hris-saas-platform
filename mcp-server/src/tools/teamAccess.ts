@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { resolveActor } from '../actor.js'
+import { resolveEffectiveActor } from '../actor.js'
 import { withActorClaims } from '../db.js'
 import { assertOrgUsable } from '../orgGuard.js'
-import { MCP_HRIS_ACTOR_EMAIL } from '../config.js'
 import { safeTool, jsonResult, errorResult } from '../toolResult.js'
 
 const ROLE_SLUGS = ['super_admin', 'hr_manager', 'hr_staff', 'accountant'] as const
@@ -18,16 +17,8 @@ const ROLE_SLUGS = ['super_admin', 'hr_manager', 'hr_staff', 'accountant'] as co
 // depends on which real user you act as, not on this server's own org
 // guard. Every tool here accepts an optional actor_email override for
 // exactly this reason: to query an org the default actor doesn't belong to,
-// pass a real member of that org instead.
-async function resolveEffectiveActor(actorEmailOverride: string | undefined) {
-  const email = actorEmailOverride ?? MCP_HRIS_ACTOR_EMAIL
-  if (!email) {
-    throw new Error(
-      'No actor email available — set MCP_HRIS_ACTOR_EMAIL in .env.local, or pass actor_email explicitly for this call.',
-    )
-  }
-  return resolveActor(email)
-}
+// pass a real member of that org instead. resolveEffectiveActor() itself
+// lives in ../actor.ts, shared with leave.ts's approve/reject tools.
 
 // change_user_role's DB RPC has NO guard against demoting the last active
 // super_admin in an org — unlike deactivate_member, which refuses that case

@@ -11,17 +11,21 @@ JWT claims — a plain service-role client can't satisfy those the way it can
 for CRM's simpler direct-table-write model).
 
 **Phase 1**: read-only tools across every domain, plus `simulate_actor`.
-**Phase 2 (current)**: team-access writes — `deactivate_member`,
-`reactivate_member`, `change_user_role`, `revoke_invite`. All four guarded
-tools (`deactivate_member`/`change_user_role`/`revoke_invite`) require
+**Phase 2**: team-access writes — `deactivate_member`, `reactivate_member`,
+`change_user_role`, `revoke_invite`. Three of the four require
 `confirm: true`; `change_user_role` additionally refuses outright — even
 with `confirm: true` — if the change would leave an org with no active
 super_admin, a guard the underlying DB RPC itself doesn't have. Invite
 *sending* (`resend_invite`/`send_invite`) is deferred — it requires calling
 the `invite-member` Edge Function with a real signed user JWT, a different
 auth mechanism than the `SET LOCAL request.jwt.claims` trick this server
-otherwise uses for RPCs. Schedule/leave/offboarding/payroll writes are
-Phase 3+ — see the design doc's phase breakdown.
+otherwise uses for RPCs.
+**Phase 3 (current)**: schedule + leave writes — `create_schedule`,
+`update_schedule`, `assign_employees_to_schedule` (plain table writes, no
+RPC needed), `apply_leave`, `approve_leave_request`/`reject_leave_request`
+(RPCs, use the claims wrapper), `seed_default_leave_types` (the one guarded
+tool in this phase). Offboarding/payroll writes are Phase 4+ — see the
+design doc's phase breakdown.
 
 ## Setup
 

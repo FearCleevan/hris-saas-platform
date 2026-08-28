@@ -19,6 +19,9 @@ export interface MockQueryBuilder {
   or: Mock
   order: Mock
   limit: Mock
+  insert: Mock
+  update: Mock
+  delete: Mock
   single: Mock
   maybeSingle: Mock
   then: (resolve: (v: QueryResult) => void) => void
@@ -26,7 +29,7 @@ export interface MockQueryBuilder {
 
 export function makeQueryBuilder(result: QueryResult): MockQueryBuilder {
   const builder = {} as MockQueryBuilder
-  const chain = ['select', 'eq', 'in', 'or', 'order', 'limit'] as const
+  const chain = ['select', 'eq', 'in', 'or', 'order', 'limit', 'insert', 'update', 'delete'] as const
   for (const method of chain) builder[method] = vi.fn(() => builder)
   builder.single = vi.fn(async () => result)
   builder.maybeSingle = vi.fn(async () => result)

@@ -1,5 +1,6 @@
 import { withPlainConnection } from './db.js'
 import type { ActorClaims } from './db.js'
+import { MCP_HRIS_ACTOR_EMAIL } from './config.js'
 
 export interface ResolvedActor extends ActorClaims {
   email: string
@@ -64,4 +65,19 @@ export async function resolveActor(email: string): Promise<ResolvedActor> {
     org_id: row.org_id,
     user_role: row.role_slug,
   }
+}
+
+// Every org-scoped RPC-calling tool needs "which real user am I acting as"
+// — this resolves that from either an explicit per-call override or the
+// configured default, so it's written once here instead of duplicated per
+// tools/*.ts file (originally lived only in tools/teamAccess.ts; extracted
+// when leave.ts needed the identical logic for approve/reject_leave_request).
+export async function resolveEffectiveActor(actorEmailOverride: string | undefined): Promise<ResolvedActor> {
+  const email = actorEmailOverride ?? MCP_HRIS_ACTOR_EMAIL
+  if (!email) {
+    throw new Error(
+      'No actor email available — set MCP_HRIS_ACTOR_EMAIL in .env.local, or pass actor_email explicitly for this call.',
+    )
+  }
+  return resolveActor(email)
 }

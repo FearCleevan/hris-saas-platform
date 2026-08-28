@@ -6,6 +6,15 @@ vi.mock('./db.js', () => ({
   withPlainConnection: vi.fn(async (fn: (query: unknown) => unknown) => fn(queryMock)),
 }))
 
+// Mutated per-test via this ref rather than a fixed mock, since
+// resolveEffectiveActor's "nothing configured at all" case needs it null.
+let mockActorEmail: string | null = null
+vi.mock('./config.js', () => ({
+  get MCP_HRIS_ACTOR_EMAIL() {
+    return mockActorEmail
+  },
+}))
+
 describe('resolveActor', () => {
   beforeEach(() => {
     queryMock.mockReset()
@@ -67,5 +76,45 @@ describe('resolveActor', () => {
     })
 
     await expect(resolveActor('no-role@example.com')).rejects.toThrow(/no resolvable role/)
+  })
+})
+
+describe('resolveEffectiveActor', () => {
+  beforeEach(() => {
+    queryMock.mockReset()
+    mockActorEmail = null
+  })
+
+  it('resolves the configured MCP_HRIS_ACTOR_EMAIL when no override is given', async () => {
+    mockActorEmail = 'peter@peterpaullazan.com'
+    const { resolveEffectiveActor } = await import('./actor.js')
+    queryMock.mockResolvedValue({
+      rows: [{ user_id: 'u1', email: 'peter@peterpaullazan.com', org_id: 'org-a', role_slug: 'super_admin' }],
+    })
+
+    const actor = await resolveEffectiveActor(undefined)
+
+    expect(actor.email).toBe('peter@peterpaullazan.com')
+  })
+
+  it('prefers an explicit override over the configured default', async () => {
+    mockActorEmail = 'default@example.com'
+    const { resolveEffectiveActor } = await import('./actor.js')
+    queryMock.mockResolvedValue({
+      rows: [{ user_id: 'u2', email: 'override@example.com', org_id: 'org-a', role_slug: 'hr_manager' }],
+    })
+
+    const actor = await resolveEffectiveActor('override@example.com')
+
+    expect(actor.email).toBe('override@example.com')
+    expect(queryMock).toHaveBeenCalledWith(expect.any(String), ['override@example.com'])
+  })
+
+  it('throws a clear error when neither an override nor MCP_HRIS_ACTOR_EMAIL is available, without ever querying', async () => {
+    mockActorEmail = null
+    const { resolveEffectiveActor } = await import('./actor.js')
+
+    await expect(resolveEffectiveActor(undefined)).rejects.toThrow(/No actor email available/)
+    expect(queryMock).not.toHaveBeenCalled()
   })
 })

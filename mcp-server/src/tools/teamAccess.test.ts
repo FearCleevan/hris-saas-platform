@@ -2,22 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createFakeServer, resultJson } from '../testSupport/fakeServer.js'
 
 const assertOrgUsableMock = vi.fn()
-const resolveActorMock = vi.fn()
+const resolveEffectiveActorMock = vi.fn()
 const queryMock = vi.fn()
 const withActorClaimsMock = vi.fn(async (_actor: unknown, fn: (query: typeof queryMock) => unknown) => fn(queryMock))
 
 vi.mock('../orgGuard.js', () => ({ assertOrgUsable: assertOrgUsableMock }))
-vi.mock('../actor.js', () => ({ resolveActor: resolveActorMock }))
+// resolveEffectiveActor is mocked as a black box here — its own fallback
+// -to-default / no-actor-available logic is unit-tested directly in
+// actor.test.ts, not re-tested per tool file.
+vi.mock('../actor.js', () => ({ resolveEffectiveActor: resolveEffectiveActorMock }))
 vi.mock('../db.js', () => ({ withActorClaims: withActorClaimsMock }))
-
-// MCP_HRIS_ACTOR_EMAIL is mutated per-test via this ref rather than a fixed
-// mock, since the "no actor available at all" case needs it to be null.
-let mockActorEmail: string | null = 'peter@peterpaullazan.com'
-vi.mock('../config.js', () => ({
-  get MCP_HRIS_ACTOR_EMAIL() {
-    return mockActorEmail
-  },
-}))
 
 const ORG_ID = '85ab7ff3-454b-4ba0-858d-037551986556'
 const ACTOR = { sub: 'u1', email: 'peter@peterpaullazan.com', org_id: ORG_ID, user_role: 'super_admin' }
@@ -25,10 +19,9 @@ const ACTOR = { sub: 'u1', email: 'peter@peterpaullazan.com', org_id: ORG_ID, us
 describe('team-access tools', () => {
   beforeEach(() => {
     assertOrgUsableMock.mockReset().mockResolvedValue({ id: ORG_ID, name: 'The Launchpad Inc' })
-    resolveActorMock.mockReset().mockResolvedValue(ACTOR)
+    resolveEffectiveActorMock.mockReset().mockResolvedValue(ACTOR)
     queryMock.mockReset()
     withActorClaimsMock.mockClear()
-    mockActorEmail = 'peter@peterpaullazan.com'
   })
 
   it('registers all seven team-access tools', async () => {
@@ -58,12 +51,12 @@ describe('team-access tools', () => {
       const result = await getTool('list_team_members').handler({ org_id: ORG_ID })
 
       expect(assertOrgUsableMock).toHaveBeenCalledWith(ORG_ID)
-      expect(resolveActorMock).toHaveBeenCalledWith('peter@peterpaullazan.com')
+      expect(resolveEffectiveActorMock).toHaveBeenCalledWith(undefined)
       expect(queryMock).toHaveBeenCalledWith('SELECT * FROM get_team_members($1)', [ORG_ID])
       expect(resultJson(result)).toEqual(rows)
     })
 
-    it('uses an explicit actor_email override instead of the default when the caller needs a different org member', async () => {
+    it('passes an explicit actor_email override straight through to resolveEffectiveActor', async () => {
       const { registerTeamAccessTools } = await import('./teamAccess.js')
       const { server, getTool } = createFakeServer()
       registerTeamAccessTools(server)
@@ -71,11 +64,11 @@ describe('team-access tools', () => {
 
       await getTool('list_team_members').handler({ org_id: 'other-org', actor_email: 'someone-else@example.com' })
 
-      expect(resolveActorMock).toHaveBeenCalledWith('someone-else@example.com')
+      expect(resolveEffectiveActorMock).toHaveBeenCalledWith('someone-else@example.com')
     })
 
-    it('fails clearly when no actor_email override is given and MCP_HRIS_ACTOR_EMAIL is unset', async () => {
-      mockActorEmail = null
+    it('surfaces a resolveEffectiveActor rejection (e.g. no actor configured) as a structured tool error', async () => {
+      resolveEffectiveActorMock.mockRejectedValue(new Error('No actor email available — set MCP_HRIS_ACTOR_EMAIL...'))
       const { registerTeamAccessTools } = await import('./teamAccess.js')
       const { server, getTool } = createFakeServer()
       registerTeamAccessTools(server)
@@ -84,7 +77,7 @@ describe('team-access tools', () => {
 
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('No actor email available')
-      expect(resolveActorMock).not.toHaveBeenCalled()
+      expect(withActorClaimsMock).not.toHaveBeenCalled()
     })
 
     it('never resolves an actor or calls the RPC when the org itself is rejected', async () => {
@@ -96,7 +89,7 @@ describe('team-access tools', () => {
       const result = await getTool('list_team_members').handler({ org_id: 'bad-id' })
 
       expect(result.isError).toBe(true)
-      expect(resolveActorMock).not.toHaveBeenCalled()
+      expect(resolveEffectiveActorMock).not.toHaveBeenCalled()
       expect(withActorClaimsMock).not.toHaveBeenCalled()
     })
   })
@@ -152,7 +145,7 @@ describe('team-access tools', () => {
 
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('Re-call with confirm: true')
-      expect(resolveActorMock).not.toHaveBeenCalled()
+      expect(resolveEffectiveActorMock).not.toHaveBeenCalled()
       expect(withActorClaimsMock).not.toHaveBeenCalled()
     })
 

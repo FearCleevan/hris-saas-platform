@@ -266,6 +266,22 @@ independently-testable server, not a partial one:
 3. **Schedule + leave writes**: `create_schedule`, `update_schedule`,
    `assign_employees_to_schedule`, `apply_leave`,
    `approve_leave_request`/`reject_leave_request`, `seed_default_leave_types`.
+   **Status (2026-08-28): done.** Schedule tools are plain service-role
+   table writes (no RPC/claims needed — `schedules`/`employee_schedules`
+   aren't RLS-gated the way team-access is); leave's approve/reject are
+   RPCs and use the claims wrapper, `apply_leave` is a plain two-table write
+   with the same compensating-rollback-on-failure as the app's own
+   `applyLeave()`. None of these six are `confirm`-guarded except
+   `seed_default_leave_types` — schedule/leave changes are routine,
+   reversible HR operations, not one-way doors. 39 new unit tests (133
+   total). Verified live end-to-end via `scripts/verify-phase3-live.mjs`:
+   created two real schedules, assigned the disposable test employee to
+   one then the other and confirmed zero rows remained on the first
+   (F6's no-double-booking behavior, now proven through the tool layer
+   too), updated a schedule's config, then a full apply→reject round-trip
+   and a full apply→approve round-trip against the real seeded Vacation
+   Leave type, confirming `pending_days`/`used_days` moved exactly as
+   expected at each step. All live test data cleaned up afterward.
 4. **Offboarding + payroll writes**: `complete_offboarding`,
    `update_clearance_item`, `update_final_pay_status`,
    `resolve_dispute`/`reject_dispute`, `bulk_terminate_employees`.

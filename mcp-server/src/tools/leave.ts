@@ -2,7 +2,28 @@ import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { supabase } from '../supabaseClient.js'
 import { assertOrgUsable } from '../orgGuard.js'
+import { resolveEffectiveActor } from '../actor.js'
+import { withActorClaims } from '../db.js'
 import { safeTool, jsonResult, errorResult } from '../toolResult.js'
+
+// The standard Philippine leave-type set this server can seed into an org
+// that has none — exactly what was done by hand via SQL for The Launchpad
+// Inc during the 2026-08-27 QA session (which discovered that org had zero
+// leave_types rows, meaning Leave Requests couldn't be filed at all).
+// Hardcoded here (not copied from another org at runtime) so seeding one
+// org never silently depends on some other org's rows still existing
+// unchanged.
+const DEFAULT_LEAVE_TYPES = [
+  { name: 'Vacation Leave', code: 'VL', is_paid: true, is_mandatory: false, requires_document: false, max_days_per_year: 15, carry_over_days: 5 },
+  { name: 'Sick Leave', code: 'SL', is_paid: true, is_mandatory: false, requires_document: false, max_days_per_year: 15, carry_over_days: 0 },
+  { name: 'Maternity Leave', code: 'ML', is_paid: true, is_mandatory: true, requires_document: true, max_days_per_year: 105, carry_over_days: 0 },
+  { name: 'Paternity Leave', code: 'PL', is_paid: true, is_mandatory: true, requires_document: false, max_days_per_year: 7, carry_over_days: 0 },
+  { name: 'Solo Parent Leave', code: 'SPL', is_paid: true, is_mandatory: true, requires_document: false, max_days_per_year: 7, carry_over_days: 0 },
+  { name: 'Bereavement Leave', code: 'BL', is_paid: true, is_mandatory: false, requires_document: false, max_days_per_year: 5, carry_over_days: 0 },
+  { name: 'Emergency Leave', code: 'EL', is_paid: true, is_mandatory: false, requires_document: false, max_days_per_year: 3, carry_over_days: 0 },
+  { name: 'Unpaid Leave', code: 'UL', is_paid: false, is_mandatory: false, requires_document: false, max_days_per_year: null, carry_over_days: 0 },
+  { name: 'Service Incentive Leave', code: 'SIL', is_paid: true, is_mandatory: true, requires_document: false, max_days_per_year: 5, carry_over_days: 5 },
+] as const
 
 export function registerLeaveTools(server: McpServer) {
   server.tool(
@@ -57,6 +78,150 @@ export function registerLeaveTools(server: McpServer) {
       const { data, error } = await q
       if (error) return errorResult(error.message)
       return jsonResult(data)
+    }),
+  )
+
+  server.tool(
+    'apply_leave',
+    'File a new leave request for an employee and bump their pending_days balance. Reproduces services/leaves.ts\'s ' +
+      'applyLeave() exactly, including its compensating rollback: if the balance update fails after the request ' +
+      'insert succeeds, the just-inserted request is deleted rather than left as an orphaned "ghost" pending row.',
+    {
+      org_id: z.string().uuid(),
+      employee_id: z.string().uuid(),
+      leave_type_id: z.string().uuid(),
+      start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+      end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+      total_days: z.number().positive(),
+      reason: z.string().min(1),
+    },
+    safeTool(async ({ org_id, employee_id, leave_type_id, start_date, end_date, total_days, reason }) => {
+      await assertOrgUsable(org_id)
+      const year = new Date(start_date).getFullYear()
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('leave_requests')
+        .insert({
+          employee_id,
+          organization_id: org_id,
+          leave_type_id,
+          start_date,
+          end_date,
+          total_days,
+          reason,
+          status: 'pending',
+        })
+        .select('id')
+        .single()
+      if (insertError) return errorResult(insertError.message)
+
+      const { data: existing, error: balanceFetchError } = await supabase
+        .from('leave_balances')
+        .select('id, pending_days')
+        .eq('employee_id', employee_id)
+        .eq('leave_type_id', leave_type_id)
+        .eq('year', year)
+        .maybeSingle()
+
+      let balanceError = balanceFetchError
+      if (!balanceError) {
+        if (existing) {
+          const { error } = await supabase
+            .from('leave_balances')
+            .update({ pending_days: Number(existing.pending_days) + total_days })
+            .eq('id', existing.id)
+          balanceError = error
+        } else {
+          const { error } = await supabase
+            .from('leave_balances')
+            .insert({ employee_id, organization_id: org_id, leave_type_id, year, pending_days: total_days })
+          balanceError = error
+        }
+      }
+
+      if (balanceError) {
+        await supabase.from('leave_requests').delete().eq('id', inserted.id)
+        return errorResult(balanceError.message)
+      }
+
+      return jsonResult({ org_id, request_id: inserted.id, employee_id, leave_type_id, total_days, status: 'pending' })
+    }),
+  )
+
+  server.tool(
+    'approve_leave_request',
+    'Approve a pending leave request via the approve_leave_request RPC, which atomically moves pending_days to ' +
+      'used_days and writes a leave_credits_history row.',
+    {
+      org_id: z.string().uuid(),
+      request_id: z.string().uuid(),
+      remarks: z.string().optional(),
+      actor_email: z.string().email().optional(),
+    },
+    safeTool(async ({ org_id, request_id, remarks, actor_email }) => {
+      await assertOrgUsable(org_id)
+      const actor = await resolveEffectiveActor(actor_email)
+
+      return withActorClaims(actor, async (query) => {
+        await query('SELECT approve_leave_request($1, $2)', [request_id, remarks ?? null])
+        return jsonResult({ org_id, request_id, status: 'approved' })
+      })
+    }),
+  )
+
+  server.tool(
+    'reject_leave_request',
+    'Reject a pending leave request via the reject_leave_request RPC, which atomically reverses the pending_days ' +
+      'bump applyLeave() added at submission.',
+    {
+      org_id: z.string().uuid(),
+      request_id: z.string().uuid(),
+      remarks: z.string().optional(),
+      actor_email: z.string().email().optional(),
+    },
+    safeTool(async ({ org_id, request_id, remarks, actor_email }) => {
+      await assertOrgUsable(org_id)
+      const actor = await resolveEffectiveActor(actor_email)
+
+      return withActorClaims(actor, async (query) => {
+        await query('SELECT reject_leave_request($1, $2)', [request_id, remarks ?? null])
+        return jsonResult({ org_id, request_id, status: 'rejected' })
+      })
+    }),
+  )
+
+  server.tool(
+    'seed_default_leave_types',
+    'Seed the standard 9 Philippine leave types (Vacation, Sick, Maternity, Paternity, Solo Parent, Bereavement, ' +
+      'Emergency, Unpaid, SIL) into an org that has none. Writes real, permanent org config — not disposable test ' +
+      'data. Requires confirm: true. Refuses outright (no confirm override) if the org already has any leave ' +
+      'types, to avoid silently double-seeding.',
+    { org_id: z.string().uuid(), confirm: z.boolean().default(false) },
+    safeTool(async ({ org_id, confirm }) => {
+      await assertOrgUsable(org_id)
+
+      const { count, error: countError } = await supabase
+        .from('leave_types')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', org_id)
+      if (countError) return errorResult(countError.message)
+      if (count && count > 0) {
+        return errorResult(`Org ${org_id} already has ${count} leave type(s) — refusing to double-seed.`)
+      }
+
+      if (!confirm) {
+        return errorResult(
+          `Seeding the standard 9 PH leave types into org ${org_id}. This writes permanent org config. ` +
+            `Re-call with confirm: true to proceed.`,
+        )
+      }
+
+      const { data, error } = await supabase
+        .from('leave_types')
+        .insert(DEFAULT_LEAVE_TYPES.map((t) => ({ ...t, organization_id: org_id })))
+        .select('id, name, code')
+      if (error) return errorResult(error.message)
+      return jsonResult({ org_id, seeded: data })
     }),
   )
 }
