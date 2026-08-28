@@ -251,6 +251,18 @@ independently-testable server, not a partial one:
 2. **Team-access writes** (directly replaces today's F5 manual work):
    `deactivate_member`, `reactivate_member`, `change_user_role` (with its
    extra last-super-admin guard), `revoke_invite`, `resend_invite`.
+   **Status (2026-08-28): done, except `resend_invite`.** Sending an invite
+   goes through the `invite-member` Edge Function, which needs a real signed
+   user JWT — a different auth mechanism than the `SET LOCAL
+   request.jwt.claims` trick every other tool here uses. Deferred as a
+   separate decision rather than solved inline. The other four are built,
+   unit-tested (20 tests), and verified live against real data — including
+   a full deactivate/reactivate and role-change round-trip on disposable
+   test accounts, and a real `revoke_invite` against a throwaway invite row.
+   The last-super-admin guard itself was verified via mocked unit tests
+   only, not live — same call made for the DB-level version of this guard
+   during the prior QA session: triggering it for real would require
+   demoting the actor's own actual logged-in account.
 3. **Schedule + leave writes**: `create_schedule`, `update_schedule`,
    `assign_employees_to_schedule`, `apply_leave`,
    `approve_leave_request`/`reject_leave_request`, `seed_default_leave_types`.

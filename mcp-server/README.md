@@ -10,10 +10,18 @@ HRISPH mutations go through `SECURITY DEFINER` RPCs that check the caller's
 JWT claims — a plain service-role client can't satisfy those the way it can
 for CRM's simpler direct-table-write model).
 
-**Phase 1 (current)**: read-only tools across every domain, plus
-`simulate_actor`. Write tools (deactivate/reactivate/role-change, schedule
-assignment, leave approval, etc.) are Phase 2+ — see the design doc's phase
-breakdown.
+**Phase 1**: read-only tools across every domain, plus `simulate_actor`.
+**Phase 2 (current)**: team-access writes — `deactivate_member`,
+`reactivate_member`, `change_user_role`, `revoke_invite`. All four guarded
+tools (`deactivate_member`/`change_user_role`/`revoke_invite`) require
+`confirm: true`; `change_user_role` additionally refuses outright — even
+with `confirm: true` — if the change would leave an org with no active
+super_admin, a guard the underlying DB RPC itself doesn't have. Invite
+*sending* (`resend_invite`/`send_invite`) is deferred — it requires calling
+the `invite-member` Edge Function with a real signed user JWT, a different
+auth mechanism than the `SET LOCAL request.jwt.claims` trick this server
+otherwise uses for RPCs. Schedule/leave/offboarding/payroll writes are
+Phase 3+ — see the design doc's phase breakdown.
 
 ## Setup
 
@@ -21,10 +29,13 @@ breakdown.
 2. `cp .env.local.example .env.local` and fill in:
    - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — Supabase Dashboard →
      Project Settings → API.
-   - `HRIS_DB_URL` — Supabase Dashboard → Project Settings → Database →
-     Connection string → **Session pooler** (port 5432). Do not use the
-     Transaction pooler (6543) — see the comment in `.env.local.example` and
-     `src/db.ts` for why.
+   - `HRIS_DB_URL` — Supabase Dashboard → click **Connect** (top right) →
+     copy a connection string. Prefer **Session pooler** (port 5432, IPv4);
+     Direct connection is IPv6-only on the Free tier and may not resolve on
+     your network. Do not use the Transaction pooler (6543) — see the
+     comment in `.env.local.example` and `src/db.ts` for why. The pooler
+     host's node number (`aws-N-<region>`) isn't derivable from the
+     project's region — copy the exact string shown, don't guess it.
    - `MCP_HRIS_ACTOR_EMAIL` — a real HRISPH user's email with an active org
      + role. Used as the default identity for org-scoped RPC tools
      (`list_team_members`, `list_pending_invites`) when a call doesn't pass
@@ -44,6 +55,13 @@ only successfully query orgs it actually belongs to — pass a different
 Every other tool here (employees, schedule, leave, offboarding, payroll)
 reads plain tables via the service-role key and isn't subject to this —
 see `src/tools/teamAccess.ts`'s header comment for the full explanation.
+
+## Testing
+
+`npm test` — runs the full unit test suite (Vitest, mocked `pg`/`supabase-js`,
+no network calls). Every function in every module has coverage; this is
+part of each phase's definition of done, same as `npm run build` /
+`npx tsc --noEmit`. `npm run test:watch` for interactive development.
 
 ## Manual verification
 
