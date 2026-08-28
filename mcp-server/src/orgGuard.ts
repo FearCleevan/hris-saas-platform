@@ -1,18 +1,24 @@
 import { supabase } from './supabaseClient.js'
 import { MCP_HRIS_ALLOWED_ORG_IDS } from './config.js'
 
+// Pure function, extracted so the allowlist logic is unit-testable without
+// mocking the supabase client — see orgGuard.test.ts.
+export function checkAllowlist(orgId: string, allowedOrgIds: string[] | null): void {
+  if (allowedOrgIds && !allowedOrgIds.includes(orgId)) {
+    throw new Error(
+      `Organization ${orgId} is not in MCP_HRIS_ALLOWED_ORG_IDS. Refusing to proceed. ` +
+        `(Currently allowed: ${allowedOrgIds.join(', ')})`,
+    )
+  }
+}
+
 // Every org in the platform is reachable by default (2026-08-28 decision,
 // see docs/mcp-server-design.md section 3.3) — this is a sanity check
 // against typos/garbage ids, not a scoping restriction. If
 // MCP_HRIS_ALLOWED_ORG_IDS is set, it additionally restricts which orgs can
 // be touched at all.
 export async function assertOrgUsable(orgId: string): Promise<{ id: string; name: string }> {
-  if (MCP_HRIS_ALLOWED_ORG_IDS && !MCP_HRIS_ALLOWED_ORG_IDS.includes(orgId)) {
-    throw new Error(
-      `Organization ${orgId} is not in MCP_HRIS_ALLOWED_ORG_IDS. Refusing to proceed. ` +
-        `(Currently allowed: ${MCP_HRIS_ALLOWED_ORG_IDS.join(', ')})`,
-    )
-  }
+  checkAllowlist(orgId, MCP_HRIS_ALLOWED_ORG_IDS)
 
   const { data, error } = await supabase
     .from('organizations')

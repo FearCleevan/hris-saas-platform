@@ -1,16 +1,22 @@
 # HRISPH MCP Server — Design Plan
 
-Status: **Phase 1 complete and fully verified live** (`hris-saas-platform/mcp-server/`).
-Built, connected against the real `hrisph` Supabase project, and registered
-with Claude Code (`claude mcp add hris`) — confirmed `✔ Connected` via
-`claude mcp list`. `npm run verify` exercises the full pipeline end-to-end:
-resolves the real configured actor (`peter@peterpaullazan.com`) and pulls
-real team-roster data through `list_team_members`'s `SET LOCAL
-request.jwt.claims` + RPC path, over the actual MCP protocol. Phases 2-5
-(writes) not started. Originally written after auditing the CRM project's
-local MCP server (`crm-project/crm-app/mcp-server/`) at the user's request,
-to work out what of that architecture transfers to HRISPH and what has to
-change.
+Status: **Phase 1 complete, fully verified live, and unit-tested**
+(`hris-saas-platform/mcp-server/`). Built, connected against the real
+`hrisph` Supabase project, and registered with Claude Code (`claude mcp add
+hris`) — confirmed `✔ Connected` via `claude mcp list`. `npm run verify`
+exercises the full pipeline end-to-end: resolves the real configured actor
+(`peter@peterpaullazan.com`) and pulls real team-roster data through
+`list_team_members`'s `SET LOCAL request.jwt.claims` + RPC path, over the
+actual MCP protocol. **82 unit tests across 13 files** (Vitest) cover every
+function — every shared module (`actor.ts`, `config.ts`, `db.ts`,
+`orgGuard.ts`, `toolResult.ts`) and every one of the 16 registered tools —
+with the DB layer mocked so the suite never touches the network; `npm run
+build` / `npx tsc --noEmit` / `npm test` / `npm run verify` are all green
+together. Phases 2-5 (writes) not started — unit tests are now part of each
+phase's definition of done going forward, same as build/typecheck already
+were. Originally written after auditing the CRM project's local MCP server
+(`crm-project/crm-app/mcp-server/`) at the user's request, to work out what
+of that architecture transfers to HRISPH and what has to change.
 
 **Real-world connection gotcha worth remembering**: the "Direct connection"
 string didn't work at all here (IPv6-only on Free tier, doesn't resolve on

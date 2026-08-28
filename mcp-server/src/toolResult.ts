@@ -3,7 +3,9 @@ export function errorResult(message: string) {
 }
 
 export function jsonResult(data: unknown) {
-  return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] }
+  // Explicit isError: false (not just omitted) so callers can check
+  // `.isError` on either result shape without a type-narrowing cast.
+  return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }], isError: false as const }
 }
 
 // Node's AggregateError (thrown by `pg` when a connection attempt fails
