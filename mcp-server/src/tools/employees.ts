@@ -2,6 +2,8 @@ import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { supabase } from '../supabaseClient.js'
 import { assertOrgUsable } from '../orgGuard.js'
+import { resolveEffectiveActor } from '../actor.js'
+import { withActorClaims } from '../db.js'
 import { safeTool, jsonResult, errorResult } from '../toolResult.js'
 
 // Mirrors apps/hris-admin-dashboard/src/services/employees.ts's getEmployees()
@@ -61,6 +63,35 @@ export function registerEmployeeTools(server: McpServer) {
       if (error) return errorResult(error.message)
       if (!data) return errorResult(`No employee with id ${employee_id} found in org ${org_id}.`)
       return jsonResult(data)
+    }),
+  )
+
+  server.tool(
+    'bulk_terminate_employees',
+    'Terminate one or more employees via the delete_employees_hard RPC (a soft-delete: sets is_active=false, ' +
+      'status=terminated — nothing is actually deleted, preserving payroll/attendance/leave history for DOLE/legal ' +
+      'compliance, but the employee immediately disappears from every active-only view). Requires confirm: true.',
+    {
+      org_id: z.string().uuid(),
+      employee_ids: z.array(z.string().uuid()).min(1),
+      confirm: z.boolean().default(false),
+      actor_email: z.string().email().optional(),
+    },
+    safeTool(async ({ org_id, employee_ids, confirm, actor_email }) => {
+      await assertOrgUsable(org_id)
+      if (!confirm) {
+        return errorResult(
+          `Terminating ${employee_ids.length} employee(s) in org ${org_id} will remove them from every active ` +
+            `view immediately. Their records are preserved (soft-delete), but there is no tool-level undo. ` +
+            `Re-call with confirm: true to proceed.`,
+        )
+      }
+      const actor = await resolveEffectiveActor(actor_email)
+
+      return withActorClaims(actor, async (query) => {
+        await query('SELECT delete_employees_hard($1)', [employee_ids])
+        return jsonResult({ org_id, employee_ids, terminated: true })
+      })
     }),
   )
 }

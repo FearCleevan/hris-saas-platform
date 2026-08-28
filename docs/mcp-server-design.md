@@ -273,7 +273,7 @@ independently-testable server, not a partial one:
    with the same compensating-rollback-on-failure as the app's own
    `applyLeave()`. None of these six are `confirm`-guarded except
    `seed_default_leave_types` — schedule/leave changes are routine,
-   reversible HR operations, not one-way doors. 39 new unit tests (133
+   reversible HR operations, not one-way doors. 19 new unit tests (113
    total). Verified live end-to-end via `scripts/verify-phase3-live.mjs`:
    created two real schedules, assigned the disposable test employee to
    one then the other and confirmed zero rows remained on the first
@@ -285,6 +285,25 @@ independently-testable server, not a partial one:
 4. **Offboarding + payroll writes**: `complete_offboarding`,
    `update_clearance_item`, `update_final_pay_status`,
    `resolve_dispute`/`reject_dispute`, `bulk_terminate_employees`.
+   **Status (2026-08-28): done, built including the two high-risk tools —
+   user explicitly said not to skip them.** `complete_offboarding` and
+   `bulk_terminate_employees` require `confirm: true`, with wording that
+   names the termination effect explicitly. `update_clearance_item` and
+   `update_final_pay_status` deliberately do **NOT** auto-trigger
+   `complete_offboarding` the way the app's own UI does — a documented,
+   intentional divergence: an incidental "mark this item cleared" call
+   should never itself terminate someone as a side effect. They keep the
+   `offboarding_records.clearance_status` rollup in sync for data
+   consistency, but completion always requires a separate, explicitly
+   confirmed call. 17 new unit tests (130 total). Verified live:
+   `update_final_pay_status` → `complete_offboarding` (refuses without
+   confirm, succeeds and terminates with confirm, safe to call twice) and
+   `bulk_terminate_employees` independently, both against the disposable
+   test employee, both fully restored after. `update_clearance_item` and
+   `resolve_dispute`/`reject_dispute` were **not** live-tested — the org has
+   no `clearance_items` or `payslips` configured, and building that
+   infrastructure from scratch was judged out of scope for a verification
+   pass; their logic is covered by unit tests only (14 tests between them).
 5. **Verification script**: a `verify-handshake.mjs` equivalent — spin up
    the real server, list tools, call each guarded tool once *without*
    `confirm: true` and assert it refuses cleanly, matching CRM's own

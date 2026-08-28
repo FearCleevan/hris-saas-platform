@@ -20,12 +20,21 @@ super_admin, a guard the underlying DB RPC itself doesn't have. Invite
 the `invite-member` Edge Function with a real signed user JWT, a different
 auth mechanism than the `SET LOCAL request.jwt.claims` trick this server
 otherwise uses for RPCs.
-**Phase 3 (current)**: schedule + leave writes — `create_schedule`,
-`update_schedule`, `assign_employees_to_schedule` (plain table writes, no
-RPC needed), `apply_leave`, `approve_leave_request`/`reject_leave_request`
-(RPCs, use the claims wrapper), `seed_default_leave_types` (the one guarded
-tool in this phase). Offboarding/payroll writes are Phase 4+ — see the
-design doc's phase breakdown.
+**Phase 3**: schedule + leave writes — `create_schedule`, `update_schedule`,
+`assign_employees_to_schedule` (plain table writes, no RPC needed),
+`apply_leave`, `approve_leave_request`/`reject_leave_request` (RPCs, use the
+claims wrapper), `seed_default_leave_types` (the one guarded tool in this
+phase).
+**Phase 4 (current)**: offboarding + payroll writes — `update_clearance_item`,
+`update_final_pay_status`, `complete_offboarding`, `bulk_terminate_employees`,
+`resolve_dispute`/`reject_dispute`. `complete_offboarding` and
+`bulk_terminate_employees` require `confirm: true` and actually terminate
+employees — no tool-level undo. `update_clearance_item`/
+`update_final_pay_status` deliberately do **not** auto-trigger
+`complete_offboarding` the way the app's UI does (a documented safety
+divergence — see the design doc §6 step 4's status note) — they keep the
+`offboarding_records.clearance_status` rollup in sync, but completion always
+needs a separate, explicitly confirmed call.
 
 ## Setup
 

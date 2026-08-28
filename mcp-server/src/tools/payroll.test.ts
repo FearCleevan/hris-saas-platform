@@ -3,23 +3,27 @@ import { createFakeServer, resultJson } from '../testSupport/fakeServer.js'
 import { makeQueryBuilder } from '../testSupport/supabaseMock.js'
 
 const assertOrgUsableMock = vi.fn()
+const resolveEffectiveActorMock = vi.fn()
 vi.mock('../orgGuard.js', () => ({ assertOrgUsable: assertOrgUsableMock }))
 vi.mock('../supabaseClient.js', () => ({ supabase: { from: vi.fn() } }))
+vi.mock('../actor.js', () => ({ resolveEffectiveActor: resolveEffectiveActorMock }))
 
 const ORG_ID = '85ab7ff3-454b-4ba0-858d-037551986556'
+const ACTOR = { sub: 'u1', email: 'peter@peterpaullazan.com', org_id: ORG_ID, user_role: 'super_admin' }
 
 describe('payroll tools', () => {
   beforeEach(async () => {
     assertOrgUsableMock.mockReset().mockResolvedValue({ id: ORG_ID, name: 'The Launchpad Inc' })
+    resolveEffectiveActorMock.mockReset().mockResolvedValue(ACTOR)
     const { supabase } = (await import('../supabaseClient.js')) as any
     supabase.from.mockReset()
   })
 
-  it('registers both payroll tools', async () => {
+  it('registers all four payroll tools', async () => {
     const { registerPayrollTools } = await import('./payroll.js')
     const { server, toolNames } = createFakeServer()
     registerPayrollTools(server)
-    expect(toolNames().sort()).toEqual(['list_payroll_disputes', 'list_payroll_runs'])
+    expect(toolNames().sort()).toEqual(['list_payroll_disputes', 'list_payroll_runs', 'reject_dispute', 'resolve_dispute'])
   })
 
   describe('list_payroll_runs', () => {
@@ -103,6 +107,55 @@ describe('payroll tools', () => {
 
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('timeout')
+    })
+  })
+
+  describe('resolve_dispute', () => {
+    it('sets status=resolved, stamps resolved_by from the resolved actor, and resolved_at', async () => {
+      const { registerPayrollTools } = await import('./payroll.js')
+      const { supabase } = (await import('../supabaseClient.js')) as any
+      const { server, getTool } = createFakeServer()
+      registerPayrollTools(server)
+
+      const updated = { id: 'd1', status: 'resolved', resolution: 'Recomputed correctly' }
+      const builder = makeQueryBuilder({ data: updated, error: null })
+      supabase.from.mockReturnValue(builder)
+
+      const result = await getTool('resolve_dispute').handler({ org_id: ORG_ID, dispute_id: 'd1', resolution: 'Recomputed correctly' })
+
+      const updateArg = builder.update.mock.calls[0][0]
+      expect(updateArg).toMatchObject({ status: 'resolved', resolution: 'Recomputed correctly', resolved_by: 'u1' })
+      expect(updateArg.resolved_at).toBeTruthy()
+      expect(resultJson(result)).toEqual(updated)
+    })
+
+    it('returns a not-found error rather than an empty result', async () => {
+      const { registerPayrollTools } = await import('./payroll.js')
+      const { supabase } = (await import('../supabaseClient.js')) as any
+      const { server, getTool } = createFakeServer()
+      registerPayrollTools(server)
+      supabase.from.mockReturnValue(makeQueryBuilder({ data: null, error: null }))
+
+      const result = await getTool('resolve_dispute').handler({ org_id: ORG_ID, dispute_id: 'missing', resolution: 'x' })
+
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('No payroll dispute with id missing')
+    })
+  })
+
+  describe('reject_dispute', () => {
+    it('sets status=rejected, distinct from resolve_dispute\'s status', async () => {
+      const { registerPayrollTools } = await import('./payroll.js')
+      const { supabase } = (await import('../supabaseClient.js')) as any
+      const { server, getTool } = createFakeServer()
+      registerPayrollTools(server)
+
+      const builder = makeQueryBuilder({ data: { id: 'd1', status: 'rejected' }, error: null })
+      supabase.from.mockReturnValue(builder)
+
+      await getTool('reject_dispute').handler({ org_id: ORG_ID, dispute_id: 'd1', resolution: 'Not a valid claim' })
+
+      expect(builder.update.mock.calls[0][0]).toMatchObject({ status: 'rejected', resolution: 'Not a valid claim' })
     })
   })
 })

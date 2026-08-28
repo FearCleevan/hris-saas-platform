@@ -2,7 +2,29 @@ import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { supabase } from '../supabaseClient.js'
 import { assertOrgUsable } from '../orgGuard.js'
+import { resolveEffectiveActor } from '../actor.js'
 import { safeTool, jsonResult, errorResult } from '../toolResult.js'
+
+async function settleDispute(
+  orgId: string,
+  disputeId: string,
+  status: 'resolved' | 'rejected',
+  resolution: string,
+  actorEmail: string | undefined,
+) {
+  const actor = await resolveEffectiveActor(actorEmail)
+
+  const { data, error } = await supabase
+    .from('payroll_disputes')
+    .update({ status, resolution, resolved_by: actor.sub, resolved_at: new Date().toISOString() })
+    .eq('id', disputeId)
+    .eq('organization_id', orgId)
+    .select('id, status, resolution, resolved_at')
+    .maybeSingle()
+  if (error) return errorResult(error.message)
+  if (!data) return errorResult(`No payroll dispute with id ${disputeId} found in org ${orgId}.`)
+  return jsonResult(data)
+}
 
 export function registerPayrollTools(server: McpServer) {
   server.tool(
@@ -46,6 +68,37 @@ export function registerPayrollTools(server: McpServer) {
       const { data, error } = await q.order('created_at', { ascending: false })
       if (error) return errorResult(error.message)
       return jsonResult(data)
+    }),
+  )
+
+  server.tool(
+    'resolve_dispute',
+    'Mark a payroll dispute resolved, with a resolution note. Not guarded — a routine business decision, ' +
+      'correctable by resolving/rejecting again if needed.',
+    {
+      org_id: z.string().uuid(),
+      dispute_id: z.string().uuid(),
+      resolution: z.string().min(1),
+      actor_email: z.string().email().optional(),
+    },
+    safeTool(async ({ org_id, dispute_id, resolution, actor_email }) => {
+      await assertOrgUsable(org_id)
+      return settleDispute(org_id, dispute_id, 'resolved', resolution, actor_email)
+    }),
+  )
+
+  server.tool(
+    'reject_dispute',
+    'Reject a payroll dispute, with a resolution note explaining why. Not guarded — same reasoning as resolve_dispute.',
+    {
+      org_id: z.string().uuid(),
+      dispute_id: z.string().uuid(),
+      resolution: z.string().min(1),
+      actor_email: z.string().email().optional(),
+    },
+    safeTool(async ({ org_id, dispute_id, resolution, actor_email }) => {
+      await assertOrgUsable(org_id)
+      return settleDispute(org_id, dispute_id, 'rejected', resolution, actor_email)
     }),
   )
 }

@@ -3,23 +3,33 @@ import { createFakeServer, resultJson } from '../testSupport/fakeServer.js'
 import { makeQueryBuilder } from '../testSupport/supabaseMock.js'
 
 const assertOrgUsableMock = vi.fn()
+const resolveEffectiveActorMock = vi.fn()
+const queryMock = vi.fn()
+const withActorClaimsMock = vi.fn(async (_actor: unknown, fn: (query: typeof queryMock) => unknown) => fn(queryMock))
+
 vi.mock('../orgGuard.js', () => ({ assertOrgUsable: assertOrgUsableMock }))
 vi.mock('../supabaseClient.js', () => ({ supabase: { from: vi.fn() } }))
+vi.mock('../actor.js', () => ({ resolveEffectiveActor: resolveEffectiveActorMock }))
+vi.mock('../db.js', () => ({ withActorClaims: withActorClaimsMock }))
 
 const ORG_ID = '85ab7ff3-454b-4ba0-858d-037551986556'
+const ACTOR = { sub: 'u1', email: 'peter@peterpaullazan.com', org_id: ORG_ID, user_role: 'super_admin' }
 
 describe('employee tools', () => {
   beforeEach(async () => {
     assertOrgUsableMock.mockReset().mockResolvedValue({ id: ORG_ID, name: 'The Launchpad Inc' })
+    resolveEffectiveActorMock.mockReset().mockResolvedValue(ACTOR)
+    queryMock.mockReset()
+    withActorClaimsMock.mockClear()
     const { supabase } = (await import('../supabaseClient.js')) as any
     supabase.from.mockReset()
   })
 
-  it('registers both employee tools', async () => {
+  it('registers all three employee tools', async () => {
     const { registerEmployeeTools } = await import('./employees.js')
     const { server, toolNames } = createFakeServer()
     registerEmployeeTools(server)
-    expect(toolNames().sort()).toEqual(['get_employee', 'search_employees'])
+    expect(toolNames().sort()).toEqual(['bulk_terminate_employees', 'get_employee', 'search_employees'])
   })
 
   describe('search_employees', () => {
@@ -117,6 +127,44 @@ describe('employee tools', () => {
 
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('No employee with id missing found in org')
+    })
+  })
+
+  describe('bulk_terminate_employees', () => {
+    it('refuses without confirm, mentions the effect, and never resolves an actor', async () => {
+      const { registerEmployeeTools } = await import('./employees.js')
+      const { server, getTool } = createFakeServer()
+      registerEmployeeTools(server)
+
+      const result = await getTool('bulk_terminate_employees').handler({ org_id: ORG_ID, employee_ids: ['e1', 'e2'], confirm: false })
+
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('2 employee(s)')
+      expect(result.content[0].text).toContain('Re-call with confirm: true')
+      expect(resolveEffectiveActorMock).not.toHaveBeenCalled()
+    })
+
+    it('calls delete_employees_hard($1) with the full id array when confirmed', async () => {
+      const { registerEmployeeTools } = await import('./employees.js')
+      const { server, getTool } = createFakeServer()
+      registerEmployeeTools(server)
+      queryMock.mockResolvedValue({})
+
+      const result = await getTool('bulk_terminate_employees').handler({ org_id: ORG_ID, employee_ids: ['e1', 'e2'], confirm: true })
+
+      expect(assertOrgUsableMock).toHaveBeenCalledWith(ORG_ID)
+      expect(queryMock).toHaveBeenCalledWith('SELECT delete_employees_hard($1)', [['e1', 'e2']])
+      expect(resultJson(result)).toEqual({ org_id: ORG_ID, employee_ids: ['e1', 'e2'], terminated: true })
+    })
+
+    it('rejects an empty employee_ids array at the schema level (zod .min(1))', async () => {
+      const { registerEmployeeTools } = await import('./employees.js')
+      const { server, getTool } = createFakeServer()
+      registerEmployeeTools(server)
+      const tool = getTool('bulk_terminate_employees')
+      const schema = tool.schema as { employee_ids: { safeParse: (v: unknown) => { success: boolean } } }
+
+      expect(schema.employee_ids.safeParse([]).success).toBe(false)
     })
   })
 })
