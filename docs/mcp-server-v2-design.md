@@ -1,9 +1,11 @@
 # HRISPH MCP Server v2 — Remote claude.ai Connector — Design Plan
 
-Status: **Phase 1 (spike) done. Phase 2 (shared tool-definition refactor)
-done. Phase 3 (OAuth + JSON-RPC scaffold) deployed and structurally
-verified — real end-to-end connector registration in claude.ai still
-needs the user's own token + action. Phases 4-5 not started.** Written
+Status: **Phases 1-4 all DONE. Connector registers, authorizes, and calls
+real tools successfully from claude.ai's actual production infrastructure
+(not just local curl tests) — confirmed live 2026-08-29, screenshot of
+"HRIS ... Custom ... ✓" in claude.ai's Connectors settings. Phase 5 (final
+polish/token-rotation doc) not started, but the connector is functionally
+complete and usable today.** Written
 after v1 (local stdio server,
 `hris-saas-platform/mcp-server/`) was fully built, unit-tested (130 tests),
 and confirmed working from a real Claude Code session. User asked how to
@@ -115,6 +117,44 @@ constraints (cold starts, connection limits, `npm:` import resolution).
 
 ---
 
+## 2.5. The real registration blocker: RFC 8414 well-known-URI placement (found + fixed 2026-08-29)
+
+After Phase 3's scaffold was deployed and passed every direct curl check,
+claude.ai's own "Add custom connector" UI still failed with **"Couldn't
+register with HRIS's sign-in service"**. Root cause, confirmed by finally
+reading CRM's own `crm-mcp/README.md` and `crm-app/middleware.ts` instead of
+just its `oauth.ts`: RFC 8414/9728's well-known-URI discovery algorithm
+inserts the `.well-known/...` segment **between host and path** for any
+issuer/resource URL that has a path component. HRISPH's issuer was the raw
+Supabase Functions URL (`https://<ref>.supabase.co/functions/v1/hris-mcp`),
+which has a path component — so claude.ai's client requested
+`.well-known/oauth-authorization-server` inserted before `/functions/v1/
+hris-mcp`, a URL Supabase's platform router never forwards to any function
+at all. The request 404'd before `hris-mcp`'s own code ever ran, which is
+exactly what CRM's README documents having already hit and fixed the same
+way.
+
+**Fix, mirroring CRM's exactly**: a Vercel Edge Middleware
+(`apps/hris-admin-dashboard/middleware.ts` + `authorize-form.ts`) fronts
+`hris-mcp` at the dashboard's own bare-root domain
+(`https://adminhrisph.vercel.app`), proxying `/register`, `/authorize`,
+`/token`, both `.well-known` paths, and non-GET `/` through to the real
+Supabase function (`SUPABASE_HRIS_MCP_URL` env var on the Vercel project).
+The Supabase function's `MCP_PUBLIC_URL` secret was set to
+`https://adminhrisph.vercel.app` so `oauth.ts`'s metadata URLs advertise the
+proxy domain, not the raw Supabase path. One difference from CRM's own
+`middleware.ts`: `hris-admin-dashboard` is a Vite SPA (no Next.js), but
+Vercel's Edge Middleware (`@vercel/functions`'s `next()` helper, not
+`next/server`) is framework-agnostic — same file works unchanged.
+
+**Register the connector in claude.ai using `https://adminhrisph.vercel.app`
+— never the raw Supabase Functions URL.** Confirmed live: `.well-known`
+metadata, `POST /register`, and the full OAuth handshake all work end to
+end through the proxy, and claude.ai's Connectors settings shows HRIS as
+connected with a working checkmark.
+
+---
+
 ## 3. Avoiding CRM's duplication — a shared tool-definition layer
 
 CRM's v1 (`mcp-server/tools/*.ts`) and v2 (`supabase/functions/crm-mcp/
@@ -154,6 +194,25 @@ swapped in behind the same function signature (true for `db.ts` if the
 This is a refactor of existing v1 code, not new functionality — worth
 doing early in v2's build, before tool-by-tool porting starts, so it isn't
 done twice.
+
+**Correction (Phase 4, 2026-08-29): this section's hope of literally
+sharing the same files across v1 and v2 didn't pan out** — Deno can't
+resolve v1's Node-style bare specifiers (`zod`, `pg`,
+`@supabase/supabase-js`) or `process.env`, and the `deploy_edge_function`
+tool needs an explicit file list for the one function being deployed, not
+an arbitrary cross-monorepo relative import. What Phase 2's `ToolDef`
+refactor still bought was a **template to port from**, not code to import:
+`backend/supabase/functions/hris-mcp/lib/*.ts` and `tools/*.ts` are
+Deno-native ports of v1's `src/*.ts` and `src/tools/*.ts` — same shapes,
+same business logic, same safety guards, `npm:`-prefixed imports and
+`Deno.env.get()` instead of bare specifiers and `process.env`. This is
+exactly the CRM precedent this section set out to avoid (CRM's own
+`crm-mcp/tools/` is a separate, hand-ported copy of its v1 tools) — turns
+out that's not avoidable across a Node/Deno boundary without a shared build
+step, which wasn't worth introducing for one function. The risk this
+section worried about (a guard existing in v1 but missing from the v2 copy)
+is mitigated instead by porting file-for-file and line-for-line rather than
+by re-deriving each tool from scratch.
 
 ---
 
@@ -229,17 +288,29 @@ HRISPH admins configure themselves."
    both `.well-known` endpoints return correct metadata, an unauthenticated
    `tools/list` call returns `401` with the correct `WWW-Authenticate`
    header, the `/authorize` form renders correctly for valid params, and is
-   rejected for a disallowed `redirect_uri`. **Not yet verified**: the
-   actual end-to-end OAuth handshake with a real `HRIS_MCP_TOKEN`, and
-   registering it as a real Custom Connector inside claude.ai's own
-   settings — both need the user to set the secret and add the connector
-   themselves; not something verifiable from this environment.
-4. **Wire in the shared tool definitions** from Phase 2, using whichever
-   Postgres approach Phase 1's spike settled on.
-5. **Manual verification**: register as a real Custom Connector in
-   claude.ai, exercise a read tool and a guarded write tool for real,
-   confirm the token-rotation story (Supabase Dashboard → Edge Functions →
-   Secrets, matching CRM's documented flow) actually works.
+   rejected for a disallowed `redirect_uri`. **Status: fully done
+   (2026-08-29)** — the real end-to-end OAuth handshake was blocked by the
+   RFC 8414 well-known-URI bug (§2.5), fixed via a Vercel Edge Middleware
+   proxy at `https://adminhrisph.vercel.app`. Registering the connector in
+   claude.ai now succeeds; Connectors settings shows HRIS connected.
+4. **Wire in the ported tool definitions** (§3's correction) — all 33 tools
+   across all 8 categories (actor, orgs, team access, employees, schedule,
+   leave, offboarding, payroll). **Status: DONE (2026-08-29)** — deployed to
+   `hris-mcp` (Supabase project `ztpoqosyrcepvwwwnsar`, deployment version
+   4). Live-verified through the Vercel proxy against real data (org "The
+   Launchpad Inc"): `simulate_actor` (exercises the ported `pg`/`db.ts`
+   connection), `get_org_context` (plain `supabase-js` read), `list_team_
+   members` (the `withActorClaims` RPC-in-transaction path, returned the
+   real 3-member roster), and `bulk_terminate_employees` called without
+   `confirm` (correctly refused with the guard message, no data touched —
+   proves the safety-guard logic ported correctly without needing to
+   actually terminate a real employee to prove it).
+5. **Manual verification / polish** (not started): confirm the
+   token-rotation story (Supabase Dashboard → Edge Functions → Secrets +
+   Vercel env var, matching CRM's documented flow) actually works end to
+   end, and exercise a few more of the 33 tools for real from within a
+   claude.ai conversation (not just curl) to confirm claude.ai's own client
+   calls them correctly.
 
 ## 7. Non-goals
 

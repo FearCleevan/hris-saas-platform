@@ -1,8 +1,9 @@
-// Phase 3 scaffold (docs/mcp-server-v2-design.md section 6): proves
-// claude.ai will accept this as a Custom Connector at all. Deliberately
-// TOOLS = [] — no real tool logic wired in yet, that's Phase 4, using the
-// ToolDef arrays mcp-server/src/tools/*.ts already exports (Phase 2).
-import { z } from 'npm:zod@4'
+// Phase 4 (docs/mcp-server-v2-design.md section 6): wires the real tool
+// definitions in, ported from mcp-server/src/tools/*.ts (Deno can't import
+// those Node-targeted files directly — different package specifiers,
+// process.env vs Deno.env — so this is a deliberate port, not a shared
+// import, matching how crm-project's crm-mcp/tools/ relates to its own v1
+// mcp-server).
 import { CORS, jsonRpcResult, jsonRpcError } from './jsonRpc.ts'
 import { checkAuth } from './auth.ts'
 import {
@@ -14,11 +15,29 @@ import {
   handleToken,
   protectedResourceMetadataUrl,
 } from './oauth.ts'
+import type { ToolDef } from './tools/types.ts'
+import { z } from 'npm:zod@4'
+import { actorTools } from './tools/actor.ts'
+import { orgTools } from './tools/orgs.ts'
+import { teamAccessTools } from './tools/teamAccess.ts'
+import { employeeTools } from './tools/employees.ts'
+import { scheduleTools } from './tools/schedule.ts'
+import { leaveTools } from './tools/leave.ts'
+import { offboardingTools } from './tools/offboarding.ts'
+import { payrollTools } from './tools/payroll.ts'
 
 const SERVER_INFO = { name: 'hris-mcp', version: '0.1.0' }
 
-// deno-lint-ignore no-explicit-any
-const TOOLS: { name: string; description: string; schema: Record<string, any>; handler: (args: any) => Promise<unknown> }[] = []
+const TOOLS: ToolDef[] = [
+  ...actorTools,
+  ...orgTools,
+  ...teamAccessTools,
+  ...employeeTools,
+  ...scheduleTools,
+  ...leaveTools,
+  ...offboardingTools,
+  ...payrollTools,
+]
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
