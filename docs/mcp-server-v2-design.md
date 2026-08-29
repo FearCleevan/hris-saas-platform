@@ -1,8 +1,10 @@
 # HRISPH MCP Server v2 — Remote claude.ai Connector — Design Plan
 
-Status: **Phase 1 (spike) done — `pg` works in Deno Edge Functions. Phase 2
-(shared tool-definition refactor) done — 130 tests still pass unchanged.
-Phases 3-5 not started.** Written after v1 (local stdio server,
+Status: **Phase 1 (spike) done. Phase 2 (shared tool-definition refactor)
+done. Phase 3 (OAuth + JSON-RPC scaffold) deployed and structurally
+verified — real end-to-end connector registration in claude.ai still
+needs the user's own token + action. Phases 4-5 not started.** Written
+after v1 (local stdio server,
 `hris-saas-platform/mcp-server/`) was fully built, unit-tested (130 tests),
 and confirmed working from a real Claude Code session. User asked how to
 get the same "Connectors" entry in claude.ai's own settings that
@@ -214,7 +216,24 @@ HRISPH admins configure themselves."
 3. **OAuth + JSON-RPC scaffold**: `hris-mcp` Edge Function with `index.ts`/
    `auth.ts`/`oauth.ts` (adapted from CRM's), zero tools wired in yet —
    verify claude.ai will actually accept it as a Custom Connector before
-   porting any real tool logic.
+   porting any real tool logic. **Status: scaffold deployed and
+   structurally verified (2026-08-29)**, deployed at
+   `backend/supabase/functions/hris-mcp/` (project `ztpoqosyrcepvwwwnsar`),
+   `verify_jwt: false` (must accept unauthenticated OAuth-discovery
+   requests — claude.ai hits `.well-known/*`/`/authorize` with no Supabase
+   JWT at all). One deliberate simplification over CRM's version: CRM's
+   failed-token retry path assumes a separate Vercel proxy in front of the
+   function (documented in CRM's own code as fragile); HRISPH has no such
+   proxy, so a failed attempt here just re-renders the form with an error
+   instead of a redirect. Verified live via `scripts/verify-phase3-v2-live.mjs`:
+   both `.well-known` endpoints return correct metadata, an unauthenticated
+   `tools/list` call returns `401` with the correct `WWW-Authenticate`
+   header, the `/authorize` form renders correctly for valid params, and is
+   rejected for a disallowed `redirect_uri`. **Not yet verified**: the
+   actual end-to-end OAuth handshake with a real `HRIS_MCP_TOKEN`, and
+   registering it as a real Custom Connector inside claude.ai's own
+   settings — both need the user to set the secret and add the connector
+   themselves; not something verifiable from this environment.
 4. **Wire in the shared tool definitions** from Phase 2, using whichever
    Postgres approach Phase 1's spike settled on.
 5. **Manual verification**: register as a real Custom Connector in
