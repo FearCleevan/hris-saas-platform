@@ -1,6 +1,6 @@
 import { useLocation, NavLink } from 'react-router-dom';
 import { navItems } from './navConfig';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 
 function getInitials(name: string): string {
   return name
@@ -15,7 +15,7 @@ function getInitials(name: string): string {
 // instead, see DashboardLayout.tsx.
 export function Sidebar() {
   const location = useLocation();
-  const user = useAuthStore((s) => s.user);
+  const { user } = useAuth();
 
   function isActive(path: string): boolean {
     if (path === '/') return location.pathname === '/';

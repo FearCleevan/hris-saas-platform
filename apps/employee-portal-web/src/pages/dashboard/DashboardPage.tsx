@@ -15,7 +15,7 @@ import {
   Banknote,
 } from 'lucide-react';
 
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 import { TodayStrip, type TodayCard } from '@/components/layout/TodayStrip';
 import { QuickActionGrid } from '@/components/layout/QuickActionGrid';
 import type { DashboardOutletContext } from '@/layouts/dashboardOutletContext';
@@ -188,7 +188,7 @@ const annCategoryStyles: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const user = useAuthStore((s) => s.user);
+  const { user } = useAuth();
   const { openMore } = useOutletContext<DashboardOutletContext>();
   const [clockedIn, setClockedIn] = useState(false);
   const [clockInTime, setClockInTime] = useState<string | null>(null);

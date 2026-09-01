@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { supabase, isSupabaseConfigured, fetchEmployeeContext } from '@/lib/supabase';
+import { supabase, fetchEmployeeContext } from '@/lib/supabase';
 import type { EmployeeUser } from '@/types';
 
 interface AuthContextValue {

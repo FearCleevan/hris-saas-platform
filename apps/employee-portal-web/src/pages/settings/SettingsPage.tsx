@@ -12,6 +12,7 @@ import {
 import { toast } from 'sonner';
 
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -82,22 +83,44 @@ function PasswordStrengthBar({ password }: { password: string }) {
 }
 
 function ChangePasswordSection() {
-  const { markPasswordChanged } = useAuth();
+  const { user } = useAuth();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<PwForm>({
+  const { register, handleSubmit, watch, reset, setError, formState: { errors } } = useForm<PwForm>({
     resolver: zodResolver(pwSchema),
   });
 
   const newPw = watch('newPassword', '');
 
-  async function onSubmit() {
+  async function onSubmit(data: PwForm) {
+    if (!supabase || !user?.email) {
+      toast.error('Supabase is not configured for this environment.');
+      return;
+    }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    markPasswordChanged();
+
+    // updateUser() doesn't verify the current password — re-authenticate
+    // with it first so "Current password" isn't just a decorative field.
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: data.currentPassword,
+    });
+    if (reauthError) {
+      setError('currentPassword', { message: 'Current password is incorrect' });
+      setLoading(false);
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: data.newPassword });
+    if (updateError) {
+      toast.error(updateError.message);
+      setLoading(false);
+      return;
+    }
+
     toast.success('Password updated successfully!');
     reset();
     setLoading(false);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Bell, Sun, Moon, LogOut, User, ChevronDown } from 'lucide-react';
 import { navItems } from './navConfig';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 import notificationsData from '@/data/mock/notifications.json';
 
 interface Notification {
@@ -38,7 +38,7 @@ function formatNotifTime(iso: string): string {
 
 export function Navbar() {
   const location = useLocation();
-  const { user, darkMode, toggleDarkMode, logout } = useAuthStore();
+  const { user, darkMode, toggleDarkMode, logout } = useAuth();
   const [bellOpen, setBellOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 

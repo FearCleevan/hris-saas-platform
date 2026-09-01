@@ -20,6 +20,21 @@ confirmed live via `pg_policies`:
 | `expense_claims` | ✅ | ✅ | ✅ (only while `status IN ('draft','submitted')`) |
 | `employee_reviews` | ✅ | — | ✅ (only while `status = 'self_review'`) |
 | `notifications` | ✅ (`recipient_id = auth.uid()`) | — | ✅ |
+| `employee_employment` | ✅ (added Phase 1) | — | — |
+| `departments` | ✅ (added Phase 1) | — | — |
+| `positions` | ✅ (added Phase 1) | — | — |
+
+**Real gap found during Phase 1, now fixed**: `employee_employment`/
+`departments`/`positions` only had `org_select_*` policies gated on
+`get_my_org_id()`, which resolves via `user_profiles.organization_id` —
+**not** via `employees.organization_id`. A plain ESS-only account (linked
+via `employees.user_id` but with no `user_profiles` row, since that table
+is admin/HR-portal-centric) could see their own `employees` row but not
+their own department/position. Added matching `self_select_*` policies for
+all three (migration `add_ess_self_select_employment_dept_position`),
+following the exact `employee_id IN (SELECT id FROM employees WHERE
+user_id = auth.uid())` pattern already used everywhere else. Confirmed via
+`get_advisors` that this introduced no new security lint findings.
 
 This means most of this plan is **wiring**, not backend design: a real
 Supabase Auth session, a typed service layer mirroring
@@ -102,12 +117,40 @@ Each hooked up via a matching `hooks/use<Domain>.ts` using TanStack Query
 
 ## Phases
 
-### Phase 1 — Real Auth + Employee Identity Resolution
+### Phase 1 — Real Auth + Employee Identity Resolution — DONE (2026-09-01)
 
 Wire Supabase Auth sign-in/sign-out/session persistence. Build
 `useAuth()`. Handle the "authenticated, no employee row" case explicitly.
 Reduce `authStore.ts` to UI-only state. **Blocks every other phase** — do
 this first, before any domain wiring.
+
+**Status: done, `tsc`/`npm run build` both pass clean.** `lib/supabase.ts`,
+`context/AuthContext.tsx` (real session + `noEmployeeRecord` state),
+`hooks/useAuth.ts` rewritten, `authStore.ts` trimmed to `darkMode` only,
+all direct `useAuthStore` consumers (`Navbar`, `Sidebar`, `DashboardPage`)
+switched to `useAuth()`, `LoginPage`/`ChangePasswordPage` (both copies)/
+`ForgotPasswordPage` wired to real `supabase.auth.*` calls.
+
+**Found and fixed live**: every `employees` row had `user_id = NULL` — no
+real account could sign in as an employee, because nothing has ever linked
+an `auth.users` account to an `employees` row (that's a separate
+"invite employee to portal" feature that doesn't exist yet on the admin
+side — not in this app's scope). Also found and fixed the
+`employee_employment`/`departments`/`positions` self-access RLS gap
+documented above. **User-approved test linkage**: `employees` row
+`964fe818-a246-4bf4-aca9-514864ebcaed` (work_email
+`peter@peterpaullazan.com`, already matching by email) linked via
+`user_id` to that same real `auth.users` account, so a real login can
+actually be tested end-to-end. This is a real, permanent data change on
+the live project, not a disposable test fixture — revisit if it needs
+unwinding once a real invite flow exists.
+
+**`role` mapping deferred**: `EmployeeUser.role` (`employee`/`manager`/
+`team_lead`) has no real schema equivalent yet — every real account
+defaults to `'employee'`. `mustChangePassword` also defaults to `false` —
+no real schema signal for it was found. Neither blocks anything currently
+built (nothing branches UI on `role` yet), but flag before building
+anything that would.
 
 ### Phase 2 — Profile + Attendance
 

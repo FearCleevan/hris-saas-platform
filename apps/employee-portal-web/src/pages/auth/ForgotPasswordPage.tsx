@@ -6,6 +6,7 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 interface ForgotPasswordForm {
@@ -24,8 +25,16 @@ export default function ForgotPasswordPage() {
   } = useForm<ForgotPasswordForm>();
 
   const onSubmit = async (data: ForgotPasswordForm) => {
+    if (!supabase) {
+      toast.error('Supabase is not configured for this environment.');
+      return;
+    }
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
+    // Supabase doesn't reveal whether the email exists — always show the
+    // "check your email" state to avoid leaking account existence.
+    await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${window.location.origin}/change-password`,
+    });
     setSentTo(data.email);
     setSent(true);
     toast.success('Reset link sent! Check your inbox.');
