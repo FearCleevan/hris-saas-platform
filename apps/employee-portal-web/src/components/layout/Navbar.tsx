@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Menu, Bell, Sun, Moon, LogOut, User, ChevronDown } from 'lucide-react';
+import { Bell, Sun, Moon, LogOut, User, ChevronDown } from 'lucide-react';
 import { navItems } from './navConfig';
 import { useAuthStore } from '@/store/authStore';
 import notificationsData from '@/data/mock/notifications.json';
-
-interface NavbarProps {
-  onMenuClick: () => void;
-}
 
 interface Notification {
   id: string;
@@ -40,7 +36,7 @@ function formatNotifTime(iso: string): string {
   return date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
 }
 
-export function Navbar({ onMenuClick }: NavbarProps) {
+export function Navbar() {
   const location = useLocation();
   const { user, darkMode, toggleDarkMode, logout } = useAuthStore();
   const [bellOpen, setBellOpen] = useState(false);
@@ -52,15 +48,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-10 h-14 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center px-4 gap-3">
-      <button
-        type="button"
-        onClick={onMenuClick}
-        className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        aria-label="Open menu"
-      >
-        <Menu size={18} />
-      </button>
-
       <span className="flex-1 font-semibold text-gray-900 dark:text-white text-sm md:text-base text-center md:text-left">
         {pageTitle}
       </span>

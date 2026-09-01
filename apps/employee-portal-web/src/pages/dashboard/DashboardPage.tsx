@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { motion, type Easing } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -11,11 +11,17 @@ import {
   Pin,
   PartyPopper,
   Cake,
+  CalendarDays,
+  Banknote,
 } from 'lucide-react';
 
 import { useAuthStore } from '@/store/authStore';
+import { TodayStrip, type TodayCard } from '@/components/layout/TodayStrip';
+import { QuickActionGrid } from '@/components/layout/QuickActionGrid';
+import type { DashboardOutletContext } from '@/layouts/dashboardOutletContext';
 import attendanceLogs from '@/data/mock/attendance-logs.json';
 import leaveBalances from '@/data/mock/leave-balances.json';
+import leaveRequestsData from '@/data/mock/leave-requests.json';
 import payrollRecords from '@/data/mock/payroll-records.json';
 import announcementsData from '@/data/mock/announcements.json';
 import eventsData from '@/data/mock/events.json';
@@ -107,8 +113,20 @@ interface Colleague {
   hireDate: string;
 }
 
+interface LeaveRequest {
+  id: string;
+  employeeId: string;
+  leaveType: string;
+  leaveTypeName: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  status: 'approved' | 'pending' | 'rejected';
+}
+
 const logs = attendanceLogs as AttendanceLog[];
 const leaveBalance = (leaveBalances as LeaveBalance[])[0];
+const leaveRequests = leaveRequestsData as LeaveRequest[];
 const payroll = payrollRecords as PayrollRecord[];
 const announcements = announcementsData as Announcement[];
 const events = eventsData as CompanyEvent[];
@@ -131,15 +149,6 @@ function formatCurrency(n: number): string {
 function formatEventDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 function diffYears(from: string, to: string): number {
@@ -180,6 +189,7 @@ const annCategoryStyles: Record<string, string> = {
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const { openMore } = useOutletContext<DashboardOutletContext>();
   const [clockedIn, setClockedIn] = useState(false);
   const [clockInTime, setClockInTime] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -193,6 +203,10 @@ export default function DashboardPage() {
   const latestPayslip = payroll[0];
   const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(TODAY + 'T00:00:00').getDay()];
   const isWorkDay = shift.workDays.includes(dayOfWeek);
+  const pendingLeaveRequests = leaveRequests.filter((r) => r.status === 'pending');
+  const lowestLeaveBalance = (['VL', 'SL'] as const)
+    .map((key) => ({ key, ...leaveBalance[key] }))
+    .sort((a, b) => a.remaining - b.remaining)[0];
 
   const birthdayCelebrations = colleagues.filter((c) => isSameMonthDay(c.birthday, TODAY));
   const anniversaryCelebrations = colleagues.filter((c) => isSameMonthDay(c.hireDate, TODAY));
@@ -225,53 +239,77 @@ export default function DashboardPage() {
 
   const firstName = user?.name.split(' ')[0] ?? 'there';
 
+  const todayCards: TodayCard[] = [
+    {
+      kind: 'clock',
+      clockedIn,
+      clockInTime,
+      currentTime: currentTime.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      subtitle: !isWorkDay
+        ? 'Rest day today'
+        : todayLog?.status === 'present'
+          ? 'Present today'
+          : todayLog?.status === 'late'
+            ? 'Arrived late today'
+            : `On duty today · ${shift.startTime}–${shift.endTime}`,
+      onToggle: handleClockToggle,
+    },
+  ];
+  if (pendingLeaveRequests.length > 0) {
+    const next = pendingLeaveRequests[0];
+    todayCards.push({
+      kind: 'info',
+      icon: CalendarDays,
+      tone: 'warning',
+      title: `${pendingLeaveRequests.length} pending leave request${pendingLeaveRequests.length > 1 ? 's' : ''}`,
+      subtitle: `${next.leaveTypeName} · awaiting approval`,
+      cta: { label: 'View', to: '/leaves' },
+    });
+  } else if (lowestLeaveBalance.remaining <= 3) {
+    todayCards.push({
+      kind: 'info',
+      icon: CalendarDays,
+      tone: 'warning',
+      title: `${lowestLeaveBalance.remaining} ${lowestLeaveBalance.key} day${lowestLeaveBalance.remaining !== 1 ? 's' : ''} left`,
+      subtitle: 'Running low this year',
+      cta: { label: 'View', to: '/leaves' },
+    });
+  } else if (latestPayslip) {
+    todayCards.push({
+      kind: 'info',
+      icon: Banknote,
+      tone: 'positive',
+      title: 'Latest payslip ready',
+      subtitle: `${latestPayslip.period} · net ${formatCurrency(latestPayslip.netPay)}`,
+      cta: { label: 'View', to: '/payslip' },
+    });
+  }
+
   return (
     <div className="space-y-4">
-      <motion.div {...fadeUp(0)} className="rounded-2xl p-5 bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white flex items-center justify-between gap-4">
-        <div>
-          <p className="text-blue-200 text-sm mb-1">
-            {new Date(TODAY + 'T00:00:00').toLocaleDateString('en-PH', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-          <h1 className="text-xl sm:text-2xl font-extrabold">
-            {getGreeting()}, {firstName}!
-          </h1>
-          <p className="text-blue-200 text-sm mt-1">Welcome back to your portal.</p>
-          <div className="flex flex-wrap gap-3 mt-3">
-            <div className="bg-white/15 rounded-xl px-3 py-1.5 text-xs font-medium">
-              {shift.startTime} – {shift.endTime}
-            </div>
-            <div
-              className={[
-                'rounded-xl px-3 py-1.5 text-xs font-medium',
-                todayLog?.status === 'present' || todayLog?.status === 'late'
-                  ? 'bg-green-500/30'
-                  : 'bg-white/15',
-              ].join(' ')}
-            >
-              {todayLog
-                ? todayLog.status === 'present'
-                  ? 'Present today'
-                  : todayLog.status === 'late'
-                    ? 'Arrived late'
-                    : todayLog.status === 'on_leave'
-                      ? 'On leave'
-                      : 'Absent'
-                : 'No record yet'}
-            </div>
-          </div>
-        </div>
-        <div className="hidden sm:flex w-14 h-14 rounded-full bg-white/20 items-center justify-center shrink-0">
-          <span className="text-white text-xl font-extrabold">{user ? getInitials(user.name) : 'U'}</span>
-        </div>
+      <div>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {new Date(TODAY + 'T00:00:00').toLocaleDateString('en-PH', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </p>
+        <h1 className="text-lg font-extrabold text-gray-900 dark:text-white">
+          {getGreeting()}, {firstName}!
+        </h1>
+      </div>
+
+      <motion.div {...fadeUp(0)}>
+        <TodayStrip cards={todayCards} />
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div {...fadeUp(1)} className={cardClass}>
+      <motion.div {...fadeUp(1)}>
+        <QuickActionGrid onMoreClick={openMore} />
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <motion.div {...fadeUp(2)} className={cardClass}>
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
             Today's Schedule
           </p>
@@ -304,32 +342,6 @@ export default function DashboardPage() {
             <span className={['w-2 h-2 rounded-full', isWorkDay ? 'bg-green-500' : 'bg-gray-300'].join(' ')} />
             {isWorkDay ? 'On duty today' : 'Rest day today'}
           </div>
-        </motion.div>
-
-        <motion.div {...fadeUp(2)} className={cardClass}>
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-            Quick Clock In/Out
-          </p>
-          <div className="text-3xl font-extrabold text-gray-900 dark:text-white tabular-nums mb-4 tracking-tight">
-            {currentTime.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </div>
-          <button
-            type="button"
-            onClick={handleClockToggle}
-            className={[
-              'w-full py-2.5 rounded-xl font-semibold text-sm text-white transition-colors',
-              clockedIn
-                ? 'bg-red-500 hover:bg-red-600'
-                : 'bg-green-500 hover:bg-green-600',
-            ].join(' ')}
-          >
-            {clockedIn ? 'Clock Out' : 'Clock In'}
-          </button>
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-            {clockedIn && clockInTime
-              ? `Clocked in since ${clockInTime}`
-              : 'Not yet clocked in'}
-          </p>
         </motion.div>
 
         <motion.div {...fadeUp(3)} className={cardClass}>

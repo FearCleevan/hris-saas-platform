@@ -184,7 +184,7 @@ function SectionHeader({
         <button
           type="button"
           onClick={onEdit}
-          className="flex items-center gap-1.5 text-xs font-medium text-brand-blue hover:text-brand-blue-dark transition-colors"
+          className="flex items-center gap-1.5 min-h-11 px-2 text-xs font-medium text-brand-blue hover:text-brand-blue-dark transition-colors"
         >
           <Pencil size={13} />
           Edit
@@ -194,7 +194,7 @@ function SectionHeader({
           <button
             type="button"
             onClick={onCancel}
-            className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            className="flex items-center gap-1 min-h-11 px-2 text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
             <X size={13} />
             Cancel
@@ -203,7 +203,7 @@ function SectionHeader({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="flex items-center gap-1.5 text-xs font-medium bg-brand-blue text-white px-3 py-1.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:opacity-60"
+            className="flex items-center gap-1.5 min-h-11 text-xs font-medium bg-brand-blue text-white px-3 py-1.5 rounded-lg hover:bg-brand-blue-dark transition-colors disabled:opacity-60"
           >
             <Check size={13} />
             Save

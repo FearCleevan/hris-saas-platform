@@ -556,68 +556,48 @@ function LeaveHistoryTab({
         <span className="text-xs text-gray-400 ml-2">{filtered.length} record{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
-      {/* Table */}
-      <div className={`${cardClass} p-0 overflow-hidden`}>
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center text-gray-400 dark:text-gray-500">
-            <CalendarDays size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm font-medium">No leave requests found</p>
-            <p className="text-xs mt-1">Try changing the filter or filing a new leave request.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-                  {['Type', 'Period', 'Days', 'Reason', 'Filed On', 'Status', ''].map((h, i) => (
-                    <th
-                      key={`${h}-${i}`}
-                      className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {filtered.map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
-                    <td className="px-4 py-3">
-                      <LeaveTypeBadge code={r.leaveType} />
-                    </td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap text-xs">
-                      {formatDateRange(r.startDate, r.endDate)}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white tabular-nums">
-                      {r.days}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400 max-w-[180px] truncate text-xs">
-                      {r.reason}
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
-                      {formatShortDate(r.submittedAt.slice(0, 10))}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={r.status} />
-                    </td>
-                    <td className="px-4 py-3">
-                      {r.status === 'pending' && (
-                        <button
-                          type="button"
-                          onClick={() => handleCancel(r.id, r.leaveTypeName)}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors whitespace-nowrap"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Card list — a table here would force horizontal scroll on every
+          phone; each request has few enough fields to read comfortably as
+          a stacked card instead. */}
+      {filtered.length === 0 ? (
+        <div className={`${cardClass} py-16 text-center text-gray-400 dark:text-gray-500`}>
+          <CalendarDays size={32} className="mx-auto mb-3 opacity-40" />
+          <p className="text-sm font-medium">No leave requests found</p>
+          <p className="text-xs mt-1">Try changing the filter or filing a new leave request.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((r) => (
+            <div key={r.id} className={cardClass}>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <LeaveTypeBadge code={r.leaveType} />
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {formatDateRange(r.startDate, r.endDate)}
+                  </span>
+                </div>
+                <StatusBadge status={r.status} />
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{r.reason}</p>
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300 tabular-nums">{r.days} day{r.days !== 1 ? 's' : ''}</span>
+                  <span>Filed {formatShortDate(r.submittedAt.slice(0, 10))}</span>
+                </div>
+                {r.status === 'pending' && (
+                  <button
+                    type="button"
+                    onClick={() => handleCancel(r.id, r.leaveTypeName)}
+                    className="min-h-11 px-3 rounded-lg text-xs font-semibold border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }

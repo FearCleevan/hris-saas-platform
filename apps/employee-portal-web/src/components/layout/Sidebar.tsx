@@ -2,11 +2,6 @@ import { useLocation, NavLink } from 'react-router-dom';
 import { navItems } from './navConfig';
 import { useAuthStore } from '@/store/authStore';
 
-interface SidebarProps {
-  mobileOpen: boolean;
-  onClose: () => void;
-}
-
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -16,7 +11,9 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
+// Desktop-only primary nav (md+) — mobile uses BottomTabBar + MoreSheet
+// instead, see DashboardLayout.tsx.
+export function Sidebar() {
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
 
@@ -25,8 +22,8 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
     return location.pathname.startsWith(path);
   }
 
-  const sidebarContent = (
-    <aside className="w-[220px] h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+  return (
+    <aside className="hidden md:flex w-[220px] h-full fixed top-0 left-0 z-20 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col">
       <div className="flex items-center gap-2.5 px-4 py-5 border-b border-gray-100 dark:border-gray-800">
         <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center shrink-0">
           <span className="text-white font-extrabold text-sm">H</span>
@@ -45,7 +42,6 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             <NavLink
               key={item.path}
               to={item.path}
-              onClick={onClose}
               className={[
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl mb-0.5 text-sm font-medium transition-colors',
                 active
@@ -72,25 +68,5 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         </div>
       )}
     </aside>
-  );
-
-  return (
-    <>
-      <div className="hidden md:block fixed top-0 left-0 h-full z-20">{sidebarContent}</div>
-
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-30 md:hidden"
-          aria-label="Sidebar overlay"
-        >
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={onClose}
-            aria-hidden="true"
-          />
-          <div className="absolute top-0 left-0 h-full">{sidebarContent}</div>
-        </div>
-      )}
-    </>
   );
 }

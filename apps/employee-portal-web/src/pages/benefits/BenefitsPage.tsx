@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { format, parseISO, differenceInMonths } from 'date-fns';
 
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import hmoData from '@/data/mock/hmo.json';
 import govBenefitsData from '@/data/mock/government-benefits.json';
 import loansData from '@/data/mock/loans.json';
@@ -196,45 +197,24 @@ function HmoTab() {
         </AnimatePresence>
       </Card>
 
-      {/* Claim detail modal */}
-      <AnimatePresence>
+      {/* Claim detail — a centered modal is a poor mobile pattern, use the
+          shared bottom sheet instead (consistent with MoreSheet). */}
+      <BottomSheet open={!!selectedClaim} onClose={() => setSelectedClaim(null)} title="Claim Details">
         {selectedClaim && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedClaim(null)}
-          >
-            <motion.div
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-gray-900 dark:text-white">Claim Details</h3>
-                <button onClick={() => setSelectedClaim(null)} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Claim ID</span><span className="font-mono font-medium">{selectedClaim.id}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Hospital</span><span className="font-medium text-right max-w-[60%]">{selectedClaim.hospital}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Date</span><span>{format(parseISO(selectedClaim.date), 'MMMM dd, yyyy')}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Type</span><span>{selectedClaim.type}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold text-lg">{currency(selectedClaim.amount)}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Status</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedClaim.status === 'settled' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {selectedClaim.status === 'settled' ? 'Settled' : 'Processing'}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between"><span className="text-gray-500">Claim ID</span><span className="font-mono font-medium">{selectedClaim.id}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Hospital</span><span className="font-medium text-right max-w-[60%]">{selectedClaim.hospital}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Date</span><span>{format(parseISO(selectedClaim.date), 'MMMM dd, yyyy')}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Type</span><span>{selectedClaim.type}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold text-lg">{currency(selectedClaim.amount)}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Status</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedClaim.status === 'settled' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                {selectedClaim.status === 'settled' ? 'Settled' : 'Processing'}
+              </span>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </BottomSheet>
     </div>
   );
 }
