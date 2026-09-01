@@ -450,96 +450,86 @@ function MyClaimsTab({
         </span>
       </div>
 
-      {/* Claims list */}
-      <div className={`${CARD} p-0 overflow-hidden`}>
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center text-gray-400 dark:text-gray-500">
-            <ReceiptText size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm font-medium">No expense claims found</p>
-            <p className="text-xs mt-1">Try adjusting the filters or submit a new claim.</p>
-          </div>
-        ) : (
-          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-            {filtered.map((claim) => {
-              const cat = expenseCategories.find((c) => c.id === claim.categoryId);
-              const isExpanded = expandedRejected.has(claim.id);
-              return (
-                <li key={claim.id}>
-                  <div className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
-                    {/* Category pill */}
-                    <div className="shrink-0 pt-0.5">
-                      {cat ? (
-                        <CategoryIconPill category={cat} />
-                      ) : (
-                        <span className="text-xs text-gray-400">{claim.categoryName}</span>
-                      )}
-                    </div>
-
-                    {/* Description + date */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {claim.description}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">{formatDate(claim.date)}</p>
-                    </div>
-
-                    {/* Receipt badge */}
-                    <div className="shrink-0 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                      <Paperclip size={12} />
-                      <span>
-                        {claim.receiptCount} receipt{claim.receiptCount !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-
-                    {/* Amount */}
-                    <p className="shrink-0 text-sm font-bold text-gray-900 dark:text-white tabular-nums">
-                      {peso(claim.amount)}
-                    </p>
-
-                    {/* Status */}
-                    <div className="shrink-0">
-                      <StatusBadge status={claim.status} />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="shrink-0 flex items-center gap-1">
-                      {claim.status === 'pending' && (
-                        <button
-                          type="button"
-                          onClick={() => handleCancel(claim)}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors whitespace-nowrap"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                      {claim.status === 'rejected' && (
-                        <button
-                          type="button"
-                          onClick={() => toggleExpand(claim.id)}
-                          className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors"
-                          aria-label="Toggle rejection reason"
-                        >
-                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Rejection note */}
-                  {claim.status === 'rejected' && isExpanded && claim.notes && (
-                    <div className="mx-4 mb-3 px-3 py-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl">
-                      <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-0.5">
-                        Rejection Reason
-                      </p>
-                      <p className="text-xs text-red-600 dark:text-red-400">{claim.notes}</p>
-                    </div>
+      {/* Claims list — stacked cards instead of a single-row-many-fields
+          layout, which squeezes badly below ~400px even without a literal
+          <table>. Same treatment as Leave History/Time Logs in Phase 3. */}
+      {filtered.length === 0 ? (
+        <div className={`${CARD} py-16 text-center text-gray-400 dark:text-gray-500`}>
+          <ReceiptText size={32} className="mx-auto mb-3 opacity-40" />
+          <p className="text-sm font-medium">No expense claims found</p>
+          <p className="text-xs mt-1">Try adjusting the filters or submit a new claim.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((claim) => {
+            const cat = expenseCategories.find((c) => c.id === claim.categoryId);
+            const isExpanded = expandedRejected.has(claim.id);
+            return (
+              <div key={claim.id} className={`${CARD} p-4`}>
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  {cat ? (
+                    <CategoryIconPill category={cat} />
+                  ) : (
+                    <span className="text-xs text-gray-400">{claim.categoryName}</span>
                   )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+                  <StatusBadge status={claim.status} />
+                </div>
+
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {claim.description}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">{formatDate(claim.date)}</p>
+                  </div>
+                  <p className="shrink-0 text-sm font-bold text-gray-900 dark:text-white tabular-nums">
+                    {peso(claim.amount)}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                    <Paperclip size={12} />
+                    <span>
+                      {claim.receiptCount} receipt{claim.receiptCount !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {claim.status === 'pending' && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancel(claim)}
+                        className="min-h-11 px-2.5 rounded-lg text-[11px] font-semibold border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    {claim.status === 'rejected' && (
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(claim.id)}
+                        className="min-h-11 min-w-11 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors"
+                        aria-label="Toggle rejection reason"
+                      >
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {claim.status === 'rejected' && isExpanded && claim.notes && (
+                  <div className="mt-3 px-3 py-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl">
+                    <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-0.5">
+                      Rejection Reason
+                    </p>
+                    <p className="text-xs text-red-600 dark:text-red-400">{claim.notes}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </motion.div>
   );
 }

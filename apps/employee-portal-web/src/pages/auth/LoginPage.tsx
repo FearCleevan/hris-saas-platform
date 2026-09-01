@@ -11,16 +11,12 @@ import {
   CalendarDays,
   Clock,
   Gift,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import usersData from '@/data/mock/users.json';
-import type { EmployeeUser } from '@/types';
 
 interface LoginForm {
   email: string;
@@ -35,55 +31,33 @@ const features = [
   { icon: Gift, label: 'Access benefits & company perks' },
 ];
 
-const demoAccounts = [
-  { email: 'juan.delacruz@hris-demo.ph', password: 'Employee@123', role: 'Employee' },
-  { email: 'maria.santos@hris-demo.ph', password: 'Manager@123', role: 'Manager' },
-  { email: 'jose.rizal@hris-demo.ph', password: 'Lead@123', role: 'Team Lead' },
-];
-
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginForm>({ defaultValues: { rememberMe: false } });
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
+    const { error } = await login(data.email, data.password);
 
-    const found = usersData.find(
-      (u) => u.email === data.email && u.password === data.password
-    );
-
-    if (!found) {
-      toast.error('Invalid credentials. Check the demo accounts below.');
+    if (error) {
+      toast.error(error);
       setIsLoading(false);
       return;
     }
 
-    const { password: _pw, ...safeUser } = found;
-    login(safeUser as EmployeeUser);
-
-    if (safeUser.mustChangePassword) {
-      navigate('/change-password');
-    } else {
-      navigate('/');
-    }
-
+    // AuthProvider resolves the employees row asynchronously after this —
+    // ProtectedRoute's loading/noEmployeeRecord states handle the rest,
+    // this just needs to land on the dashboard route.
+    navigate('/');
     setIsLoading(false);
-  };
-
-  const fillDemo = (email: string, password: string) => {
-    setValue('email', email);
-    setValue('password', password);
   };
 
   return (
@@ -286,56 +260,6 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-
-          {/* Demo accounts collapsible */}
-          <div className="mt-6 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowDemo((v) => !v)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-            >
-              <span>Demo Accounts</span>
-              {showDemo ? (
-                <ChevronUp className="w-4 h-4 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              )}
-            </button>
-
-            <AnimatePresence initial={false}>
-              {showDemo && (
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: 'auto' }}
-                  exit={{ height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-4 pb-4 space-y-2 bg-gray-50 dark:bg-gray-900/50">
-                    {demoAccounts.map((acc) => (
-                      <button
-                        key={acc.email}
-                        type="button"
-                        onClick={() => fillDemo(acc.email, acc.password)}
-                        className="w-full text-left rounded-xl border border-gray-200 dark:border-gray-700 p-3 hover:border-[#0038a8] hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all group"
-                      >
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 group-hover:text-[#0038a8]">
-                            {acc.role}
-                          </span>
-                          <span className="text-xs text-[#0038a8] dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                            Click to fill
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{acc.email}</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{acc.password}</p>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </motion.div>
       </div>
     </div>

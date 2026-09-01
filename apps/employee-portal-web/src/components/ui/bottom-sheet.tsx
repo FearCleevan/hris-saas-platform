@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -15,6 +16,15 @@ interface BottomSheetProps {
 // Built on framer-motion (already a dependency), no Radix Dialog installed.
 export function BottomSheet({ open, onClose, title, children }: BottomSheetProps) {
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open, onClose]);
 
   return (
     <AnimatePresence>

@@ -1,51 +1,23 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { EmployeeUser } from '@/types';
 
+// Identity/session now lives in AuthContext (backed by a real Supabase
+// session) — this store holds only UI-only state that has nothing to do
+// with who's signed in.
 interface AuthStore {
-  user: EmployeeUser | null;
-  isAuthenticated: boolean;
   darkMode: boolean;
-
-  login: (user: EmployeeUser) => void;
-  logout: () => void;
   toggleDarkMode: () => void;
-  markPasswordChanged: () => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
-      user: null,
-      isAuthenticated: false,
       darkMode: false,
-
-      login: (user) =>
-        set({
-          user,
-          isAuthenticated: true,
-        }),
-
-      logout: () =>
-        set({
-          user: null,
-          isAuthenticated: false,
-        }),
-
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
-
-      markPasswordChanged: () =>
-        set((state) => ({
-          user: state.user ? { ...state.user, mustChangePassword: false } : null,
-        })),
     }),
     {
       name: 'hrisph-employee-auth',
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-        darkMode: state.darkMode,
-      }),
+      partialize: (state) => ({ darkMode: state.darkMode }),
     }
   )
 );

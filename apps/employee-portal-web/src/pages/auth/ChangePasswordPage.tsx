@@ -8,7 +8,8 @@ import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 const schema = z
@@ -81,7 +82,7 @@ function PasswordStrength({ password }: { password: string }) {
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
-  const { markPasswordChanged, user } = useAuthStore();
+  const { user } = useAuth();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -91,6 +92,7 @@ export default function ChangePasswordPage() {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
   } = useForm<ChangePasswordForm>({
     resolver: zodResolver(schema),
@@ -98,10 +100,33 @@ export default function ChangePasswordPage() {
 
   const newPasswordValue = watch('newPassword', '');
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: ChangePasswordForm) => {
+    if (!supabase || !user?.email) {
+      toast.error('Supabase is not configured for this environment.');
+      return;
+    }
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    markPasswordChanged();
+
+    // Supabase's updateUser() doesn't verify the current password itself —
+    // re-authenticate with it first so "Current password" isn't just a
+    // decorative field.
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: data.currentPassword,
+    });
+    if (reauthError) {
+      setError('currentPassword', { message: 'Current password is incorrect' });
+      setIsLoading(false);
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: data.newPassword });
+    if (updateError) {
+      toast.error(updateError.message);
+      setIsLoading(false);
+      return;
+    }
+
     toast.success('Password updated successfully!');
     navigate('/');
     setIsLoading(false);

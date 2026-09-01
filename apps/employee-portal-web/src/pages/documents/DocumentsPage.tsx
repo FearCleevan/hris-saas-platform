@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, type Easing } from 'framer-motion';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -17,10 +17,10 @@ import {
   FolderOpen,
   SendHorizonal,
   Info,
-  X,
 } from 'lucide-react';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import myDocumentsRaw from '@/data/mock/my-documents.json';
 import documentRequestsRaw from '@/data/mock/document-requests.json';
 import companPoliciesRaw from '@/data/mock/company-policies.json';
@@ -216,92 +216,42 @@ function getPolicyBody(policy: CompanyPolicy): string[] {
   }
 }
 
-// ─── Policy Modal ─────────────────────────────────────────────────────────────
+// ─── Policy Detail ────────────────────────────────────────────────────────────
+// A centered modal is a poor mobile pattern, use the shared bottom sheet
+// instead (consistent with BenefitsPage's claim detail).
 
-function PolicyModal({
-  policy,
-  onClose,
-}: {
-  policy: CompanyPolicy;
-  onClose: () => void;
-}) {
+function PolicyDetail({ policy }: { policy: CompanyPolicy }) {
   const catColors = POLICY_CATEGORY_COLORS[policy.category];
   const bodyParagraphs = getPolicyBody(policy);
 
-  // Close on Escape
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.2, ease: EASE_OUT }}
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+    <div>
+      <div className="flex items-center gap-2 mb-1">
+        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${catColors.bg} ${catColors.text}`}>
+          {policyCategoryLabel(policy.category)}
+        </span>
+        <span className="text-[11px] text-gray-400">{policy.version}</span>
+      </div>
+      <p className="text-xs text-gray-400 mb-4">
+        Effective {formatDate(policy.effectiveDate)} &middot; Last updated {formatDate(policy.lastUpdated)}
+      </p>
+
+      <div className="space-y-4">
+        {bodyParagraphs.map((para, i) => (
+          <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+            {para}
+          </p>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => toast.info(`Downloading ${policy.title} PDF...`)}
+        className="mt-5 w-full min-h-11 flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
-        {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-start justify-between gap-4 rounded-t-2xl">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${catColors.bg} ${catColors.text}`}>
-                {policyCategoryLabel(policy.category)}
-              </span>
-              <span className="text-[11px] text-gray-400">{policy.version}</span>
-            </div>
-            <h2 className="text-base font-extrabold text-gray-900 dark:text-white">{policy.title}</h2>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Effective {formatDate(policy.effectiveDate)} &middot; Last updated {formatDate(policy.lastUpdated)}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors"
-            aria-label="Close policy"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-5 space-y-4">
-          {bodyParagraphs.map((para, i) => (
-            <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              {para}
-            </p>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-end gap-3 rounded-b-2xl">
-          <button
-            type="button"
-            onClick={() => toast.info(`Downloading ${policy.title} PDF...`)}
-            className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-          >
-            <Download size={14} />
-            Download PDF
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </motion.div>
+        <Download size={14} />
+        Download PDF
+      </button>
     </div>
   );
 }
@@ -647,52 +597,28 @@ function RequestDocumentsTab({
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No document requests yet</p>
           </div>
         ) : (
-          <div className={`${CARD} p-0 overflow-hidden`}>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
-                    {['Document Type', 'Purpose', 'Requested', 'Status', 'Completed', 'Notes'].map((h) => (
-                      <th
-                        key={h}
-                        className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {requests.map((req) => {
-                    const s = REQUEST_STATUS_STYLES[req.status];
-                    return (
-                      <tr key={req.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
-                        <td className="px-4 py-3 text-xs font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-                          {req.typeName}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 max-w-[160px] truncate">
-                          {req.purpose}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
-                          {formatDateTime(req.requestedAt)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${s.bg} ${s.text}`}>
-                            {s.label}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
-                          {req.completedAt ? formatDateTime(req.completedAt) : '—'}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-400 max-w-[140px] truncate">
-                          {req.notes ?? '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-3">
+            {requests.map((req) => {
+              const s = REQUEST_STATUS_STYLES[req.status];
+              return (
+                <div key={req.id} className={`${CARD} p-4`}>
+                  <div className="flex items-start justify-between gap-3 mb-1.5">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{req.typeName}</p>
+                    <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-semibold ${s.bg} ${s.text}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{req.purpose}</p>
+                  {req.notes && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 italic">{req.notes}</p>
+                  )}
+                  <div className="flex items-center gap-3 text-[11px] text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-800">
+                    <span>Requested {formatDateTime(req.requestedAt)}</span>
+                    {req.completedAt && <span>Completed {formatDateTime(req.completedAt)}</span>}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -975,10 +901,9 @@ function CompanyPoliciesTab() {
         </div>
       )}
 
-      {/* Modal */}
-      {selectedPolicy && (
-        <PolicyModal policy={selectedPolicy} onClose={handleClose} />
-      )}
+      <BottomSheet open={!!selectedPolicy} onClose={handleClose} title={selectedPolicy?.title}>
+        {selectedPolicy && <PolicyDetail policy={selectedPolicy} />}
+      </BottomSheet>
     </motion.div>
   );
 }

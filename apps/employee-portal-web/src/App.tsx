@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ProtectedRoute } from '@/components/router/ProtectedRoute';
+import { AuthProvider } from '@/context/AuthContext';
 import { useAuthStore } from '@/store/authStore';
 import { lightTheme, darkTheme } from '@/lib/theme';
 
@@ -90,7 +91,9 @@ export default function App() {
       <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
         <CssBaseline />
         <DarkModeSync />
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
         <Toaster position="top-right" richColors closeButton />
       </ThemeProvider>
     </QueryClientProvider>

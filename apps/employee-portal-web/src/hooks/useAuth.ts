@@ -1,28 +1,31 @@
+import { useAuthContext } from '@/context/AuthContext';
 import { useAuthStore } from '@/store/authStore';
 import type { EmployeeUser } from '@/types';
 
 type EmployeeRole = EmployeeUser['role'];
 
 export function useAuth() {
-  const store = useAuthStore();
+  const { user, isAuthenticated, loading, noEmployeeRecord, login, logout } = useAuthContext();
+  const { darkMode, toggleDarkMode } = useAuthStore();
 
   function hasRole(role: EmployeeRole): boolean {
-    return store.user?.role === role;
+    return user?.role === role;
   }
 
   function hasAnyRole(roles: EmployeeRole[]): boolean {
-    return roles.includes(store.user?.role as EmployeeRole);
+    return roles.includes(user?.role as EmployeeRole);
   }
 
   return {
-    user: store.user,
-    isAuthenticated: store.isAuthenticated,
-    darkMode: store.darkMode,
+    user,
+    isAuthenticated,
+    loading,
+    noEmployeeRecord,
+    darkMode,
     hasRole,
     hasAnyRole,
-    login: store.login,
-    logout: store.logout,
-    toggleDarkMode: store.toggleDarkMode,
-    markPasswordChanged: store.markPasswordChanged,
+    login,
+    logout,
+    toggleDarkMode,
   };
 }
