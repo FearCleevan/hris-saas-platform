@@ -23,6 +23,7 @@ export const supabase = isSupabaseConfigured
 
 interface EmployeeRow {
   id: string;
+  organization_id: string;
   employee_no: string;
   first_name: string;
   last_name: string;
@@ -47,7 +48,7 @@ export async function fetchEmployeeContext(userId: string, authEmail: string): P
   const { data, error } = await supabase
     .from('employees')
     .select(`
-      id, employee_no, first_name, last_name, work_email,
+      id, organization_id, employee_no, first_name, last_name, work_email,
       employee_employment!employee_id ( direct_manager_id, departments(name), positions(title) )
     `)
     .eq('user_id', userId)
@@ -63,6 +64,7 @@ export async function fetchEmployeeContext(userId: string, authEmail: string): P
   // account defaults to the lowest-privilege value until that's built.
   return {
     id: data.id,
+    organizationId: data.organization_id,
     name: `${data.first_name} ${data.last_name}`,
     email: data.work_email ?? authEmail,
     role: 'employee',

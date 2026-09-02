@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -18,92 +19,18 @@ import {
 } from 'lucide-react';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import profileData from '@/data/mock/profile.json';
-
-interface Address {
-  street: string;
-  barangay: string;
-  city: string;
-  province: string;
-  zip: string;
-}
-
-interface Personal {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  suffix: string | null;
-  gender: string;
-  civilStatus: string;
-  birthday: string;
-  birthPlace: string;
-  nationality: string;
-  religion: string;
-  bloodType: string;
-  address: Address;
-}
-
-interface Contact {
-  companyEmail: string;
-  personalEmail: string;
-  mobile: string;
-  landline: string | null;
-}
-
-interface Employment {
-  employeeId: string;
-  position: string;
-  department: string;
-  type: string;
-  hireDate: string;
-  regularizationDate: string;
-  branch: string;
-  supervisor: string;
-  workSchedule: string;
-  salary: number;
-}
-
-interface GovernmentIds {
-  sss: string;
-  philhealth: string;
-  pagibig: string;
-  tin: string;
-}
-
-interface Bank {
-  bankName: string;
-  accountName: string;
-  accountNumber: string;
-  accountType: string;
-}
-
-interface EmergencyContact {
-  id: string;
-  name: string;
-  relationship: string;
-  mobile: string;
-  address: string;
-}
-
-interface Dependent {
-  id: string;
-  name: string;
-  relationship: string;
-  birthday: string;
-  beneficiary: boolean;
-  percentage: number;
-}
-
-const profile = profileData as {
-  employeeId: string;
-  personal: Personal;
-  contact: Contact;
-  employment: Employment;
-  governmentIds: GovernmentIds;
-  bank: Bank;
-  emergencyContacts: EmergencyContact[];
-  dependents: Dependent[];
-};
+import { useAuth } from '@/hooks/useAuth';
+import {
+  getMyProfile,
+  updatePersonalInfo,
+  updateAddress,
+  updateContactDetails,
+  getGovernmentIds,
+  getBankAccount,
+  getEmergencyContacts,
+  addEmergencyContact,
+  getDependents,
+} from '@/services/profile';
 
 const cardClass =
   'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5';
@@ -118,12 +45,14 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return '—';
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-function calcAge(birthday: string): number {
+function calcAge(birthday: string | null): number | null {
+  if (!birthday) return null;
   const b = new Date(birthday + 'T00:00:00');
   const now = new Date();
   let age = now.getFullYear() - b.getFullYear();
@@ -132,7 +61,8 @@ function calcAge(birthday: string): number {
   return age;
 }
 
-function calcTenure(hireDate: string): string {
+function calcTenure(hireDate: string | null): string {
+  if (!hireDate) return '—';
   const h = new Date(hireDate + 'T00:00:00');
   const now = new Date();
   let years = now.getFullYear() - h.getFullYear();
@@ -142,10 +72,6 @@ function calcTenure(hireDate: string): string {
   if (years > 0) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
   if (months > 0) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
   return parts.join(' ') || 'Less than a month';
-}
-
-function capitalizeFirst(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 interface InfoRowProps {
@@ -274,15 +200,52 @@ function EditRow({ label, editMode, displayValue, children }: EditRowProps) {
   );
 }
 
-function ProfileHeader() {
-  const { personal, employment } = profile;
-  const fullName = [personal.firstName, personal.middleName, personal.lastName]
+// ─── Shape of the real query result ────────────────────────────────────────
+
+interface ProfileData {
+  id: string;
+  employee_no: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  suffix: string | null;
+  gender: string | null;
+  civil_status: string | null;
+  date_of_birth: string | null;
+  place_of_birth: string | null;
+  nationality: string | null;
+  religion: string | null;
+  blood_type: string | null;
+  personal_email: string | null;
+  work_email: string | null;
+  mobile_number: string | null;
+  phone_number: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  city: string | null;
+  province: string | null;
+  zip_code: string | null;
+  country: string | null;
+  employee_employment: {
+    date_hired: string | null;
+    date_regularized: string | null;
+    work_schedule: string | null;
+    work_arrangement: string | null;
+    departments: { name: string } | null;
+    positions: { title: string } | null;
+    employment_types: { name: string } | null;
+  }[];
+}
+
+function ProfileHeader({ profile }: { profile: ProfileData }) {
+  const fullName = [profile.first_name, profile.middle_name, profile.last_name]
     .filter(Boolean)
     .join(' ');
-  const tenure = calcTenure(employment.hireDate);
+  const employment = profile.employee_employment[0];
+  const tenure = calcTenure(employment?.date_hired ?? null);
 
   function handlePhotoClick() {
-    toast.success('Profile photo updated');
+    toast.info('Photo upload coming soon.');
   }
 
   return (
@@ -311,14 +274,11 @@ function ProfileHeader() {
       <div className="flex-1 min-w-0">
         <h1 className="text-xl font-extrabold text-gray-900 dark:text-white">{fullName}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-          {employment.position} · {employment.department}
+          {employment?.positions?.title ?? '—'} · {employment?.departments?.name ?? '—'}
         </p>
         <div className="flex flex-wrap items-center gap-2 mt-2">
           <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300">
-            {employment.employeeId}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-green-100 dark:bg-green-950 text-xs font-semibold text-green-700 dark:text-green-300">
-            Regular Employee
+            {profile.employee_no}
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-brand-blue-light dark:bg-blue-950 text-xs font-semibold text-brand-blue dark:text-blue-300">
             {tenure}
@@ -329,41 +289,62 @@ function ProfileHeader() {
   );
 }
 
-function TabOverview() {
-  const { personal, contact, employment } = profile;
+const CIVIL_STATUS_OPTIONS = ['Single', 'Married', 'Widowed', 'Separated', 'Annulled'];
+
+function TabOverview({ profile }: { profile: ProfileData }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const employment = profile.employee_employment[0];
 
   const [personalEdit, setPersonalEdit] = useState(false);
-  const [civilStatus, setCivilStatus] = useState(personal.civilStatus);
-  const [religion, setReligion] = useState(personal.religion);
+  const [civilStatus, setCivilStatus] = useState(profile.civil_status ?? 'Single');
+  const [religion, setReligion] = useState(profile.religion ?? '');
 
   const [addressEdit, setAddressEdit] = useState(false);
-  const [street, setStreet] = useState(personal.address.street);
-  const [barangay, setBarangay] = useState(personal.address.barangay);
-  const [city, setCity] = useState(personal.address.city);
-  const [province, setProvince] = useState(personal.address.province);
-  const [zip, setZip] = useState(personal.address.zip);
+  const [street, setStreet] = useState(profile.address_line1 ?? '');
+  const [addressLine2, setAddressLine2] = useState(profile.address_line2 ?? '');
+  const [city, setCity] = useState(profile.city ?? '');
+  const [province, setProvince] = useState(profile.province ?? '');
+  const [zip, setZip] = useState(profile.zip_code ?? '');
 
   const [contactEdit, setContactEdit] = useState(false);
-  const [personalEmail, setPersonalEmail] = useState(contact.personalEmail);
-  const [mobile, setMobile] = useState(contact.mobile);
-  const [landline, setLandline] = useState(contact.landline ?? '');
+  const [personalEmail, setPersonalEmail] = useState(profile.personal_email ?? '');
+  const [mobile, setMobile] = useState(profile.mobile_number ?? '');
+  const [landline, setLandline] = useState(profile.phone_number ?? '');
 
-  function savePersonal() {
-    setPersonalEdit(false);
-    toast.success('Personal info updated');
+  function invalidate() {
+    queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
   }
 
-  function saveAddress() {
-    setAddressEdit(false);
-    toast.success('Address updated');
-  }
+  const personalMutation = useMutation({
+    mutationFn: () => updatePersonalInfo(profile.id, { civil_status: civilStatus, religion }),
+    onSuccess: () => { setPersonalEdit(false); invalidate(); toast.success('Personal info updated'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  function saveContact() {
-    setContactEdit(false);
-    toast.success('Contact details updated');
-  }
+  const addressMutation = useMutation({
+    mutationFn: () =>
+      updateAddress(profile.id, {
+        address_line1: street,
+        address_line2: addressLine2,
+        city,
+        province,
+        zip_code: zip,
+      }),
+    onSuccess: () => { setAddressEdit(false); invalidate(); toast.success('Address updated'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  const employmentTypeLabel = capitalizeFirst(employment.type);
+  const contactMutation = useMutation({
+    mutationFn: () =>
+      updateContactDetails(profile.id, {
+        personal_email: personalEmail,
+        mobile_number: mobile,
+        phone_number: landline || null,
+      }),
+    onSuccess: () => { setContactEdit(false); invalidate(); toast.success('Contact details updated'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -378,27 +359,28 @@ function TabOverview() {
             title="Personal Information"
             editMode={personalEdit}
             onEdit={() => setPersonalEdit(true)}
-            onSave={savePersonal}
+            onSave={() => personalMutation.mutate()}
             onCancel={() => setPersonalEdit(false)}
+            saving={personalMutation.isPending}
           />
-          <InfoRow label="Gender" value={personal.gender} />
+          <InfoRow label="Gender" value={profile.gender} />
           <EditRow label="Civil Status" editMode={personalEdit} displayValue={civilStatus}>
-            <EditSelect
-              value={civilStatus}
-              onChange={setCivilStatus}
-              options={['Single', 'Married', 'Widowed', 'Separated', 'Annulled']}
-            />
+            <EditSelect value={civilStatus} onChange={setCivilStatus} options={CIVIL_STATUS_OPTIONS} />
           </EditRow>
           <InfoRow
             label="Birthday"
-            value={`${formatDate(personal.birthday)} (Age: ${calcAge(personal.birthday)})`}
+            value={
+              profile.date_of_birth
+                ? `${formatDate(profile.date_of_birth)} (Age: ${calcAge(profile.date_of_birth)})`
+                : null
+            }
           />
-          <InfoRow label="Birth Place" value={personal.birthPlace} />
-          <InfoRow label="Nationality" value={personal.nationality} />
+          <InfoRow label="Birth Place" value={profile.place_of_birth} />
+          <InfoRow label="Nationality" value={profile.nationality} />
           <EditRow label="Religion" editMode={personalEdit} displayValue={religion}>
             <EditInput value={religion} onChange={setReligion} placeholder="Religion" />
           </EditRow>
-          <InfoRow label="Blood Type" value={personal.bloodType} />
+          <InfoRow label="Blood Type" value={profile.blood_type} />
         </motion.div>
 
         <motion.div
@@ -411,14 +393,15 @@ function TabOverview() {
             title="Address"
             editMode={addressEdit}
             onEdit={() => setAddressEdit(true)}
-            onSave={saveAddress}
+            onSave={() => addressMutation.mutate()}
             onCancel={() => setAddressEdit(false)}
+            saving={addressMutation.isPending}
           />
           <EditRow label="Street" editMode={addressEdit} displayValue={street}>
             <EditInput value={street} onChange={setStreet} placeholder="Street" />
           </EditRow>
-          <EditRow label="Barangay" editMode={addressEdit} displayValue={barangay}>
-            <EditInput value={barangay} onChange={setBarangay} placeholder="Barangay" />
+          <EditRow label="Barangay / Unit" editMode={addressEdit} displayValue={addressLine2}>
+            <EditInput value={addressLine2} onChange={setAddressLine2} placeholder="Barangay / Unit / Building" />
           </EditRow>
           <EditRow label="City" editMode={addressEdit} displayValue={city}>
             <EditInput value={city} onChange={setCity} placeholder="City" />
@@ -443,14 +426,15 @@ function TabOverview() {
             title="Contact Details"
             editMode={contactEdit}
             onEdit={() => setContactEdit(true)}
-            onSave={saveContact}
+            onSave={() => contactMutation.mutate()}
             onCancel={() => setContactEdit(false)}
+            saving={contactMutation.isPending}
           />
           <div className="py-3 border-b border-gray-100 dark:border-gray-800">
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Company Email</p>
             <div className="flex items-center gap-2">
               <Lock size={13} className="text-gray-400 shrink-0" />
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{contact.companyEmail}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{profile.work_email ?? '—'}</p>
             </div>
           </div>
           <EditRow label="Personal Email" editMode={contactEdit} displayValue={personalEmail}>
@@ -482,162 +466,131 @@ function TabOverview() {
               View only
             </span>
           </div>
-          <InfoRow label="Employee ID" value={employment.employeeId} />
-          <InfoRow label="Position" value={employment.position} />
-          <InfoRow label="Department" value={employment.department} />
-          <InfoRow label="Employment Type" value={employmentTypeLabel} />
-          <InfoRow label="Hire Date" value={formatDate(employment.hireDate)} />
-          <InfoRow label="Regularization Date" value={formatDate(employment.regularizationDate)} />
-          <InfoRow label="Branch" value={employment.branch} />
-          <InfoRow label="Supervisor" value={employment.supervisor} />
-          <InfoRow label="Work Schedule" value={employment.workSchedule} />
+          <InfoRow label="Employee ID" value={profile.employee_no} />
+          <InfoRow label="Position" value={employment?.positions?.title} />
+          <InfoRow label="Department" value={employment?.departments?.name} />
+          <InfoRow label="Employment Type" value={employment?.employment_types?.name} />
+          <InfoRow label="Hire Date" value={formatDate(employment?.date_hired ?? null)} />
+          <InfoRow label="Regularization Date" value={formatDate(employment?.date_regularized ?? null)} />
+          <InfoRow label="Work Schedule" value={employment?.work_schedule} />
+          <InfoRow label="Work Arrangement" value={employment?.work_arrangement} />
         </motion.div>
       </div>
     </div>
   );
 }
 
-function TabGovernmentIds() {
-  const { governmentIds } = profile;
+function TabGovernmentIds({ employeeId }: { employeeId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['profile', 'gov-ids', employeeId],
+    queryFn: () => getGovernmentIds(employeeId),
+  });
 
   const ids = [
-    {
-      key: 'sss',
-      label: 'Social Security System',
-      short: 'SSS',
-      value: governmentIds.sss,
-      accent: 'border-brand-blue',
-      iconBg: 'bg-blue-100 dark:bg-blue-950',
-      iconText: 'text-brand-blue',
-    },
-    {
-      key: 'philhealth',
-      label: 'Philippine Health Insurance',
-      short: 'PhilHealth',
-      value: governmentIds.philhealth,
-      accent: 'border-green-500',
-      iconBg: 'bg-green-100 dark:bg-green-950',
-      iconText: 'text-green-600',
-    },
-    {
-      key: 'pagibig',
-      label: 'Pag-IBIG Fund',
-      short: 'Pag-IBIG',
-      value: governmentIds.pagibig,
-      accent: 'border-orange-500',
-      iconBg: 'bg-orange-100 dark:bg-orange-950',
-      iconText: 'text-orange-600',
-    },
-    {
-      key: 'tin',
-      label: 'Bureau of Internal Revenue',
-      short: 'TIN',
-      value: governmentIds.tin,
-      accent: 'border-purple-500',
-      iconBg: 'bg-purple-100 dark:bg-purple-950',
-      iconText: 'text-purple-600',
-    },
+    { key: 'sss', label: 'Social Security System', short: 'SSS', value: data?.sss_number, accent: 'border-brand-blue', iconBg: 'bg-blue-100 dark:bg-blue-950', iconText: 'text-brand-blue' },
+    { key: 'philhealth', label: 'Philippine Health Insurance', short: 'PhilHealth', value: data?.philhealth_number, accent: 'border-green-500', iconBg: 'bg-green-100 dark:bg-green-950', iconText: 'text-green-600' },
+    { key: 'pagibig', label: 'Pag-IBIG Fund', short: 'Pag-IBIG', value: data?.pagibig_number, accent: 'border-orange-500', iconBg: 'bg-orange-100 dark:bg-orange-950', iconText: 'text-orange-600' },
+    { key: 'tin', label: 'Bureau of Internal Revenue', short: 'TIN', value: data?.tin_number, accent: 'border-purple-500', iconBg: 'bg-purple-100 dark:bg-purple-950', iconText: 'text-purple-600' },
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-4"
-    >
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-4">
       <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 py-3">
         <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <p className="text-sm text-amber-800 dark:text-amber-300">
           Government ID numbers are managed by HR. Contact{' '}
-          <a href="mailto:hr@hris-demo.ph" className="font-semibold underline">
-            hr@hris-demo.ph
-          </a>{' '}
-          to update.
+          <a href="mailto:hr@hris-demo.ph" className="font-semibold underline">hr@hris-demo.ph</a> to update.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {ids.map((item, i) => (
-          <motion.div
-            key={item.key}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.06 }}
-            className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 border-l-4 ${item.accent} rounded-2xl p-5`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl ${item.iconBg} flex items-center justify-center shrink-0`}>
-                  <Shield size={18} className={item.iconText} />
+      {isLoading ? (
+        <div className={`${cardClass} py-10 text-center text-gray-400`}>Loading…</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {ids.map((item, i) => (
+            <motion.div
+              key={item.key}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.06 }}
+              className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 border-l-4 ${item.accent} rounded-2xl p-5`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${item.iconBg} flex items-center justify-center shrink-0`}>
+                    <Shield size={18} className={item.iconText} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{item.label}</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">{item.short}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{item.label}</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">{item.short}</p>
-                </div>
+                <Lock size={14} className="text-gray-300 dark:text-gray-600 shrink-0 mt-1" />
               </div>
-              <Lock size={14} className="text-gray-300 dark:text-gray-600 shrink-0 mt-1" />
-            </div>
-            <p className="mt-3 text-base font-mono font-semibold text-gray-900 dark:text-white tracking-wider">
-              {item.value}
-            </p>
-          </motion.div>
-        ))}
-      </div>
+              <p className="mt-3 text-base font-mono font-semibold text-gray-900 dark:text-white tracking-wider">
+                {item.value ?? 'Not on file'}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }
 
-function TabBankAccount() {
-  const { bank } = profile;
+function TabBankAccount({ employeeId }: { employeeId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['profile', 'bank', employeeId],
+    queryFn: () => getBankAccount(employeeId),
+  });
 
   function handleRequestUpdate() {
     toast.success('Bank update request submitted. HR will verify within 3-5 business days.');
   }
 
+  if (isLoading) return <div className={`${cardClass} py-10 text-center text-gray-400`}>Loading…</div>;
+  if (!data) {
+    return (
+      <div className={`${cardClass} py-10 text-center text-gray-400`}>
+        No bank account on file. Contact HR to set one up.
+      </div>
+    );
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="max-w-lg"
-    >
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="max-w-lg">
       <div className={cardClass}>
         <div className="flex items-center gap-4 mb-5">
           <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center shrink-0">
-            <span className="text-brand-blue font-extrabold text-xl">
-              {bank.bankName.charAt(0)}
-            </span>
+            <span className="text-brand-blue font-extrabold text-xl">{data.bank_name?.charAt(0)}</span>
           </div>
           <div>
-            <p className="font-bold text-gray-900 dark:text-white">{bank.bankName}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{bank.accountType} Account</p>
+            <p className="font-bold text-gray-900 dark:text-white">{data.bank_name}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{data.account_type} Account</p>
           </div>
         </div>
 
-        <InfoRow label="Account Name" value={bank.accountName} />
+        <InfoRow label="Account Name" value={data.account_name} />
         <div className="py-3 border-b border-gray-100 dark:border-gray-800">
           <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Account Number</p>
           <div className="flex items-center gap-2">
             <Banknote size={14} className="text-gray-400 shrink-0" />
             <p className="text-sm font-mono font-semibold text-gray-900 dark:text-white tracking-widest">
-              {bank.accountNumber}
+              {data.account_number}
             </p>
           </div>
         </div>
-        <InfoRow label="Account Type" value={bank.accountType} />
+        <InfoRow label="Account Type" value={data.account_type} />
 
         <div className="mt-5 flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
           <Lock size={14} className="text-gray-400 shrink-0" />
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Account numbers are partially masked for security
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Account numbers are partially masked for security</p>
         </div>
 
         <button
           type="button"
           onClick={handleRequestUpdate}
-          className="mt-4 w-full py-2.5 rounded-xl font-semibold text-sm bg-brand-blue text-white hover:bg-brand-blue-dark transition-colors"
+          className="mt-4 w-full min-h-11 py-2.5 rounded-xl font-semibold text-sm bg-brand-blue text-white hover:bg-brand-blue-dark transition-colors"
         >
           Request Update
         </button>
@@ -649,142 +602,37 @@ function TabBankAccount() {
 interface EmergencyContactFormState {
   name: string;
   relationship: string;
-  mobile: string;
+  mobile_number: string;
   address: string;
 }
 
 const RELATIONSHIP_OPTIONS = ['Spouse', 'Father', 'Mother', 'Sibling', 'Child', 'Other'];
 
-function EmergencyContactCard({
-  contact: ec,
-  index,
-}: {
-  contact: EmergencyContact;
-  index: number;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<EmergencyContactFormState>({
-    name: ec.name,
-    relationship: ec.relationship,
-    mobile: ec.mobile,
-    address: ec.address,
+function TabEmergencyContacts({ employeeId }: { employeeId: string }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { data: contacts, isLoading } = useQuery({
+    queryKey: ['profile', 'emergency', employeeId],
+    queryFn: () => getEmergencyContacts(employeeId),
   });
 
-  function handleSave() {
-    setEditing(false);
-    toast.success('Emergency contact updated');
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.07 }}
-      className={cardClass}
-    >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-brand-blue-light dark:bg-blue-950 flex items-center justify-center shrink-0">
-            <span className="text-brand-blue font-bold text-sm">{getInitials(form.name)}</span>
-          </div>
-          <div>
-            {editing ? (
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="text-sm font-semibold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-blue w-full"
-              />
-            ) : (
-              <p className="font-semibold text-gray-900 dark:text-white text-sm">{form.name}</p>
-            )}
-            {editing ? (
-              <select
-                value={form.relationship}
-                onChange={(e) => setForm((f) => ({ ...f, relationship: e.target.value }))}
-                className="mt-1 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-brand-blue"
-              >
-                {RELATIONSHIP_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
-            ) : (
-              <span className="text-xs px-2 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-brand-blue font-medium">
-                {form.relationship}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {!editing ? (
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="flex items-center gap-1 text-xs font-medium text-brand-blue hover:text-brand-blue-dark transition-colors shrink-0"
-          >
-            <Pencil size={12} />
-            Edit
-          </button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setEditing(false)}
-              className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              <X size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="text-xs font-semibold bg-brand-blue text-white px-2.5 py-1 rounded-lg hover:bg-brand-blue-dark transition-colors"
-            >
-              Save
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Phone size={13} className="text-gray-400 shrink-0" />
-          {editing ? (
-            <input
-              type="text"
-              value={form.mobile}
-              onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
-              className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-blue flex-1"
-            />
-          ) : (
-            <p className="text-sm text-gray-700 dark:text-gray-300">{form.mobile}</p>
-          )}
-        </div>
-        <div className="flex items-start gap-2">
-          <MapPin size={13} className="text-gray-400 shrink-0 mt-0.5" />
-          {editing ? (
-            <input
-              type="text"
-              value={form.address}
-              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-              className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-blue flex-1"
-            />
-          ) : (
-            <p className="text-sm text-gray-700 dark:text-gray-300">{form.address}</p>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function TabEmergencyContacts() {
-  const [contacts, setContacts] = useState<EmergencyContact[]>(profile.emergencyContacts);
   const [addOpen, setAddOpen] = useState(false);
   const [newForm, setNewForm] = useState<EmergencyContactFormState>({
-    name: '',
-    relationship: 'Spouse',
-    mobile: '',
-    address: '',
+    name: '', relationship: 'Spouse', mobile_number: '', address: '',
+  });
+
+  const addMutation = useMutation({
+    mutationFn: () => {
+      if (!user?.organizationId) throw new Error('Missing organization context.');
+      return addEmergencyContact(employeeId, user.organizationId, newForm);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile', 'emergency', employeeId] });
+      setNewForm({ name: '', relationship: 'Spouse', mobile_number: '', address: '' });
+      setAddOpen(false);
+      toast.success('Emergency contact added');
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   function handleAdd() {
@@ -792,34 +640,51 @@ function TabEmergencyContacts() {
       toast.error('Name is required');
       return;
     }
-    const newContact: EmergencyContact = {
-      id: `ec${Date.now()}`,
-      name: newForm.name,
-      relationship: newForm.relationship,
-      mobile: newForm.mobile,
-      address: newForm.address,
-    };
-    setContacts((prev) => [...prev, newContact]);
-    setNewForm({ name: '', relationship: 'Spouse', mobile: '', address: '' });
-    setAddOpen(false);
-    toast.success('Emergency contact added');
+    addMutation.mutate();
   }
+
+  if (isLoading) return <div className={`${cardClass} py-10 text-center text-gray-400`}>Loading…</div>;
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {contacts.map((ec, i) => (
-          <EmergencyContactCard key={ec.id} contact={ec} index={i} />
+        {(contacts ?? []).map((ec, i) => (
+          <motion.div
+            key={ec.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.07 }}
+            className={cardClass}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-brand-blue-light dark:bg-blue-950 flex items-center justify-center shrink-0">
+                <span className="text-brand-blue font-bold text-sm">{getInitials(ec.name)}</span>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">{ec.name}</p>
+                <span className="text-xs px-2 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-brand-blue font-medium">
+                  {ec.relationship}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Phone size={13} className="text-gray-400 shrink-0" />
+                <p className="text-sm text-gray-700 dark:text-gray-300">{ec.mobile_number}</p>
+              </div>
+              {ec.address && (
+                <div className="flex items-start gap-2">
+                  <MapPin size={13} className="text-gray-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{ec.address}</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
         ))}
       </div>
 
       {addOpen ? (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={cardClass}
-        >
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className={cardClass}>
           <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-4">New Emergency Contact</h4>
           <div className="space-y-3">
             <div>
@@ -839,17 +704,15 @@ function TabEmergencyContacts() {
                 onChange={(e) => setNewForm((f) => ({ ...f, relationship: e.target.value }))}
                 className="w-full text-sm font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-blue"
               >
-                {RELATIONSHIP_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
+                {RELATIONSHIP_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs text-gray-400 dark:text-gray-500 mb-1 block">Mobile</label>
               <input
                 type="text"
-                value={newForm.mobile}
-                onChange={(e) => setNewForm((f) => ({ ...f, mobile: e.target.value }))}
+                value={newForm.mobile_number}
+                onChange={(e) => setNewForm((f) => ({ ...f, mobile_number: e.target.value }))}
                 placeholder="+63 9XX XXX XXXX"
                 className="w-full text-sm font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
@@ -876,7 +739,8 @@ function TabEmergencyContacts() {
             <button
               type="button"
               onClick={handleAdd}
-              className="text-sm font-semibold bg-brand-blue text-white px-4 py-2 rounded-xl hover:bg-brand-blue-dark transition-colors"
+              disabled={addMutation.isPending}
+              className="text-sm font-semibold bg-brand-blue text-white px-4 py-2 rounded-xl hover:bg-brand-blue-dark transition-colors disabled:opacity-60"
             >
               Add Contact
             </button>
@@ -886,7 +750,7 @@ function TabEmergencyContacts() {
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="flex items-center gap-2 text-sm font-medium text-brand-blue hover:text-brand-blue-dark transition-colors py-2"
+          className="flex items-center gap-2 text-sm font-medium text-brand-blue hover:text-brand-blue-dark transition-colors py-2 min-h-11"
         >
           <Plus size={16} />
           Add Contact
@@ -896,107 +760,93 @@ function TabEmergencyContacts() {
   );
 }
 
-function TabDependents() {
-  const { dependents } = profile;
+function TabDependents({ employeeId }: { employeeId: string }) {
+  const { data: dependents, isLoading } = useQuery({
+    queryKey: ['profile', 'dependents', employeeId],
+    queryFn: () => getDependents(employeeId),
+  });
 
   function handleRequestUpdate() {
     toast.success('Dependent update request submitted.');
   }
 
-  const totalPct = dependents
-    .filter((d) => d.beneficiary)
-    .reduce((sum, d) => sum + d.percentage, 0);
+  if (isLoading) return <div className={`${cardClass} py-10 text-center text-gray-400`}>Loading…</div>;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-4"
-    >
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-4">
       <div className={cardClass}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Dependents & Beneficiaries</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Dependents</h3>
           <span className="flex items-center gap-1 text-xs text-gray-400">
             <Lock size={12} />
             View only
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-gray-800">
-                <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Name</th>
-                <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Relationship</th>
-                <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Birthday</th>
-                <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Beneficiary</th>
-                <th className="text-left text-xs font-semibold text-gray-400 pb-2">Benefit %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dependents.map((dep, i) => (
-                <motion.tr
-                  key={dep.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.06 }}
-                  className="border-b border-gray-50 dark:border-gray-800 last:border-0"
-                >
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-brand-blue-light dark:bg-blue-950 flex items-center justify-center shrink-0">
-                        <span className="text-brand-blue text-[10px] font-bold">{getInitials(dep.name)}</span>
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{dep.name}</p>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{dep.relationship}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                      {formatDate(dep.birthday)}{' '}
-                      <span className="text-gray-400">(Age {calcAge(dep.birthday)})</span>
-                    </span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    {dep.beneficiary ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs font-semibold">
-                        <Star size={10} className="fill-current" />
-                        Yes
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">No</span>
-                    )}
-                  </td>
-                  <td className="py-3">
-                    {dep.beneficiary ? (
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {dep.percentage}%
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400">—</span>
-                    )}
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Total beneficiary allocation</span>
-          <span className="text-sm font-bold text-gray-900 dark:text-white">Total: {totalPct}%</span>
-        </div>
+        {(dependents ?? []).length === 0 ? (
+          <p className="text-sm text-gray-400 py-6 text-center">No dependents on file.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Name</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Relationship</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 pb-2 pr-4">Birthday</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 pb-2">Tax Dependent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(dependents ?? []).map((dep, i) => {
+                  const depName = `${dep.first_name} ${dep.last_name}`;
+                  return (
+                    <motion.tr
+                      key={dep.id}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: i * 0.06 }}
+                      className="border-b border-gray-50 dark:border-gray-800 last:border-0"
+                    >
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-brand-blue-light dark:bg-blue-950 flex items-center justify-center shrink-0">
+                            <span className="text-brand-blue text-[10px] font-bold">{getInitials(depName)}</span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{depName}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{dep.relationship}</span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {formatDate(dep.date_of_birth)}
+                          {dep.date_of_birth && <span className="text-gray-400"> (Age {calcAge(dep.date_of_birth)})</span>}
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        {dep.is_dependent_for_tax ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                            <Star size={10} className="fill-current" />
+                            Yes
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">No</span>
+                        )}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-2xl px-4 py-3">
         <Building2 size={15} className="text-brand-blue shrink-0 mt-0.5" />
         <div className="flex-1">
-          <p className="text-sm text-blue-800 dark:text-blue-300">
-            To update dependents, please submit a request to HR.
-          </p>
+          <p className="text-sm text-blue-800 dark:text-blue-300">To update dependents, please submit a request to HR.</p>
           <button
             type="button"
             onClick={handleRequestUpdate}
@@ -1011,9 +861,28 @@ function TabDependents() {
 }
 
 export default function MyProfilePage() {
+  const { user } = useAuth();
+
+  const { data: profile, isLoading, error } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: () => getMyProfile(user!.id),
+    enabled: !!user?.id,
+  });
+
+  if (isLoading) {
+    return <div className={`${cardClass} py-16 text-center text-gray-400`}>Loading your profile…</div>;
+  }
+  if (error || !profile) {
+    return (
+      <div className={`${cardClass} py-16 text-center text-red-500`}>
+        Couldn&apos;t load your profile. {error instanceof Error ? error.message : ''}
+      </div>
+    );
+  }
+
   return (
     <div>
-      <ProfileHeader />
+      <ProfileHeader profile={profile as unknown as ProfileData} />
 
       <Tabs defaultValue="overview">
         <div className="overflow-x-auto pb-1">
@@ -1027,23 +896,23 @@ export default function MyProfilePage() {
         </div>
 
         <TabsContent value="overview">
-          <TabOverview />
+          <TabOverview profile={profile as unknown as ProfileData} />
         </TabsContent>
 
         <TabsContent value="gov-ids">
-          <TabGovernmentIds />
+          <TabGovernmentIds employeeId={profile.id} />
         </TabsContent>
 
         <TabsContent value="bank">
-          <TabBankAccount />
+          <TabBankAccount employeeId={profile.id} />
         </TabsContent>
 
         <TabsContent value="emergency">
-          <TabEmergencyContacts />
+          <TabEmergencyContacts employeeId={profile.id} />
         </TabsContent>
 
         <TabsContent value="dependents">
-          <TabDependents />
+          <TabDependents employeeId={profile.id} />
         </TabsContent>
       </Tabs>
     </div>
